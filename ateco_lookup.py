@@ -3,15 +3,16 @@
 ATECO Lookup – offline & API-ready (no ISTAT APIs)
 
 Obiettivo: dato un codice ATECO, restituire subito tutte le informazioni (descrizioni 2022/2025,
-ricodifiche, gerarchie). Funziona:
+ricodifiche, gerarchie) + arricchimento con normative e certificazioni dal mapping.yaml.
+Funziona:
   • in locale via CLI
-  • come micro‑API FastAPI (per uso esterno dalla chat in futuro)
+  • come micro-API FastAPI (per uso esterno dalla chat in futuro)
 
-Dipendenze minime: pandas, openpyxl
+Dipendenze minime: pandas, openpyxl, pyyaml
 Opzionali per API: fastapi, uvicorn
 
 Installazione (Windows/macOS/Linux):
-  pip install pandas openpyxl
+  pip install pandas openpyxl pyyaml
   # API opzionali
   pip install fastapi uvicorn
 
@@ -23,8 +24,6 @@ Esempi CLI:
 Avvio API locali:
   python ateco_lookup.py --file tabella_ATECO.xlsx --serve --host 127.0.0.1 --port 8000
   # poi GET http://127.0.0.1:8000/lookup?code=01.11.0
-
-Nota: rileva automaticamente il foglio con i dati (se esiste "Tabella operativa" lo usa, altrimenti il primo).
 """
 from __future__ import annotations
 import argparse
@@ -33,6 +32,16 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 import pandas as pd
+import yaml
+
+# ----------------------- Caricamento mapping esterno -------------------------
+def load_mapping(path: Path = Path("mapping.yaml")) -> dict:
+    if not path.exists():
+        return {}
+    with open(path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f) or {}
+
+MAPPING = load_mapping()
 
 # ----------------------- Header alias (tolleranza nomi) -----------------------
 ALIASES = {
@@ -123,12 +132,10 @@ SEARCH_ORDER = [
 
 def search_smart(df: pd.DataFrame, code: str, prefer: Optional[str] = None, prefix: bool = False) -> pd.DataFrame:
     variants = code_variants(code)
-    # costruisci priorità
     order = SEARCH_ORDER.copy()
     if prefer:
         order.sort(key=lambda x: 0 if x[0] == prefer else 1)
 
-    # 1) match esatto (norm/strip/raw)
     for _, base in order:
         cols = [c for c in (base + "__NORM", base + "__STRIP", base) if c in df.columns]
         if not cols:
@@ -141,7 +148,6 @@ def search_smart(df: pd.DataFrame, code: str, prefer: Optional[str] = None, pref
         if not exact.empty:
             return exact
 
-    # 2) se non trovato, prefix search
     if prefix:
         for _, base in order:
             cols = [c for c in (base + "__NORM", base + "__STRIP", base) if c in df.columns]
@@ -158,7 +164,6 @@ def search_smart(df: pd.DataFrame, code: str, prefer: Optional[str] = None, pref
             if not pref.empty:
                 return pref
 
-    # 3) fallback: famiglia gerarchica dal 2022 se il codice è un prefisso palese
     base = "CODICE_ATECO_2022__NORM" if "CODICE_ATECO_2022__NORM" in df.columns else "CODICE_ATECO_2022"
     ser = df[base].astype(str)
     m = False
@@ -167,13 +172,6 @@ def search_smart(df: pd.DataFrame, code: str, prefer: Optional[str] = None, pref
     return df[m]
 
 # ----------------------- Output helpers --------------------------------------
-HUMAN_KEYS = [
-    "CODICE_ATECO_2022", "TITOLO_ATECO_2022", "GERARCHIA_ATECO_2022",
-    "CODICE_ATECO_2025_RAPPRESENTATIVO", "TITOLO_ATECO_2025_RAPPRESENTATIVO",
-    "CODICE_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE",
-    "TITOLO_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE",
-]
-
 def flatten(row: pd.Series) -> Dict[str, Optional[str]]:
     data: Dict[str, Optional[str]] = {}
     for k, v in row.items():
@@ -182,8 +180,39 @@ def flatten(row: pd.Series) -> Dict[str, Optional[str]]:
         data[k] = None if pd.isna(v) else v
     return data
 
-# ----------------------- CLI / API -------------------------------------------
+def enrich(item: dict) -> dict:
+    """
+    Arricchisce un item ATECO con settore, normative e certificazioni
+    basandosi sul mapping.yaml.
+    """
+    code = item.get("CODICE_ATECO_2022", "") or ""
+    settore = None
 
+    if code.startswith("20"):
+        settore = "chimico"
+    elif code.startswith("10") or code.startswith("11"):
+        settore = "alimentare"
+    elif code.startswith("21") or code.startswith("86"):
+        settore = "sanitario"
+    elif code.startswith("29") or code.startswith("45"):
+        settore = "automotive"
+    elif code.startswith("25") or code.startswith("28"):
+        settore = "industriale"
+    elif code.startswith("64") or code.startswith("66"):
+        settore = "finance"
+
+    if settore and settore in MAPPING.get("settori", {}):
+        item["settore"] = settore
+        item["normative"] = MAPPING["settori"][settore].get("normative", [])
+        item["certificazioni"] = MAPPING["settori"][settore].get("certificazioni", [])
+    else:
+        item["settore"] = settore or "non mappato"
+        item["normative"] = []
+        item["certificazioni"] = []
+
+    return item
+
+# ----------------------- CLI / API -------------------------------------------
 def run_cli(args):
     df = load_dataset(args.file, debug=args.debug)
     res = search_smart(df, args.code, prefer=args.prefer, prefix=args.prefix)
@@ -194,14 +223,12 @@ def run_cli(args):
         print(json.dumps({"found": 0, "items": []}, ensure_ascii=False, indent=2))
         return
 
-    # Se non è una ricerca per prefisso, consideriamo solo il 1° match (più naturale per codice esatto)
     if not args.prefix:
         res = res.head(1)
 
-    items = [flatten(r) for _, r in res.iterrows()]
+    items = [enrich(flatten(r)) for _, r in res.iterrows()]
 
     if args.pretty:
-        # Scegli la coppia codice/titolo corretta in base alla colonna matchata
         it = items[0]
         pairs = [
             ("CODICE_ATECO_2022", "TITOLO_ATECO_2022"),
@@ -212,18 +239,14 @@ def run_cli(args):
         code_out, title_out = None, None
         for ccol, tcol in pairs:
             if it.get(ccol) and it.get(tcol):
-                # scegli la prima coppia completa
                 code_out, title_out = it[ccol], it[tcol]
                 break
-        # fallback se necessario
         code_out = code_out or it.get("CODICE_ATECO_2022") or it.get("CODICE_ATECO_2025_RAPPRESENTATIVO") or ""
         title_out = title_out or it.get("TITOLO_ATECO_2022") or it.get("TITOLO_ATECO_2025_RAPPRESENTATIVO") or it.get("TITOLO_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE") or ""
         print(f"{code_out} — {title_out}")
         return
 
-    # JSON “pulito” unico
     print(json.dumps({"found": len(items), "items": items}, ensure_ascii=False, indent=2))
-
 
 def build_api(df: pd.DataFrame):
     from fastapi import FastAPI, Query
@@ -245,11 +268,10 @@ def build_api(df: pd.DataFrame):
             return JSONResponse({"found": 0, "items": []})
         if prefix:
             res = res.head(limit)
-        items = [flatten(r) for _, r in res.iterrows()]
+        items = [enrich(flatten(r)) for _, r in res.iterrows()]
         return JSONResponse({"found": len(items), "items": items})
 
     return app
-
 
 def main():
     ap = argparse.ArgumentParser(description="ATECO lookup offline / API")
@@ -266,7 +288,6 @@ def main():
     args = ap.parse_args()
 
     if args.serve:
-        # Avvio API
         df = load_dataset(args.file, debug=args.debug)
         app = build_api(df)
         try:
@@ -280,7 +301,6 @@ def main():
         ap.error("--code è obbligatorio in modalità CLI (senza --serve)")
 
     run_cli(args)
-
 
 if __name__ == "__main__":
     main()

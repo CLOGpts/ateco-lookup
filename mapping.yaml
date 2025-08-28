@@ -1,0 +1,66 @@
+settori:
+  chimico:
+    normative:
+      - "REACH (Reg. CE 1907/2006)"
+      - "CLP (Reg. CE 1272/2008)"
+      - "Direttiva 98/24/CE (Agenti chimici)"
+      - "Direttiva Seveso III (2012/18/UE)"
+    certificazioni:
+      - "ISO 9001"
+      - "ISO 14001"
+      - "ISO 45001"
+      - "ISO 50001"
+
+  alimentare:
+    normative:
+      - "Regolamento CE 178/2002 (Legislazione alimentare)"
+      - "Regolamento UE 1169/2011 (Etichettatura alimentare)"
+      - "Regolamento UE 625/2017 (Controlli ufficiali)"
+    certificazioni:
+      - "ISO 22000"
+      - "ISO 22005"
+      - "ISO 10854 HACCP"
+
+  sanitario:
+    normative:
+      - "Regolamento UE 2017/745 (MDR – dispositivi medici)"
+      - "Regolamento UE 2017/746 (IVDR – diagnostica in vitro)"
+      - "EU Health Data Space (EHDS)"
+    certificazioni:
+      - "ISO 13485"
+      - "ISO 27001"
+      - "ISO 22301"
+
+  automotive:
+    normative:
+      - "UNECE R155/R156 (Cybersecurity & Software Updates)"
+      - "ISO/SAE 21434:2021 (Cybersecurity automotive)"
+      - "Regolamento macchine NRM (EU 2023/1230 dal 2027)"
+    certificazioni:
+      - "IATF 16949"
+      - "ISO 9001"
+      - "TISAX"
+      - "ISO 27001"
+
+  industriale:
+    normative:
+      - "IEC 62443 (Sicurezza ICS/OT)"
+      - "Cyber Resilience Act (Reg. UE 2024/2847)"
+      - "Direttiva macchine 2006/42/CE / NRM (EU 2023/1230)"
+    certificazioni:
+      - "ISO 9001"
+      - "ISO 14001"
+      - "ISO 45001"
+      - "ISO 27001"
+      - "ISO 22301"
+
+  finance:
+    normative:
+      - "DORA (Reg. UE 2022/2554 – resilienza digitale)"
+      - "PSD2 (Pagamenti)"
+      - "MiFID II (Direttiva 2014/65/UE)"
+    certificazioni:
+      - "ISO 27001"
+      - "ISO 22301"
+      - "SOC 1/2"
+      - "PCI DSS"
