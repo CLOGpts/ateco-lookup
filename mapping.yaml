@@ -23,8 +23,8 @@ settori:
 
   sanitario:
     normative:
-      - "Regolamento UE 2017/745 (MDR – dispositivi medici)"
-      - "Regolamento UE 2017/746 (IVDR – diagnostica in vitro)"
+      - "Regolamento UE 2017/745 (MDR - dispositivi medici)"
+      - "Regolamento UE 2017/746 (IVDR - diagnostica in vitro)"
       - "EU Health Data Space (EHDS)"
     certificazioni:
       - "ISO 13485"
@@ -56,7 +56,7 @@ settori:
 
   finance:
     normative:
-      - "DORA (Reg. UE 2022/2554 – resilienza digitale)"
+      - "DORA (Reg. UE 2022/2554 - resilienza digitale)"
       - "PSD2 (Pagamenti)"
       - "MiFID II (Direttiva 2014/65/UE)"
     certificazioni:
@@ -64,3 +64,15 @@ settori:
       - "ISO 22301"
       - "SOC 1/2"
       - "PCI DSS"
+
+  ict:
+    normative:
+      - "NIS2 (Direttiva UE 2022/2555 – cybersicurezza e resilienza)"
+      - "GDPR (Reg. UE 2016/679 – protezione dati personali)"
+      - "Cyber Resilience Act (Reg. UE 2024/2847 – sicurezza software e IoT)"
+      - "DORA (Reg. UE 2022/2554 – resilienza digitale per il settore finanziario, se applicabile)"
+    certificazioni:
+      - "ISO/IEC 27001 (Sicurezza delle informazioni)"
+      - "ISO/IEC 27017 (Sicurezza per il cloud)"
+      - "ISO/IEC 27018 (Protezione dati personali su cloud)"
+      - "ISO 22301 (Business Continuity)"

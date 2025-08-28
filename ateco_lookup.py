@@ -198,6 +198,8 @@ def enrich(item: dict) -> dict:
         settore = "automotive"
     elif code.startswith("25") or code.startswith("28"):
         settore = "industriale"
+    elif code.startswith("62"):
+        settore = "ict"
     elif code.startswith("64") or code.startswith("66"):
         settore = "finance"
 
@@ -251,8 +253,18 @@ def run_cli(args):
 def build_api(df: pd.DataFrame):
     from fastapi import FastAPI, Query
     from fastapi.responses import JSONResponse
+    from fastapi.middleware.cors import CORSMiddleware
 
     app = FastAPI(title="ATECO Lookup", version="1.0")
+
+    # Abilita CORS
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # in produzione meglio specificare solo il dominio della UI
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     @app.get("/health")
     def health():
@@ -272,6 +284,7 @@ def build_api(df: pd.DataFrame):
         return JSONResponse({"found": len(items), "items": items})
 
     return app
+
 
 def main():
     ap = argparse.ArgumentParser(description="ATECO lookup offline / API")
