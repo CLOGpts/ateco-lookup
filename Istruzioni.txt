@@ -1,0 +1,48 @@
+  "Ciao Claude, sto lavorando sul backend Python (FastAPI su Render) che fa lookup di codici ATECO. Ti ho caricato:
+  1. La documentazione del backend esistente
+  2. Il documento di coordinamento dal frontend (backend_coordination.md)
+
+  Il backend funziona già bene, ma vorrei ottimizzarlo per integrarsi meglio con il frontend React che chiama le nostre API.
+
+  Obiettivi principali:
+  1. Analizza il codice ateco_lookup.py esistente
+  2. Implementa le ottimizzazioni suggerite nel documento di coordinamento:
+    - Cache LRU per migliorare performance
+    - Endpoint /batch per lookup multipli
+    - Endpoint /autocomplete per suggerimenti mentre l'utente digita
+    - Migliorare gestione errori con suggerimenti quando non trova match
+
+  Filosofia importante:
+  - Il backend deve fare il lookup veloce e preciso sui 3158 codici
+  - NON deve chiamare AI - quello lo fa il frontend con Gemini
+  - Deve restituire dati puliti e strutturati che il frontend userà
+
+  Domande per te:
+  1. Puoi mostrarmi il codice attuale di ateco_lookup.py?
+  2. Implementiamo insieme le ottimizzazioni mantenendo retrocompatibilità?
+  3. Il deploy su Render richiede modifiche particolari per le nuove features?
+
+  Il frontend si aspetta la struttura JSON documentata. Non cambiare i nomi dei campi esistenti, solo aggiungere features.
+
+  Iniziamo?"
+
+  ---
+  🎯 Punti chiave da sottolineare:
+
+  1. Non rompere la compatibilità - Il frontend già funziona con la struttura attuale
+  2. Focus su performance - Cache, batch, autocomplete
+  3. No AI nel backend - Solo lookup dati
+  4. Mantieni semplicità - FastAPI è già ottimo, solo ottimizzazioni mirate
+
+  📝 Se ti chiede chiarimenti, specifica:
+
+  # Priorità implementazione:
+  1. Cache LRU (immediato boost performance)
+  2. Gestione errori con suggerimenti
+  3. Endpoint /batch (per import massivi)
+  4. Endpoint /autocomplete (per UX migliore)
+
+  # Retrocompatibilità:
+  - Endpoint /lookup deve rimanere identico
+  - Solo aggiungere campi opzionali, mai rimuovere
+  - Nuovi endpoint sono addizioni, non sostituzioni

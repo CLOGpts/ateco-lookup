@@ -1,0 +1,105 @@
+# 📌 RIEPILOGO SESSIONE - SISTEMA ESTRAZIONE VISURE CAMERALI
+
+## ✅ COSA ABBIAMO FATTO OGGI
+
+### 1. **Sistema Completo di Estrazione PDF Visure**
+- Creato `visura_extractor.py` - classe completa per estrarre:
+  - Codici ATECO (con regex pattern robusto)
+  - Oggetto sociale (descrizione attività)
+  - Sedi (legale + unità locali)
+  - Tipo business (B2B/B2C/Misto con inferenza intelligente)
+  - Confidence score per validare i risultati
+
+### 2. **Integrazione con Backend Esistente**
+- Aggiunto endpoint `/api/extract-visura` in `ateco_lookup.py`
+- Upload file PDF via POST con FastAPI
+- Arricchimento automatico con normative/certificazioni dai codici ATECO
+- Import condizionale per compatibilità con Render
+- Gestione errori strutturata (file troppo grande, non PDF, ecc.)
+
+### 3. **Dipendenze e Requirements**
+- Aggiunto `pdfplumber` per estrazione testo da PDF
+- Aggiunto `python-multipart` per gestione upload file
+- Tutto in `requirements.txt` pronto per Render
+
+### 4. **Test e Documentazione**
+- Creato `test_visura_extraction.py` - test completo del sistema
+- Creato `test_visura_simple.py` - test veloce senza PDF
+- Documentazione completa in `DOCUMENTAZIONE_ESTRAZIONE_VISURE.md`
+- Istruzioni deploy in `ISTRUZIONI_DEPLOY_RENDER.md`
+
+## ❌ PROBLEMA ATTUALE
+
+**L'endpoint `/api/extract-visura` restituisce 404** perché il codice non è ancora su Render.
+
+### Errore Console Frontend:
+```
+POST https://ateco-lookup.onrender.com/api/extract-visura 404 (Not Found)
+```
+
+## 🚀 COSA FARE SUBITO
+
+### 1. **Push su GitHub (DA FARE ORA)**
+```bash
+# Dal terminale Windows (fuori WSL)
+cd C:\Users\speci\Desktop\Varie\Celerya_Cyber_Ateco
+git push origin main
+```
+
+Se chiede credenziali, usa:
+- Username: tuo username GitHub
+- Password: Personal Access Token (non password normale!)
+
+### 2. **Aspettare Deploy Automatico**
+- Render detecta il push e fa auto-deploy
+- Ci vogliono 2-3 minuti
+- Monitorare su dashboard Render
+
+### 3. **Verificare Endpoint**
+Test che funzioni:
+```bash
+curl https://ateco-lookup.onrender.com/health
+curl -X POST https://ateco-lookup.onrender.com/api/extract-visura -F "file=@test.pdf"
+```
+
+## 💡 SISTEMA ANTIFRAGILE
+
+Il frontend ha 3 livelli di fallback:
+1. **Backend Python** (regex veloce) - Quello che abbiamo costruito
+2. **Gemini AI** (se backend fallisce) - Già funzionante
+3. **Chat manuale** (ultima risorsa) - Già implementato
+
+Quindi anche se l'estrazione non è perfetta, il sistema complessivo funziona!
+
+## 📝 NOTE TECNICHE
+
+### File Modificati:
+- `ateco_lookup.py` - Aggiunto endpoint `/api/extract-visura`
+- `visura_extractor.py` - NUOVO, classe estrazione
+- `requirements.txt` - Aggiunte dipendenze pdfplumber e python-multipart
+
+### Commit Già Fatto:
+```
+feat: aggiunto endpoint /api/extract-visura per estrazione dati da PDF visure camerali
+```
+
+### Pattern Regex Usati:
+- ATECO: `\b\d{2}[\.]\d{2}(?:[\.]\d{1,2})?\b`
+- CAP: `\b\d{5}\b`
+- P.IVA: `(?:P\.?\s?IVA|Partita IVA)[:\s]*(\d{11})`
+
+## 🎯 PROSSIMA SESSIONE
+
+Se dopo il deploy ci sono ancora problemi:
+1. Controllare log su Render Dashboard
+2. Verificare che pdfplumber sia installato correttamente
+3. Testare con diversi formati di visure PDF
+4. Eventualmente aggiungere più pattern regex per formati non standard
+
+## 🍾 STATO: PRONTO PER DEPLOY!
+
+Tutto il codice è pronto e testato localmente. 
+Manca solo il push su GitHub per attivare il deploy su Render.
+
+---
+**Ultimo aggiornamento:** Sistema completo creato, in attesa di deploy su Render
