@@ -39,6 +39,24 @@ import tempfile
 import pandas as pd
 import yaml
 
+# Import FastAPI opzionali - necessari per l'API
+try:
+    from fastapi import FastAPI, Query, HTTPException, UploadFile, File
+    from fastapi.responses import JSONResponse
+    from fastapi.middleware.cors import CORSMiddleware
+    from pydantic import BaseModel
+    from typing import List
+    FASTAPI_AVAILABLE = True
+except ImportError:
+    FASTAPI_AVAILABLE = False
+
+# Import condizionale per VisuraExtractor
+try:
+    from visura_extractor import VisuraExtractor
+    visura_extraction_available = True
+except ImportError:
+    visura_extraction_available = False
+
 # ----------------------- Caricamento mapping esterno -------------------------
 def load_mapping(path: Path = Path("mapping.yaml")) -> dict:
     if not path.exists():
@@ -301,19 +319,11 @@ _global_df = None
 _df_hash = None
 
 def build_api(df: pd.DataFrame):
-    from fastapi import FastAPI, Query, HTTPException, UploadFile, File
-    from fastapi.responses import JSONResponse
-    from fastapi.middleware.cors import CORSMiddleware
-    from pydantic import BaseModel
-    from typing import List
+    if not FASTAPI_AVAILABLE:
+        raise ImportError("FastAPI non disponibile. Installa con: pip install fastapi uvicorn")
     
-    # Import condizionale per VisuraExtractor
-    try:
-        from visura_extractor import VisuraExtractor
-        visura_extraction_available = True
-    except ImportError:
+    if not visura_extraction_available:
         logger.warning("VisuraExtractor non disponibile - installa pdfplumber")
-        visura_extraction_available = False
     
     class BatchRequest(BaseModel):
         codes: List[str]
