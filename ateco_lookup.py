@@ -28,8 +28,11 @@ Avvio API locali:
 from __future__ import annotations
 import argparse
 import json
+import logging
+from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Optional, Union
+from difflib import get_close_matches
 
 import pandas as pd
 import yaml
@@ -130,7 +133,20 @@ SEARCH_ORDER = [
     ("2025-camerale", "CODICE_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE"),
 ]
 
+@lru_cache(maxsize=500)
+def cached_search(code: str, prefer: Optional[str], prefix: bool, df_hash: int):
+    """Cached version of search. df_hash is used to invalidate cache if df changes."""
+    global _global_df
+    return search_smart_internal(_global_df, code, prefer, prefix)
+
 def search_smart(df: pd.DataFrame, code: str, prefer: Optional[str] = None, prefix: bool = False) -> pd.DataFrame:
+    """Wrapper that uses cache when possible."""
+    global _global_df, _df_hash
+    _global_df = df
+    _df_hash = id(df)
+    return cached_search(code, prefer, prefix, _df_hash)
+
+def search_smart_internal(df: pd.DataFrame, code: str, prefer: Optional[str] = None, prefix: bool = False) -> pd.DataFrame:
     variants = code_variants(code)
     order = SEARCH_ORDER.copy()
     if prefer:
@@ -170,6 +186,27 @@ def search_smart(df: pd.DataFrame, code: str, prefer: Optional[str] = None, pref
     for v in variants:
         m = m | ser.str.startswith(v)
     return df[m]
+
+def find_similar_codes(df: pd.DataFrame, code: str, limit: int = 5) -> List[Dict[str, str]]:
+    """Trova codici simili quando la ricerca non produce risultati."""
+    code_norm = normalize_code(code)
+    all_codes = df["CODICE_ATECO_2022"].dropna().unique()
+    all_codes_norm = [normalize_code(c) for c in all_codes]
+    
+    # Trova corrispondenze simili
+    matches = get_close_matches(code_norm, all_codes_norm, n=limit, cutoff=0.6)
+    
+    suggestions = []
+    for match in matches:
+        idx = all_codes_norm.index(match)
+        original_code = all_codes[idx]
+        row = df[df["CODICE_ATECO_2022"] == original_code].iloc[0]
+        suggestions.append({
+            "code": original_code,
+            "title": row.get("TITOLO_ATECO_2022", "")
+        })
+    
+    return suggestions
 
 # ----------------------- Output helpers --------------------------------------
 def flatten(row: pd.Series) -> Dict[str, Optional[str]]:
@@ -250,12 +287,30 @@ def run_cli(args):
 
     print(json.dumps({"found": len(items), "items": items}, ensure_ascii=False, indent=2))
 
+# Configurazione logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Variabili globali per cache
+_global_df = None
+_df_hash = None
+
 def build_api(df: pd.DataFrame):
-    from fastapi import FastAPI, Query
+    from fastapi import FastAPI, Query, HTTPException
     from fastapi.responses import JSONResponse
     from fastapi.middleware.cors import CORSMiddleware
+    from pydantic import BaseModel
+    from typing import List
+    
+    class BatchRequest(BaseModel):
+        codes: List[str]
+        prefer: Optional[str] = None
+        prefix: bool = False
 
-    app = FastAPI(title="ATECO Lookup", version="1.0")
+    app = FastAPI(title="ATECO Lookup", version="2.0")
 
     # Abilita CORS
     app.add_middleware(
@@ -268,20 +323,124 @@ def build_api(df: pd.DataFrame):
 
     @app.get("/health")
     def health():
-        return {"status": "ok"}
+        logger.info("Health check requested")
+        return {"status": "ok", "version": "2.0", "cache_enabled": True}
 
     @app.get("/lookup")
     def lookup(code: str = Query(..., description="Codice ATECO"),
                prefer: Optional[str] = Query(None, description="priorità: 2022 | 2025 | 2025-camerale"),
                prefix: bool = Query(False, description="ricerca per prefisso"),
                limit: int = Query(50)):
+        logger.info(f"Lookup requested for code: {code}, prefer: {prefer}, prefix: {prefix}")
+        
+        # Validazione input
+        if not code or len(code) < 2:
+            logger.warning(f"Invalid code provided: {code}")
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "INVALID_CODE",
+                    "message": "Codice troppo corto (minimo 2 caratteri)"
+                }
+            )
+        
         res = search_smart(df, code, prefer=prefer, prefix=prefix)
+        
         if res.empty:
-            return JSONResponse({"found": 0, "items": []})
+            logger.info(f"No results found for code: {code}")
+            # Suggerisci alternative
+            suggestions = find_similar_codes(df, code)
+            return JSONResponse({
+                "found": 0,
+                "items": [],
+                "suggestions": suggestions,
+                "message": f"Nessun risultato per '{code}'. Prova con uno dei suggerimenti."
+            })
+        
         if prefix:
             res = res.head(limit)
         items = [enrich(flatten(r)) for _, r in res.iterrows()]
+        logger.info(f"Found {len(items)} results for code: {code}")
         return JSONResponse({"found": len(items), "items": items})
+    
+    @app.post("/batch")
+    def batch_lookup(request: BatchRequest):
+        """Endpoint per lookup multipli in una singola richiesta."""
+        logger.info(f"Batch lookup requested for {len(request.codes)} codes")
+        
+        if len(request.codes) > 50:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "TOO_MANY_CODES",
+                    "message": "Massimo 50 codici per richiesta batch"
+                }
+            )
+        
+        results = []
+        for code in request.codes:
+            res = search_smart(df, code, prefer=request.prefer, prefix=request.prefix)
+            if res.empty:
+                results.append({
+                    "code": code,
+                    "found": 0,
+                    "items": []
+                })
+            else:
+                items = [enrich(flatten(r)) for _, r in res.head(1).iterrows()]
+                results.append({
+                    "code": code,
+                    "found": len(items),
+                    "items": items
+                })
+        
+        return JSONResponse({
+            "total_codes": len(request.codes),
+            "results": results
+        })
+    
+    @app.get("/autocomplete")
+    def autocomplete(partial: str = Query(..., min_length=2, description="Codice parziale"),
+                     limit: int = Query(5, le=20, description="Numero suggerimenti")):
+        """Endpoint per suggerimenti autocomplete durante la digitazione."""
+        logger.info(f"Autocomplete requested for: {partial}")
+        
+        partial_norm = normalize_code(partial)
+        suggestions = []
+        seen = set()
+        
+        # Cerca nei codici 2022
+        for _, row in df.iterrows():
+            code = normalize_code(row.get("CODICE_ATECO_2022", ""))
+            if code and code.startswith(partial_norm) and code not in seen:
+                seen.add(code)
+                suggestions.append({
+                    "code": row.get("CODICE_ATECO_2022", ""),
+                    "title": row.get("TITOLO_ATECO_2022", ""),
+                    "version": "2022"
+                })
+                if len(suggestions) >= limit:
+                    break
+        
+        # Se non abbastanza risultati, cerca anche nei codici 2025
+        if len(suggestions) < limit:
+            for _, row in df.iterrows():
+                code = normalize_code(row.get("CODICE_ATECO_2025_RAPPRESENTATIVO", ""))
+                if code and code.startswith(partial_norm) and code not in seen:
+                    seen.add(code)
+                    suggestions.append({
+                        "code": row.get("CODICE_ATECO_2025_RAPPRESENTATIVO", ""),
+                        "title": row.get("TITOLO_ATECO_2025_RAPPRESENTATIVO", ""),
+                        "version": "2025"
+                    })
+                    if len(suggestions) >= limit:
+                        break
+        
+        return JSONResponse({
+            "partial": partial,
+            "suggestions": suggestions[:limit],
+            "count": len(suggestions[:limit])
+        })
 
     return app
 
