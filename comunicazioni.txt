@@ -1,96 +1,62 @@
-# 🚨 STATO CRITICO DEPLOY - AZIONE RICHIESTA
+# 📋 STATO PROGETTO ATECO-LOOKUP - ESTRAZIONE VISURE
+
+## 🎯 OBIETTIVO
+Implementare endpoint `/api/extract-visura` per estrarre dati da PDF di visure camerali.
+
+## ✅ COSA ABBIAMO FATTO
+1. **Risolto problema Python 3.13** (commit `9a1eb08`):
+   - Spostati import FastAPI a livello globale per evitare ForwardRef error
+   - Deploy su Render ora funziona
+
+2. **Implementato sistema estrazione visure**:
+   - `visura_extractor.py`: Classe per estrarre dati da PDF (ATECO, oggetto sociale, sedi, tipo business)
+   - Endpoint `/api/extract-visura` in `ateco_lookup.py`
+   - Aggiunto `pdfplumber` a requirements.txt
+
+3. **Aggiunto logging dettagliato** (commit `a00d92b`):
+   - Log per debug import VisuraExtractor
+   - Traceback completo in caso di errori
+   - Check esplicito presenza pdfplumber
 
 ## ❌ PROBLEMA ATTUALE
-**Il deploy su Render sta fallendo** a causa di un errore di compatibilità con Python 3.13 e FastAPI.
+**Errore 500 su endpoint `/api/extract-visura`**:
+- Il deploy funziona ma l'endpoint restituisce Internal Server Error
+- Probabilmente `VisuraExtractor` non viene importato correttamente su Render
+- Possibili cause:
+  1. `pdfplumber` non installato correttamente
+  2. Dipendenze mancanti di pdfplumber
+  3. Problemi di permessi o path su Render
 
-### Errore specifico:
-```
-fastapi.exceptions.FastAPIError: Invalid args for response field! 
-Hint: check that ForwardRef('UploadFile') is a valid Pydantic field type
-```
+## 🔍 PROSSIMI PASSI
+1. **Verificare log Render dopo deploy** con nuovo logging dettagliato
+2. **Se pdfplumber manca**, verificare che sia in requirements.txt (già presente)
+3. **Se dipendenze mancano**, potrebbe servire aggiungere:
+   ```
+   Pillow>=9.0.0
+   pdfminer.six>=20211012
+   ```
+4. **Alternative se pdfplumber non funziona su Render**:
+   - Usare PyPDF2 (più leggero ma meno accurato)
+   - Usare un servizio esterno per parsing PDF
+   - Implementare parsing lato client
 
-## ✅ FIX GIÀ APPLICATA (COMMIT LOCALE)
-Ho già risolto il problema nel commit `9a1eb08`:
-- **File modificato**: `ateco_lookup.py`
-- **Soluzione**: Spostati gli import di FastAPI (`UploadFile`, `File`, etc.) a livello globale invece che dentro la funzione `build_api()`
-- **Motivo**: Python 3.13 non gestisce bene i ForwardRef quando gli import sono dentro le funzioni
+## 📂 FILE PRINCIPALI
+- `ateco_lookup.py`: Backend FastAPI con endpoint
+- `visura_extractor.py`: Logica estrazione dati da PDF  
+- `requirements.txt`: Dipendenze (include pdfplumber)
+- Frontend React già pronto per usare l'endpoint
 
-## 🔴 BLOCCATO: ERRORE PUSH GITHUB
-```
-remote: Permission to CLOGpts/ateco-lookup.git denied to CLOGpts.
-fatal: unable to access 'https://github.com/CLOGpts/ateco-lookup/': The requested URL returned error: 403
-```
+## 🚀 STATO DEPLOY
+- **Ultimo commit pushato**: `a00d92b` - logging dettagliato
+- **Branch**: main
+- **URL Render**: https://ateco-lookup.onrender.com
+- **Endpoint problematico**: POST /api/extract-visura
 
-## 🎯 AZIONE IMMEDIATA RICHIESTA
+## 💡 NOTE
+Il sistema è progettato per:
+1. Ricevere PDF visura (max 20MB)
+2. Estrarre codici ATECO, oggetto sociale, sedi
+3. Inferire tipo business (B2B/B2C)
+4. Arricchire con dati dal mapping ATECO
 
-### Opzione 1: Fix credenziali Git (CONSIGLIATO)
-```bash
-# Rimuovi credenziali salvate
-git config --global --unset credential.helper
-
-# Poi push normale (userà il browser per auth)
-git push origin main
-```
-
-### Opzione 2: Usa Personal Access Token
-1. Vai su GitHub → Settings → Developer settings → Personal access tokens
-2. Genera nuovo token con permessi `repo`
-3. Push con:
-```bash
-git push https://TUO_USERNAME:TUO_TOKEN@github.com/CLOGpts/ateco-lookup.git main
-```
-
-### Opzione 3: Push da Windows Git Bash
-```bash
-cd C:\Users\speci\Desktop\Varie\Celerya_Cyber_Ateco
-git push origin main
-```
-
-## 📊 STATO REPOSITORY
-- **Branch locale**: main (aggiornato con fix)
-- **Ultimo commit locale**: 9a1eb08 - fix import FastAPI
-- **Ultimo commit su GitHub**: 1c08865 - VISURA PROVA
-- **Commit da pushare**: 1 (la fix critica)
-
-## 🔧 COSA SUCCEDERÀ DOPO IL PUSH
-1. Render detecterà il nuovo commit
-2. Avvierà automaticamente il rebuild
-3. Con la fix, il build avrà successo
-4. L'endpoint `/api/extract-visura` sarà disponibile
-5. Il frontend potrà usare l'estrazione PDF delle visure
-
-## 📝 RIEPILOGO SISTEMA VISURE
-### Funzionalità implementata:
-- **Endpoint**: `/api/extract-visura` 
-- **Input**: PDF visura camerale (max 20MB)
-- **Output**: JSON con codici ATECO, oggetto sociale, sedi, tipo business
-- **File principali**:
-  - `ateco_lookup.py` - Backend FastAPI con endpoint
-  - `visura_extractor.py` - Classe per estrazione dati da PDF
-  - `requirements.txt` - Include pdfplumber e python-multipart
-
-### Test endpoint (dopo deploy):
-```bash
-curl -X POST https://ateco-lookup.onrender.com/api/extract-visura \
-  -F "file=@test.pdf"
-```
-
-## ⚠️ IMPORTANTE
-**Non fare altri cambiamenti al codice finché non hai pushato questa fix!**
-Il problema è già risolto, serve solo il push per attivare il deploy.
-
----
-**Ultimo aggiornamento**: Fix pronta in locale, in attesa di push su GitHub per risolvere errore deploy Render
-
-useVisuraExtraction.ts:40 
- POST https://ateco-lookup.onrender.com/api/extract-visura 500 (Internal Server Error)
-useVisuraExtraction.ts:61 ❌ Backend extraction failed: Error: Backend error: 500
-    at extractWithBackend (useVisuraExtraction.ts:46:15)
-    at async useVisuraExtraction.ts:191:18
-    at async useUpload.ts:70:27
-extractWithBackend	@	useVisuraExtraction.ts:61
-await in extractWithBackend		
-(anonymous)	@	useVisuraExtraction.ts:191
-(anonymous)	@	useUpload.ts:70
-(anonymous)	@	useUpload.ts:56
-handleDrop	@	UploadCenter.tsx:29
+Quando il problema sarà risolto, l'utente potrà caricare visure e ottenere automaticamente tutti i dati strutturati.
