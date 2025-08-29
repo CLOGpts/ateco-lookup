@@ -54,8 +54,13 @@ except ImportError:
 try:
     from visura_extractor import VisuraExtractor
     visura_extraction_available = True
-except ImportError:
+    logger.info("VisuraExtractor importato con successo")
+except ImportError as e:
     visura_extraction_available = False
+    logger.error(f"Impossibile importare VisuraExtractor: {str(e)}")
+except Exception as e:
+    visura_extraction_available = False
+    logger.error(f"Errore inaspettato durante import VisuraExtractor: {str(e)}")
 
 # ----------------------- Caricamento mapping esterno -------------------------
 def load_mapping(path: Path = Path("mapping.yaml")) -> dict:
@@ -324,6 +329,12 @@ def build_api(df: pd.DataFrame):
     
     if not visura_extraction_available:
         logger.warning("VisuraExtractor non disponibile - installa pdfplumber")
+        # Verifica quale dipendenza manca
+        try:
+            import pdfplumber
+            logger.info("pdfplumber è installato")
+        except ImportError:
+            logger.error("pdfplumber NON è installato - aggiungi a requirements.txt")
     
     class BatchRequest(BaseModel):
         codes: List[str]
@@ -517,8 +528,11 @@ def build_api(df: pd.DataFrame):
         
         try:
             # Estrai dati usando VisuraExtractor
+            logger.info("Creazione istanza VisuraExtractor...")
             extractor = VisuraExtractor()
+            logger.info("Inizio estrazione da PDF...")
             result = extractor.extract_from_pdf(tmp_path)
+            logger.info(f"Estrazione completata: {result}")
             
             # Se estrazione riuscita e ci sono codici ATECO, arricchisci con dati ATECO
             if result.get('success') and result.get('data', {}).get('codici_ateco'):
@@ -544,13 +558,17 @@ def build_api(df: pd.DataFrame):
             return JSONResponse(result)
             
         except Exception as e:
-            logger.error(f"Errore durante estrazione: {str(e)}")
+            logger.error(f"Errore durante estrazione: {str(e)}", exc_info=True)
+            import traceback
+            tb = traceback.format_exc()
+            logger.error(f"Traceback completo: {tb}")
             return JSONResponse({
                 'success': False,
                 'error': {
                     'code': 'EXTRACTION_ERROR',
                     'message': 'Errore durante estrazione dati dal PDF',
-                    'details': str(e)
+                    'details': str(e),
+                    'traceback': tb if logger.level <= 10 else None
                 }
             }, status_code=500)
             

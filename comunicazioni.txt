@@ -81,3 +81,16 @@ Il problema è già risolto, serve solo il push per attivare il deploy.
 
 ---
 **Ultimo aggiornamento**: Fix pronta in locale, in attesa di push su GitHub per risolvere errore deploy Render
+
+useVisuraExtraction.ts:40 
+ POST https://ateco-lookup.onrender.com/api/extract-visura 500 (Internal Server Error)
+useVisuraExtraction.ts:61 ❌ Backend extraction failed: Error: Backend error: 500
+    at extractWithBackend (useVisuraExtraction.ts:46:15)
+    at async useVisuraExtraction.ts:191:18
+    at async useUpload.ts:70:27
+extractWithBackend	@	useVisuraExtraction.ts:61
+await in extractWithBackend		
+(anonymous)	@	useVisuraExtraction.ts:191
+(anonymous)	@	useUpload.ts:70
+(anonymous)	@	useUpload.ts:56
+handleDrop	@	UploadCenter.tsx:29
