@@ -3,3 +3,5 @@ openpyxl
 fastapi
 uvicorn
 pyyaml
+python-multipart
+pdfplumber

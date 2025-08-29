@@ -33,6 +33,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 from difflib import get_close_matches
+import os
+import tempfile
 
 import pandas as pd
 import yaml
@@ -299,11 +301,19 @@ _global_df = None
 _df_hash = None
 
 def build_api(df: pd.DataFrame):
-    from fastapi import FastAPI, Query, HTTPException
+    from fastapi import FastAPI, Query, HTTPException, UploadFile, File
     from fastapi.responses import JSONResponse
     from fastapi.middleware.cors import CORSMiddleware
     from pydantic import BaseModel
     from typing import List
+    
+    # Import condizionale per VisuraExtractor
+    try:
+        from visura_extractor import VisuraExtractor
+        visura_extraction_available = True
+    except ImportError:
+        logger.warning("VisuraExtractor non disponibile - installa pdfplumber")
+        visura_extraction_available = False
     
     class BatchRequest(BaseModel):
         codes: List[str]
@@ -441,6 +451,106 @@ def build_api(df: pd.DataFrame):
             "suggestions": suggestions[:limit],
             "count": len(suggestions[:limit])
         })
+    
+    @app.post("/api/extract-visura")
+    async def extract_visura(file: UploadFile = File(...)):
+        """
+        Estrae dati strutturati da una visura camerale PDF
+        
+        Returns:
+            JSON con codici ATECO, oggetto sociale, sedi e tipo business
+        """
+        logger.info(f"Ricevuto file per estrazione: {file.filename}")
+        
+        # Verifica che VisuraExtractor sia disponibile
+        if not visura_extraction_available:
+            logger.error("VisuraExtractor non disponibile")
+            return JSONResponse({
+                'success': False,
+                'error': {
+                    'code': 'MODULE_NOT_AVAILABLE',
+                    'message': 'Modulo estrazione PDF non disponibile',
+                    'details': 'Installa pdfplumber: pip install pdfplumber'
+                }
+            }, status_code=503)
+        
+        # Validazione tipo file
+        if not file.filename.endswith('.pdf'):
+            logger.warning(f"File non PDF ricevuto: {file.filename}")
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "code": "INVALID_FILE_TYPE",
+                    "message": "Solo file PDF sono accettati",
+                    "details": f"File ricevuto: {file.filename}"
+                }
+            )
+        
+        # Validazione dimensione (20MB max)
+        if file.size and file.size > 20 * 1024 * 1024:
+            logger.warning(f"File troppo grande: {file.size} bytes")
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "code": "FILE_TOO_LARGE",
+                    "message": "File troppo grande (max 20MB)",
+                    "details": f"Dimensione: {file.size} bytes"
+                }
+            )
+        
+        # Salva temporaneamente il file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
+            content = await file.read()
+            tmp.write(content)
+            tmp_path = tmp.name
+            logger.info(f"File salvato temporaneamente: {tmp_path}")
+        
+        try:
+            # Estrai dati usando VisuraExtractor
+            extractor = VisuraExtractor()
+            result = extractor.extract_from_pdf(tmp_path)
+            
+            # Se estrazione riuscita e ci sono codici ATECO, arricchisci con dati ATECO
+            if result.get('success') and result.get('data', {}).get('codici_ateco'):
+                ateco_enrichment = []
+                for code in result['data']['codici_ateco']:
+                    # Usa la funzione lookup esistente per arricchire
+                    lookup_result = ateco_lookup(df, code, prefer="2025-camerale")
+                    if lookup_result:
+                        ateco_enrichment.append({
+                            'code': code,
+                            'description': lookup_result.get('TITOLO_ATECO_2025_RAPPRESENTATIVO') or 
+                                         lookup_result.get('TITOLO_ATECO_2022') or 
+                                         "Descrizione non trovata",
+                            'normative': lookup_result.get('normative', []),
+                            'certificazioni': lookup_result.get('certificazioni', [])
+                        })
+                
+                # Aggiungi arricchimento al risultato
+                result['data']['ateco_details'] = ateco_enrichment
+                logger.info(f"Arricchiti {len(ateco_enrichment)} codici ATECO")
+            
+            logger.info(f"Estrazione completata con successo: {result.get('data', {}).get('confidence', 0):.0%} confidence")
+            return JSONResponse(result)
+            
+        except Exception as e:
+            logger.error(f"Errore durante estrazione: {str(e)}")
+            return JSONResponse({
+                'success': False,
+                'error': {
+                    'code': 'EXTRACTION_ERROR',
+                    'message': 'Errore durante estrazione dati dal PDF',
+                    'details': str(e)
+                }
+            }, status_code=500)
+            
+        finally:
+            # Pulisci file temporaneo
+            try:
+                os.unlink(tmp_path)
+                logger.debug(f"File temporaneo eliminato: {tmp_path}")
+            except:
+                pass
 
     return app
 
