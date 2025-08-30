@@ -620,12 +620,51 @@ def build_api(df: pd.DataFrame):
             file_size = file.size if hasattr(file, 'size') and file.size else 'unknown'
             logger.info(f"📥 Ricevuto file per estrazione: {file.filename} ({file_size} bytes)")
             
-            # Usa il nuovo estrattore potente se disponibile, altrimenti il vecchio
-            if VisuraExtractorPower:
-                logger.info("✅ Utilizzo VisuraExtractorPower per estrazione COMPLETA...")
+            # Usa l'estrattore migliore disponibile (priorità: Fixed > Power > Base)
+            if VisuraExtractorFixed and visura_fixed_available:
+                logger.info("🚀 Utilizzo VisuraExtractorFixed - VERSIONE CORRETTA che risolve TUTTI i problemi...")
+                try:
+                    extractor = VisuraExtractorFixed()
+                    logger.info("📄 Inizio estrazione FIXED da PDF...")
+                    result = extractor.extract_from_pdf(tmp_path)
+                    
+                    # Log dei campi estratti per debug
+                    data = result.get('data', {})
+                    logger.info(f"📊 Campi estratti FIXED: denominazione={data.get('denominazione')}, REA={data.get('numero_rea')}, ATECO={len(data.get('codici_ateco', []))} codici")
+                    
+                    # Log errori validazione se presenti
+                    if result.get('validation_errors'):
+                        logger.warning(f"⚠️ Errori validazione: {result['validation_errors']}")
+                    
+                    logger.info(f"✅ Estrazione FIXED completata con {result.get('confidence', 0):.0%} confidence")
+                except Exception as fixed_error:
+                    logger.error(f"❌ Errore in VisuraExtractorFixed: {str(fixed_error)}")
+                    import traceback
+                    logger.error(f"Traceback: {traceback.format_exc()}")
+                    # Fallback su Power
+                    if VisuraExtractorPower:
+                        logger.info("⚠️ Fallback a VisuraExtractorPower...")
+                        extractor = VisuraExtractorPower()
+                        result = extractor.extract_all_data(tmp_path)
+                        # Formatta per compatibilità
+                        formatted_result = {
+                            'success': True,
+                            'data': result,
+                            'extraction_method': 'regex_power',
+                            'processing_time_ms': 1000
+                        }
+                        result = formatted_result
+                    elif VisuraExtractor:
+                        logger.info("⚠️ Fallback a VisuraExtractor base...")
+                        extractor = VisuraExtractor()
+                        result = extractor.extract_from_pdf(tmp_path)
+                    else:
+                        raise fixed_error
+            elif VisuraExtractorPower:
+                logger.info("⚠️ Utilizzo VisuraExtractorPower (Fixed non disponibile)...")
                 try:
                     extractor = VisuraExtractorPower()
-                    logger.info("📄 Inizio estrazione COMPLETA da PDF...")
+                    logger.info("📄 Inizio estrazione POWER da PDF...")
                     result = extractor.extract_all_data(tmp_path)
                     
                     # Log dei campi estratti per debug
@@ -639,7 +678,7 @@ def build_api(df: pd.DataFrame):
                         'processing_time_ms': 1000
                     }
                     result = formatted_result
-                    logger.info(f"✅ Estrazione COMPLETA completata con {result['data'].get('confidence', 0):.0%} confidence")
+                    logger.info(f"✅ Estrazione POWER completata con {result['data'].get('confidence', 0):.0%} confidence")
                 except Exception as power_error:
                     logger.error(f"❌ Errore in VisuraExtractorPower: {str(power_error)}")
                     import traceback
