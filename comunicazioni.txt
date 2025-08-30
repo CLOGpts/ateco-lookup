@@ -77,3 +77,160 @@ Dopo il deploy, l'endpoint `/api/extract-visura` dovrebbe:
 3. Inferire tipo di business (B2B/B2C)
 4. Arricchire i dati con informazioni dal database ATECO
 5. Ritornare JSON strutturato con tutti i dati estratti
+
+(index):1 Access to fetch at 'https://ateco-lookup.onrender.com/api/extract-visura' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+useVisuraExtraction.ts:40  POST https://ateco-lookup.onrender.com/api/extract-visura net::ERR_FAILED 500 (Internal Server Error)
+extractWithBackend @ useVisuraExtraction.ts:40
+(anonymous) @ useVisuraExtraction.ts:191
+(anonymous) @ useUpload.ts:70
+(anonymous) @ useUpload.ts:56
+handleDrop @ UploadCenter.tsx:29
+callCallback2 @ chunk-PJEEZAML.js?v=1fb14d92:3674
+invokeGuardedCallbackDev @ chunk-PJEEZAML.js?v=1fb14d92:3699
+invokeGuardedCallback @ chunk-PJEEZAML.js?v=1fb14d92:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-PJEEZAML.js?v=1fb14d92:3736
+executeDispatch @ chunk-PJEEZAML.js?v=1fb14d92:7014
+processDispatchQueueItemsInOrder @ chunk-PJEEZAML.js?v=1fb14d92:7034
+processDispatchQueue @ chunk-PJEEZAML.js?v=1fb14d92:7043
+dispatchEventsForPlugins @ chunk-PJEEZAML.js?v=1fb14d92:7051
+(anonymous) @ chunk-PJEEZAML.js?v=1fb14d92:7174
+batchedUpdates$1 @ chunk-PJEEZAML.js?v=1fb14d92:18913
+batchedUpdates @ chunk-PJEEZAML.js?v=1fb14d92:3579
+dispatchEventForPluginEventSystem @ chunk-PJEEZAML.js?v=1fb14d92:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-PJEEZAML.js?v=1fb14d92:5478
+dispatchEvent @ chunk-PJEEZAML.js?v=1fb14d92:5472
+dispatchDiscreteEvent @ chunk-PJEEZAML.js?v=1fb14d92:5449Understand this error
+useVisuraExtraction.ts:61 ❌ Backend extraction failed: TypeError: Failed to fetch
+    at extractWithBackend (useVisuraExtraction.ts:40:30)
+    at useVisuraExtraction.ts:191:24
+    at useUpload.ts:70:33
+    at Array.forEach (<anonymous>)
+    at useUpload.ts:56:16
+    at handleDrop (UploadCenter.tsx:29:7)
+    at HTMLUnknownElement.callCallback2 (chunk-PJEEZAML.js?v=1fb14d92:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-PJEEZAML.js?v=1fb14d92:3699:24)
+    at invokeGuardedCallback (chunk-PJEEZAML.js?v=1fb14d92:3733:39)
+    at invokeGuardedCallbackAndCatchFirstError (chunk-PJEEZAML.js?v=1fb14d92:3736:33)
+extractWithBackend @ useVisuraExtraction.ts:61
+await in extractWithBackend
+(anonymous) @ useVisuraExtraction.ts:191
+(anonymous) @ useUpload.ts:70
+(anonymous) @ useUpload.ts:56
+handleDrop @ UploadCenter.tsx:29
+callCallback2 @ chunk-PJEEZAML.js?v=1fb14d92:3674
+invokeGuardedCallbackDev @ chunk-PJEEZAML.js?v=1fb14d92:3699
+invokeGuardedCallback @ chunk-PJEEZAML.js?v=1fb14d92:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-PJEEZAML.js?v=1fb14d92:3736
+executeDispatch @ chunk-PJEEZAML.js?v=1fb14d92:7014
+processDispatchQueueItemsInOrder @ chunk-PJEEZAML.js?v=1fb14d92:7034
+processDispatchQueue @ chunk-PJEEZAML.js?v=1fb14d92:7043
+dispatchEventsForPlugins @ chunk-PJEEZAML.js?v=1fb14d92:7051
+(anonymous) @ chunk-PJEEZAML.js?v=1fb14d92:7174
+batchedUpdates$1 @ chunk-PJEEZAML.js?v=1fb14d92:18913
+batchedUpdates @ chunk-PJEEZAML.js?v=1fb14d92:3579
+dispatchEventForPluginEventSystem @ chunk-PJEEZAML.js?v=1fb14d92:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-PJEEZAML.js?v=1fb14d92:5478
+dispatchEvent @ chunk-PJEEZAML.js?v=1fb14d92:5472
+dispatchDiscreteEvent @ chunk-PJEEZAML.js?v=1fb14d92:5449Understand this error
+useVisuraExtraction.ts:71 🤖 Tentativo 2: AI per estrazione visura...
+useVisuraExtraction.ts:129 ✅ AI extraction successful! {codici_ateco: Array(1), oggetto_sociale: "LA SOCIETA' HA PER OGGETTO LO SVILUPPO, LA PRODUZI… VIGENTI NORME IN MATERIA DI ATTIVITA' RISERVATE.", sedi: {…}, tipo_business: 'B2B/B2C'}
+useVisuraExtraction.ts:34 🔧 Tentativo 1: Backend Python per estrazione visura...
+chunk-PJEEZAML.js?v=1fb14d92:521 Warning: Encountered two children with the same key, `2_2023-02-10 CELERYA VISURA ORD.pdf-1756503876147-131373`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+    at ul
+    at div
+    at div
+    at UploadCenter (http://localhost:5173/src/components/sidebar/UploadCenter.tsx:26:44)
+    at aside
+    at Sidebar
+    at div
+    at main
+    at div
+    at App (http://localhost:5173/App.tsx:26:17)
+printWarning @ chunk-PJEEZAML.js?v=1fb14d92:521
+error @ chunk-PJEEZAML.js?v=1fb14d92:505
+warnOnInvalidKey @ chunk-PJEEZAML.js?v=1fb14d92:10219
+reconcileChildrenArray @ chunk-PJEEZAML.js?v=1fb14d92:10235
+reconcileChildFibers2 @ chunk-PJEEZAML.js?v=1fb14d92:10559
+reconcileChildren @ chunk-PJEEZAML.js?v=1fb14d92:14292
+updateHostComponent @ chunk-PJEEZAML.js?v=1fb14d92:14807
+beginWork @ chunk-PJEEZAML.js?v=1fb14d92:15935
+beginWork$1 @ chunk-PJEEZAML.js?v=1fb14d92:19753
+performUnitOfWork @ chunk-PJEEZAML.js?v=1fb14d92:19198
+workLoopSync @ chunk-PJEEZAML.js?v=1fb14d92:19137
+renderRootSync @ chunk-PJEEZAML.js?v=1fb14d92:19116
+performSyncWorkOnRoot @ chunk-PJEEZAML.js?v=1fb14d92:18874
+flushSyncCallbacks @ chunk-PJEEZAML.js?v=1fb14d92:9119
+flushSync @ chunk-PJEEZAML.js?v=1fb14d92:18959
+finishEventHandler @ chunk-PJEEZAML.js?v=1fb14d92:3569
+batchedUpdates @ chunk-PJEEZAML.js?v=1fb14d92:3582
+dispatchEventForPluginEventSystem @ chunk-PJEEZAML.js?v=1fb14d92:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-PJEEZAML.js?v=1fb14d92:5478
+dispatchEvent @ chunk-PJEEZAML.js?v=1fb14d92:5472
+dispatchDiscreteEvent @ chunk-PJEEZAML.js?v=1fb14d92:5449Understand this error
+(index):1 Access to fetch at 'https://ateco-lookup.onrender.com/api/extract-visura' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+useVisuraExtraction.ts:40  POST https://ateco-lookup.onrender.com/api/extract-visura net::ERR_FAILED 500 (Internal Server Error)
+extractWithBackend @ useVisuraExtraction.ts:40
+(anonymous) @ useVisuraExtraction.ts:191
+(anonymous) @ useUpload.ts:70
+(anonymous) @ useUpload.ts:56
+handleFileChange @ ChatInputBar.tsx:36
+callCallback2 @ chunk-PJEEZAML.js?v=1fb14d92:3674
+invokeGuardedCallbackDev @ chunk-PJEEZAML.js?v=1fb14d92:3699
+invokeGuardedCallback @ chunk-PJEEZAML.js?v=1fb14d92:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-PJEEZAML.js?v=1fb14d92:3736
+executeDispatch @ chunk-PJEEZAML.js?v=1fb14d92:7014
+processDispatchQueueItemsInOrder @ chunk-PJEEZAML.js?v=1fb14d92:7034
+processDispatchQueue @ chunk-PJEEZAML.js?v=1fb14d92:7043
+dispatchEventsForPlugins @ chunk-PJEEZAML.js?v=1fb14d92:7051
+(anonymous) @ chunk-PJEEZAML.js?v=1fb14d92:7174
+batchedUpdates$1 @ chunk-PJEEZAML.js?v=1fb14d92:18913
+batchedUpdates @ chunk-PJEEZAML.js?v=1fb14d92:3579
+dispatchEventForPluginEventSystem @ chunk-PJEEZAML.js?v=1fb14d92:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-PJEEZAML.js?v=1fb14d92:5478
+dispatchEvent @ chunk-PJEEZAML.js?v=1fb14d92:5472
+dispatchDiscreteEvent @ chunk-PJEEZAML.js?v=1fb14d92:5449Understand this error
+useVisuraExtraction.ts:61 ❌ Backend extraction failed: TypeError: Failed to fetch
+    at extractWithBackend (useVisuraExtraction.ts:40:30)
+    at useVisuraExtraction.ts:191:24
+    at useUpload.ts:70:33
+    at Array.forEach (<anonymous>)
+    at useUpload.ts:56:16
+    at handleFileChange (ChatInputBar.tsx:36:5)
+    at HTMLUnknownElement.callCallback2 (chunk-PJEEZAML.js?v=1fb14d92:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-PJEEZAML.js?v=1fb14d92:3699:24)
+    at invokeGuardedCallback (chunk-PJEEZAML.js?v=1fb14d92:3733:39)
+    at invokeGuardedCallbackAndCatchFirstError (chunk-PJEEZAML.js?v=1fb14d92:3736:33)
+extractWithBackend @ useVisuraExtraction.ts:61
+await in extractWithBackend
+(anonymous) @ useVisuraExtraction.ts:191
+(anonymous) @ useUpload.ts:70
+(anonymous) @ useUpload.ts:56
+handleFileChange @ ChatInputBar.tsx:36
+callCallback2 @ chunk-PJEEZAML.js?v=1fb14d92:3674
+invokeGuardedCallbackDev @ chunk-PJEEZAML.js?v=1fb14d92:3699
+invokeGuardedCallback @ chunk-PJEEZAML.js?v=1fb14d92:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-PJEEZAML.js?v=1fb14d92:3736
+executeDispatch @ chunk-PJEEZAML.js?v=1fb14d92:7014
+processDispatchQueueItemsInOrder @ chunk-PJEEZAML.js?v=1fb14d92:7034
+processDispatchQueue @ chunk-PJEEZAML.js?v=1fb14d92:7043
+dispatchEventsForPlugins @ chunk-PJEEZAML.js?v=1fb14d92:7051
+(anonymous) @ chunk-PJEEZAML.js?v=1fb14d92:7174
+batchedUpdates$1 @ chunk-PJEEZAML.js?v=1fb14d92:18913
+batchedUpdates @ chunk-PJEEZAML.js?v=1fb14d92:3579
+dispatchEventForPluginEventSystem @ chunk-PJEEZAML.js?v=1fb14d92:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-PJEEZAML.js?v=1fb14d92:5478
+dispatchEvent @ chunk-PJEEZAML.js?v=1fb14d92:5472
+dispatchDiscreteEvent @ chunk-PJEEZAML.js?v=1fb14d92:5449Understand this error
+useVisuraExtraction.ts:71 🤖 Tentativo 2: AI per estrazione visura...
+useVisuraExtraction.ts:129 ✅ AI extraction successful! {codici_ateco: Array(1), oggetto_sociale: "LA SOCIETA' HA PER OGGETTO LO SVILUPPO, LA PRODUZI… VIGENTI NORME IN MATERIA DI ATTIVITA' RISERVATE.", sedi: {…}, tipo_business: 'B2B/B2C'}
+2chunk-PJEEZAML.js?v=1fb14d92:521 Warning: Encountered two children with the same key, `2_2023-02-10 CELERYA VISURA ORD.pdf-1756503876147-131373`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+    at ul
+    at div
+    at div
+    at UploadCenter (http://localhost:5173/src/components/sidebar/UploadCenter.tsx:26:44)
+    at aside
+    at Sidebar
+    at div
+    at main
+    at div
+    at App (http://localhost:5173/App.tsx:26:17)

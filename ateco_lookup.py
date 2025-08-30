@@ -311,6 +311,7 @@ logger = logging.getLogger(__name__)
 
 # Import condizionale per VisuraExtractor dopo configurazione logger
 visura_extraction_available = False
+VisuraExtractor = None
 try:
     from visura_extractor import VisuraExtractor
     visura_extraction_available = True
@@ -349,14 +350,40 @@ def build_api(df: pd.DataFrame):
 
     app = FastAPI(title="ATECO Lookup", version="2.0")
 
-    # Abilita CORS
+    # Abilita CORS con configurazione più permissiva per debug
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],  # in produzione meglio specificare solo il dominio della UI
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=["*"],  # Esponi tutti gli header
     )
+    
+    # Middleware personalizzato per garantire CORS su errori
+    @app.middleware("http")
+    async def catch_exceptions_middleware(request, call_next):
+        try:
+            response = await call_next(request)
+            return response
+        except Exception as e:
+            logger.error(f"Errore non gestito: {str(e)}", exc_info=True)
+            # Assicura che gli header CORS siano presenti anche su errori
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "success": False,
+                    "error": {
+                        "code": "INTERNAL_ERROR",
+                        "message": "Errore interno del server",
+                        "details": str(e)
+                    }
+                },
+                headers={
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Credentials": "true",
+                }
+            )
 
     @app.get("/health")
     def health():
@@ -490,6 +517,7 @@ def build_api(df: pd.DataFrame):
         logger.info(f"Ricevuto file per estrazione: {file.filename}")
         
         # Verifica che VisuraExtractor sia disponibile
+        global visura_extraction_available, VisuraExtractor
         if not visura_extraction_available:
             logger.error("VisuraExtractor non disponibile")
             # Prova a importare al volo se non era disponibile all'avvio
@@ -533,11 +561,26 @@ def build_api(df: pd.DataFrame):
             )
         
         # Salva temporaneamente il file
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
-            content = await file.read()
-            tmp.write(content)
-            tmp_path = tmp.name
-            logger.info(f"File salvato temporaneamente: {tmp_path}")
+        tmp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
+                content = await file.read()
+                if not content:
+                    logger.error("File PDF vuoto")
+                    raise HTTPException(
+                        status_code=400,
+                        detail={
+                            "code": "EMPTY_FILE",
+                            "message": "Il file PDF è vuoto",
+                            "details": "Nessun contenuto nel file caricato"
+                        }
+                    )
+                tmp.write(content)
+                tmp_path = tmp.name
+                logger.info(f"File salvato temporaneamente: {tmp_path} ({len(content)} bytes)")
+        except Exception as e:
+            logger.error(f"Errore nel salvare il file temporaneo: {str(e)}")
+            raise
         
         try:
             # Estrai dati usando VisuraExtractor
@@ -555,12 +598,11 @@ def build_api(df: pd.DataFrame):
                     res = search_smart(df, code, prefer="2025-camerale")
                     if not res.empty:
                         lookup_result = enrich(flatten(res.iloc[0]))
-                    if not res.empty:
                         ateco_enrichment.append({
                             'code': code,
-                            'description': lookup_result.get('TITOLO_ATECO_2025_RAPPRESENTATIVO') or 
+                            'description': (lookup_result.get('TITOLO_ATECO_2025_RAPPRESENTATIVO') or 
                                          lookup_result.get('TITOLO_ATECO_2022') or 
-                                         "Descrizione non trovata",
+                                         "Descrizione non trovata"),
                             'normative': lookup_result.get('normative', []),
                             'certificazioni': lookup_result.get('certificazioni', [])
                         })
