@@ -1,79 +1,135 @@
-# 🔴 MESSAGGIO PER CLAUDE BACKEND - ERRORE 500 CRITICO
+ CONSIGLI PER MIGLIORARE IL BACKEND
 
-Ciao, hai fatto un ottimo lavoro con l'integrazione ma il backend crasha con **ERRORE 500** quando provo a caricare una visura!
+## ✅ OTTIMO LAVORO!
+Il backend ora estrae:
+- Denominazione ✅
+- P.IVA ✅  
+- PEC ✅
+- Capitale sociale ✅
 
-## ❌ ERRORE:
+## 🔴 PROBLEMA: CODICI ATECO SPORCHI
+
+Il backend sta estraendo TUTTO come codice ATECO, inclusi anni e testi casuali:
 ```
-ateco-lookup.onrender.com/api/extract-visura:1  Failed to load resource: the server responded with a status of 500
-Backend extraction failed: Error: Backend error: 500
+"2021" - Attività economica
+"10" - BIS DEL DECRETO LEGGE
+"2022" - 106524
+"62.01" - produzione di software  ← QUESTO È GIUSTO!
 ```
 
-## 🔍 COSA FARE SUBITO:
+## 🛠️ SOLUZIONE NEL BACKEND
 
-1. **CONTROLLA I LOG SU RENDER DASHBOARD**
-   - Vai su Render → Service → Logs
-   - Cerca l'errore esatto (probabilmente ModuleNotFoundError o TypeError)
-   - Copia l'errore completo
+Nel file `visura_extractor_power.py`, modifica il metodo `extract_ateco_with_description`:
 
-2. **VERIFICA requirements.txt**
-   Assicurati che contenga:
-   ```
-   pdfplumber==0.9.0
-   ```
+```python
+def extract_ateco_with_description(self, text: str) -> List[Dict[str, Any]]:
+    """Estrae SOLO codici ATECO validi con descrizioni"""
+    ateco_list = []
+    
+    # Pattern MIGLIORATI per ATECO
+    patterns = [
+        # Formato standard: 62.01 - Descrizione
+        r'(?:^|\s)(\d{2}\.\d{2}(?:\.\d{2})?)\s*[\-\:]\s*([^\n]+)',
+        # Con parola chiave ATECO
+        r'(?:ATECO|Ateco|Codice)\s*[:]\s*(\d{2}\.\d{2}(?:\.\d{2})?)\s*[\-]?\s*([^\n]*)',
+        # Attività prevalente
+        r'(?:Attività prevalente|Attività principale)\s*[:]\s*(\d{2}\.\d{2}(?:\.\d{2})?)\s*[\-]?\s*([^\n]*)',
+    ]
+    
+    for pattern in patterns:
+        matches = re.findall(pattern, text, re.IGNORECASE)
+        for match in matches:
+            code = match[0].strip()
+            description = match[1].strip() if len(match) > 1 else ''
+            
+            # VALIDAZIONE: Verifica che sia un codice ATECO valido
+            if self.is_valid_ateco(code):
+                # Pulisci la descrizione
+                description = self.clean_ateco_description(description)
+                
+                if code not in [a['codice'] for a in ateco_list]:
+                    ateco_list.append({
+                        'codice': code,
+                        'descrizione': description or self.ateco_descriptions.get(code, 'Attività economica'),
+                        'principale': len(ateco_list) == 0
+                    })
+    
+    return ateco_list
 
-3. **AGGIUNGI LOGGING DI DEBUG**
-   Nell'endpoint `/api/extract-visura` aggiungi:
-   ```python
-   try:
-       print(f"📥 Ricevuto file: {file.filename}")
-       # ... codice estrazione ...
-   except Exception as e:
-       print(f"❌ ERRORE: {str(e)}")
-       import traceback
-       print(traceback.format_exc())
-   ```
+def is_valid_ateco(self, code: str) -> bool:
+    """Verifica se è un codice ATECO valido"""
+    # Formato: XX.XX o XX.XX.XX
+    if not re.match(r'^\d{2}(\.\d{2}){1,2}$', code):
+        return False
+    
+    # Il primo numero deve essere tra 01 e 99
+    first_two = int(code[:2])
+    if first_two < 1 or first_two > 99:
+        return False
+    
+    # Non può essere un anno (es: 20.21)
+    if first_two >= 19 and first_two <= 21:
+        second_part = code.split('.')[1] if '.' in code else ''
+        if second_part and int(second_part) >= 0 and int(second_part) <= 99:
+            # Potrebbe essere un anno tipo 20.21, verifica il contesto
+            return False
+    
+    return True
 
-4. **TEST RAPIDO**
-   Temporaneamente sostituisci l'endpoint con uno che ritorna dati fissi per verificare che almeno l'endpoint risponda:
-   ```python
-   @app.post("/api/extract-visura")
-   async def extract_visura(file: UploadFile = File(...)):
-       return {
-           "success": True,
-           "data": {
-               "denominazione": "TEST",
-               "partita_iva": "12345678901",
-               "pec": "test@pec.it",
-               "confidence": 0.9
-           }
-       }
-   ```
+def clean_ateco_description(self, description: str) -> str:
+    """Pulisce la descrizione ATECO"""
+    # Rimuovi testi inutili
+    remove_patterns = [
+        r'^\d+\s*$',  # Solo numeri
+        r'^[A-Z]{2,}\s+DEL\s+',  # BIS DEL DECRETO...
+        r'^\d{4}.*',  # Anni all'inizio
+        r'Addetti.*$',  # Info addetti
+        r'\d{2}/\d{2}/\d{4}',  # Date
+    ]
+    
+    for pattern in remove_patterns:
+        description = re.sub(pattern, '', description, flags=re.IGNORECASE)
+    
+    return description.strip()
+```
 
-5. **CONTROLLA CHE I FILE ESISTANO**
-   - `visura_extractor_power.py` deve essere nella root del progetto
-   - L'import deve funzionare: `from visura_extractor_power import VisuraExtractorPower`
+## 📊 RISULTATO ATTESO
 
-## 📊 IL FRONTEND SI ASPETTA:
+Invece di:
 ```json
-{
-  "success": true,
-  "data": {
-    "denominazione": "...",
-    "partita_iva": "...",
-    "pec": "...",
-    "codici_ateco": [...],
-    "sede_legale": {...},
-    "confidence": 0.9
-  }
-}
+"codici_ateco": [
+  {"codice": "2021", "descrizione": "Attività economica"},
+  {"codice": "10", "descrizione": "BIS DEL DECRETO"},
+  {"codice": "62.01", "descrizione": "produzione di software"}
+]
 ```
 
-## 🚨 URGENTE:
-Il sistema non funziona finché non risolviamo l'errore 500. L'AI di fallback funziona ma costa troppo!
+Dovrebbe restituire SOLO:
+```json
+"codici_ateco": [
+  {"codice": "62.01", "descrizione": "Produzione di software non connesso all'edizione", "principale": true}
+]
+```
 
-Fammi sapere:
-1. Cosa dicono i log di Render
-2. Se pdfplumber è in requirements.txt
-3. Se riesci a farlo funzionare con dati di test
+## 🎯 ALTRI MIGLIORAMENTI CONSIGLIATI
 
-Grazie!
+1. **REA più pulito**: Rimuovi caratteri strani (ora esce "le 1223096")
+2. **Provincia corretta**: Assicurati sia sempre 2 lettere maiuscole (TO, non LE)
+3. **Capitale sociale**: Converti correttamente in numero float
+
+## 🚀 TEST RAPIDO
+
+Prima di deployare, testa localmente:
+```python
+text = """
+Codice ATECO: 62.01 - Produzione di software
+Anno 2021
+REA: TO-1275874
+"""
+
+extractor = VisuraExtractorPower()
+ateco = extractor.extract_ateco_with_description(text)
+print(ateco)  # Dovrebbe mostrare SOLO 62.01, non 2021
+```
+
+Grazie per l'ottimo lavoro! Siamo quasi alla perfezione! 🎉

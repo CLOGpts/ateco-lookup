@@ -46,6 +46,7 @@ class VisuraExtractorPower:
                 r'(?:Numero iscrizione al Registro Imprese)[\s:]*([A-Z]{2}[\s\-]?\d{5,7})',
                 r'(?:CCIAA)[\s:]*[^\n]*?([A-Z]{2}[\s\-]?\d{5,7})',
                 r'(?:n\.|numero|nr\.?)\s*([A-Z]{2}[\s\-]?\d{5,7})',
+                r'REA\s+([A-Z]{2})\s*[\-]?\s*(\d{5,7})',  # REA TO-1234567
             ],
             
             'camera_commercio': [
@@ -161,6 +162,37 @@ class VisuraExtractorPower:
         text = text.strip()
         return text
     
+    def clean_rea(self, rea: str) -> str:
+        """Pulisce il numero REA estratto"""
+        if not rea:
+            return ''
+        
+        # Rimuovi caratteri strani all'inizio
+        rea = re.sub(r'^[^A-Z0-9]+', '', rea)
+        
+        # Pattern per REA valido: XX-NNNNNNN o XX NNNNNNN
+        match = re.search(r'([A-Z]{2})[\s\-]?(\d{5,7})', rea)
+        if match:
+            provincia = match.group(1)
+            numero = match.group(2)
+            return f"{provincia}-{numero}"
+        
+        return rea
+    
+    def clean_provincia(self, provincia: str) -> str:
+        """Assicura che la provincia sia sempre 2 lettere maiuscole"""
+        if not provincia:
+            return ''
+        
+        # Estrai solo lettere maiuscole
+        provincia = re.sub(r'[^A-Z]', '', provincia.upper())
+        
+        # Deve essere esattamente 2 lettere
+        if len(provincia) == 2:
+            return provincia
+        
+        return ''
+    
     def extract_with_patterns(self, text: str, patterns: List[str]) -> Optional[str]:
         """Estrae usando multipli pattern regex"""
         for pattern in patterns:
@@ -188,49 +220,116 @@ class VisuraExtractorPower:
                 return 0.0
         return 0.0
     
+    def is_valid_ateco(self, code: str) -> bool:
+        """Verifica se è un codice ATECO valido"""
+        # Formato: XX.XX o XX.XX.XX dove XX sono numeri
+        if not re.match(r'^\d{2}(\.\d{2}){1,2}$', code):
+            return False
+        
+        # Il primo numero deve essere tra 01 e 99
+        first_two = int(code[:2])
+        if first_two < 1 or first_two > 99:
+            return False
+        
+        # Esclude anni travestiti da codici (es: 20.21, 20.22)
+        parts = code.split('.')
+        if len(parts) >= 2:
+            # Se sembra un anno (19xx, 20xx, 21xx)
+            if first_two in [19, 20, 21] and len(parts[1]) == 2:
+                second_num = int(parts[1])
+                # Se il secondo numero è 00-30 potrebbe essere un anno
+                if 0 <= second_num <= 30:
+                    return False
+        
+        return True
+    
+    def clean_ateco_description(self, description: str) -> str:
+        """Pulisce la descrizione ATECO"""
+        if not description:
+            return ''
+            
+        # Rimuovi testi inutili
+        remove_patterns = [
+            r'^\d+\s*$',  # Solo numeri
+            r'^[A-Z]{2,}\s+DEL\s+.*',  # BIS DEL DECRETO...
+            r'^\d{4}.*',  # Anni all'inizio
+            r'Addetti.*$',  # Info addetti
+            r'\d{2}/\d{2}/\d{4}',  # Date
+            r'^[\*\-\•]+',  # Bullet points
+            r'[\*\-\•]+$',  # Bullet points finali
+        ]
+        
+        for pattern in remove_patterns:
+            description = re.sub(pattern, '', description, flags=re.IGNORECASE)
+        
+        # Capitalizza prima lettera
+        description = description.strip()
+        if description and description[0].islower():
+            description = description[0].upper() + description[1:]
+            
+        return description
+    
     def extract_ateco_with_description(self, text: str) -> List[Dict[str, Any]]:
-        """Estrae codici ATECO con descrizioni"""
+        """Estrae SOLO codici ATECO validi con descrizioni"""
         ateco_list = []
         
-        # Pattern per trovare ATECO con descrizione nella visura
+        # Pattern MIGLIORATI per ATECO - più specifici
         patterns = [
-            r'(\d{2}[\.\d]*)\s*[\-\:]\s*([^\n]+)',  # 62.01 - Descrizione
-            r'(?:Codice ATECO|ATECO|Attività)[\s:]*(\d{2}[\.\d]*)\s*([^\n]+)',
-            r'(\d{2}\.\d{2}(?:\.\d{2})?)\s+([A-Z][^\n]+)',
+            # Formato con parola chiave ATECO/Codice
+            r'(?:ATECO|Ateco|Codice ATECO|Codice attività|Attività prevalente)\s*[:]\s*(\d{2}\.\d{2}(?:\.\d{2})?)\s*[\-]?\s*([^\n]*)',
+            # Formato standard con trattino: 62.01 - Descrizione
+            r'(?:^|\s)(\d{2}\.\d{2}(?:\.\d{2})?)\s*[\-]\s*([a-zA-Z][^\n]+)',
+            # Import/Export codici
+            r'(?:Import\.|Export\.)\s*[:]\s*(\d{2}\.\d{2}(?:\.\d{2})?)\s*[\-]?\s*([^\n]*)',
         ]
         
         for pattern in patterns:
-            matches = re.findall(pattern, text, re.IGNORECASE)
+            matches = re.findall(pattern, text, re.IGNORECASE | re.MULTILINE)
             for match in matches:
                 code = match[0].strip()
                 description = match[1].strip() if len(match) > 1 else ''
                 
-                # Se non c'è descrizione, usa il dizionario
-                if not description or len(description) < 5:
-                    description = self.ateco_descriptions.get(code, 'Attività economica')
-                
-                # Pulisci la descrizione
-                description = re.sub(r'[\*\-\•]+$', '', description).strip()
-                
-                if code and not any(a['codice'] == code for a in ateco_list):
-                    ateco_list.append({
-                        'codice': code,
-                        'descrizione': description,
-                        'principale': len(ateco_list) == 0  # Il primo è principale
-                    })
-        
-        # Se non troviamo ATECO con descrizione, cerca solo i codici
-        if not ateco_list:
-            codes = self.extract_with_patterns(text, self.patterns['ateco_codes'])
-            if codes:
-                for code in codes.split(','):
-                    code = code.strip()
-                    if code:
+                # VALIDAZIONE: Verifica che sia un codice ATECO valido
+                if self.is_valid_ateco(code):
+                    # Pulisci la descrizione
+                    description = self.clean_ateco_description(description)
+                    
+                    # Se non c'è descrizione valida, usa il dizionario
+                    if not description or len(description) < 5:
+                        description = self.ateco_descriptions.get(code, 'Attività economica')
+                    
+                    # Aggiungi solo se non già presente
+                    if code not in [a['codice'] for a in ateco_list]:
                         ateco_list.append({
                             'codice': code,
-                            'descrizione': self.ateco_descriptions.get(code, 'Attività economica'),
+                            'descrizione': description,
                             'principale': len(ateco_list) == 0
                         })
+        
+        # Se non troviamo nulla con i pattern specifici, cerca con pattern più generici
+        if not ateco_list:
+            # Pattern generico per codici ATECO isolati
+            generic_pattern = r'\b(\d{2}\.\d{2}(?:\.\d{2})?)\b'
+            matches = re.findall(generic_pattern, text)
+            for code in matches:
+                if self.is_valid_ateco(code):
+                    # Cerca descrizione nelle vicinanze
+                    desc_pattern = rf'{re.escape(code)}\s*[\-:]\s*([^\n]+)'
+                    desc_match = re.search(desc_pattern, text, re.IGNORECASE)
+                    description = ''
+                    if desc_match:
+                        description = self.clean_ateco_description(desc_match.group(1))
+                    
+                    if not description:
+                        description = self.ateco_descriptions.get(code, 'Attività economica')
+                    
+                    if code not in [a['codice'] for a in ateco_list]:
+                        ateco_list.append({
+                            'codice': code,
+                            'descrizione': description,
+                            'principale': len(ateco_list) == 0
+                        })
+                        break  # Prendi solo il primo valido se usiamo il pattern generico
         
         return ateco_list
     
@@ -302,7 +401,8 @@ class VisuraExtractorPower:
         extracted_data['pec'] = self.extract_with_patterns(full_text, self.patterns['pec'])
         
         # DATI REGISTRO IMPRESE
-        extracted_data['numero_rea'] = self.extract_with_patterns(full_text, self.patterns['numero_rea'])
+        rea_raw = self.extract_with_patterns(full_text, self.patterns['numero_rea'])
+        extracted_data['numero_rea'] = self.clean_rea(rea_raw) if rea_raw else None
         extracted_data['camera_commercio'] = self.extract_with_patterns(full_text, self.patterns['camera_commercio'])
         extracted_data['forma_giuridica'] = self.extract_with_patterns(full_text, self.patterns['forma_giuridica'])
         
@@ -327,11 +427,12 @@ class VisuraExtractorPower:
             extracted_data['oggetto_sociale'] = self.clean_text(oggetto_matches[0])[:500]
         
         # SEDE LEGALE
+        provincia_raw = self.extract_with_patterns(full_text, self.patterns['provincia'])
         extracted_data['sede_legale'] = {
             'indirizzo': self.extract_with_patterns(full_text, self.patterns['indirizzo']) or '',
             'cap': self.extract_with_patterns(full_text, self.patterns['cap']) or '',
             'comune': self.extract_with_patterns(full_text, self.patterns['comune']) or '',
-            'provincia': self.extract_with_patterns(full_text, self.patterns['provincia']) or '',
+            'provincia': self.clean_provincia(provincia_raw) if provincia_raw else '',
             'nazione': 'ITALIA'
         }
         
