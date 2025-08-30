@@ -305,13 +305,16 @@ class VisuraExtractorPower:
                         description = description[:197] + '...'
                     
                     # Aggiungi solo se non già presente
-                    if code not in [a['codice'] for a in ateco_list]:
+                    # Verifica che il codice non sia già nella lista (confronta solo il numero, non il prefisso)
+                    code_numbers = [a.get('codice_puro', a['codice'].replace('ATECO: ', '')) for a in ateco_list]
+                    if code not in code_numbers:
                         ateco_list.append({
-                            'codice': code,
-                            'codice_completo': f'ATECO {code}',  # Codice con etichetta inclusa
+                            'codice': f'ATECO: {code}',  # SEMPRE con etichetta ATECO davanti!
+                            'codice_puro': code,  # Codice senza etichetta per confronti
+                            'codice_completo': f'ATECO {code}',  # Compatibilità
                             'descrizione': description,
                             'principale': len(ateco_list) == 0,
-                            'label': 'ATECO'  # Aggiungi etichetta esplicita
+                            'label': 'ATECO'  # Etichetta esplicita
                         })
         
         # Se non troviamo nulla con i pattern specifici, cerca con pattern più generici
@@ -331,13 +334,16 @@ class VisuraExtractorPower:
                     if not description:
                         description = self.ateco_descriptions.get(code, 'Attività economica')
                     
-                    if code not in [a['codice'] for a in ateco_list]:
+                    # Verifica che il codice non sia già nella lista
+                    code_numbers = [a.get('codice_puro', a['codice'].replace('ATECO: ', '')) for a in ateco_list]
+                    if code not in code_numbers:
                         ateco_list.append({
-                            'codice': code,
-                            'codice_completo': f'ATECO {code}',  # Codice con etichetta inclusa
+                            'codice': f'ATECO: {code}',  # SEMPRE con etichetta ATECO davanti!
+                            'codice_puro': code,  # Codice senza etichetta per confronti
+                            'codice_completo': f'ATECO {code}',  # Compatibilità
                             'descrizione': description,
                             'principale': len(ateco_list) == 0,
-                            'label': 'ATECO'  # Aggiungi etichetta esplicita
+                            'label': 'ATECO'  # Etichetta esplicita
                         })
                         break  # Prendi solo il primo valido se usiamo il pattern generico
         

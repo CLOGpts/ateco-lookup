@@ -29,3 +29,24 @@ BOSCONERO (LE) - CAP 10080
 **Confidenza:** 95%
 
 ✅ Dati estratti e salvati nel pannello laterale.
+
+🎯 BINGO! Trovati ateco_details con descrizioni: [{…}]
+useVisuraExtraction.ts:58 ✅ Codici ATECO processati: [{…}]
+useVisuraExtraction.ts:64 ✓ Trovato denominazione con chiave 'denominazione': CELERYA SRL
+useVisuraExtraction.ts:64 ✓ Trovato forma_giuridica con chiave 'forma_giuridica': societa' a responsabilita' limitata
+useVisuraExtraction.ts:64 ✓ Trovato partita_iva con chiave 'partita_iva': 12230960010
+useVisuraExtraction.ts:64 ✓ Trovato codice_fiscale con chiave 'codice_fiscale': 12230960010
+useVisuraExtraction.ts:64 ✓ Trovato numero_rea con chiave 'numero_rea': 1223096
+useVisuraExtraction.ts:68 ✗ Non trovato camera_commercio, chiavi cercate: (4) ['camera_commercio', 'chamber_commerce', 'cciaa', 'chamber']
+useVisuraExtraction.ts:64 ✓ Trovato data_costituzione con chiave 'data_costituzione': 09/01/2020
+useVisuraExtraction.ts:68 ✗ Non trovato data_iscrizione_rea, chiavi cercate: (3) ['data_iscrizione_rea', 'rea_registration_date', 'registration_date']
+useVisuraExtraction.ts:64 ✓ Trovato stato_attivita con chiave 'stato_attivita': ATTIVA
+useVisuraExtraction.ts:64 ✓ Trovato oggetto_sociale con chiave 'oggetto_sociale': LA SOCIETA' HA PER OGGETTO LO SVILUPPO, LA PRODUZIONE E LA
+useVisuraExtraction.ts:104 📍 Sede trovata in sedi.sede_legale: {indirizzo: 'legale BOSCONERO (TO) VIA DON', cap: '10080', citta: 'BOSCONERO', provincia: 'LE'}
+useVisuraExtraction.ts:64 ✓ Trovato pec con chiave 'pec': celerya@pec.it
+useVisuraExtraction.ts:64 ✓ Trovato email con chiave 'email': celerya@pec.it
+useVisuraExtraction.ts:68 ✗ Non trovato telefono, chiavi cercate: (6) ['telefono', 'phone', 'telephone', 'tel', 'phone_number', 'numero_telefono']
+useVisuraExtraction.ts:64 ✓ Trovato tipo_business con chiave 'tipo_business': B2C
+useVisuraExtraction.ts:141 📦 Dati adattati finali: {denominazione: 'CELERYA SRL', forma_giuridica: "societa' a responsabilita' limitata", partita_iva: '12230960010', codice_fiscale: '12230960010', numero_rea: '1223096', …}
+useVisuraExtraction.ts:208 ✅ Backend extraction successful con dati adattati! {denominazione: 'CELERYA SRL', forma_giuridica: "societa' a responsabilita' limitata", partita_iva: '12230960010', codice_fiscale: '12230960010', numero_rea: '1223096', …}
+useVisuraExtraction.ts:448 📊 Popolamento dati estratti: {denominazione: 'CELERYA SRL', forma_giuridica: "societa' a responsabilita' limitata", partita_iva: '12230960010', codice_fiscale: '12230960010', numero_rea: '1223096', …}
