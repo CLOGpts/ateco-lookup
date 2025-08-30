@@ -11,6 +11,9 @@ Il backend **ATECO Lookup** è un servizio Python che permette di:
 2. **Ottenere informazioni dettagliate** su ogni codice (descrizioni, gerarchie, ricodifiche 2022/2025)
 3. **Arricchire i dati** con normative e certificazioni pertinenti al settore
 4. **Fornire API REST** per integrazione con applicazioni frontend
+5. **Estrarre automaticamente dati** da PDF di visure camerali
+6. **Suggerire codici simili** quando non si trovano corrispondenze esatte
+7. **Supportare ricerche batch** per elaborazione multipla efficiente
 
 ### Architettura
 ```
@@ -34,6 +37,8 @@ Il backend **ATECO Lookup** è un servizio Python che permette di:
 - **FastAPI**: Framework web moderno per API REST
 - **Pandas**: Manipolazione dati Excel
 - **CORS abilitato**: Permette chiamate da domini diversi
+- **Cache LRU**: Ottimizzazione performance per ricerche frequenti
+- **pdfplumber/PyPDF2**: Estrazione dati da PDF (opzionale)
 
 ---
 
@@ -52,7 +57,9 @@ http://127.0.0.1:8000
 **Risposta:**
 ```json
 {
-  "status": "ok"
+  "status": "ok",
+  "version": "2.0",
+  "cache_enabled": true
 }
 ```
 
@@ -123,8 +130,174 @@ GET /lookup?code=62.01&prefer=2025
 ```json
 {
   "found": 0,
-  "items": []
+  "items": [],
+  "suggestions": [
+    {
+      "code": "20.13.0",
+      "title": "Fabbricazione di altri prodotti chimici di base inorganici"
+    },
+    {
+      "code": "20.15.0",
+      "title": "Fabbricazione di fertilizzanti e composti azotati"
+    }
+  ],
+  "message": "Nessun risultato per 'XX.XX'. Prova con uno dei suggerimenti."
 }
+```
+
+### 3. Ricerca Batch (Multipla)
+**Endpoint:** `POST /batch`
+
+**Descrizione:** Permette di cercare più codici ATECO in una singola richiesta
+
+**Corpo richiesta:**
+```json
+{
+  "codes": ["20.14.0", "62.01", "10.11"],
+  "prefer": "2025",
+  "prefix": false
+}
+```
+
+**Parametri:**
+| Parametro | Tipo | Obbligatorio | Descrizione |
+|-----------|------|--------------|-------------|
+| `codes` | array | ✅ | Lista di codici ATECO da cercare (max 50) |
+| `prefer` | string | ❌ | Priorità versione: `2022`, `2025`, `2025-camerale` |
+| `prefix` | boolean | ❌ | Se `true`, cerca per prefisso |
+
+**Risposta:**
+```json
+{
+  "total_codes": 3,
+  "results": [
+    {
+      "code": "20.14.0",
+      "found": 1,
+      "items": [/* dettagli ATECO */]
+    },
+    {
+      "code": "62.01",
+      "found": 1,
+      "items": [/* dettagli ATECO */]
+    },
+    {
+      "code": "10.11",
+      "found": 0,
+      "items": []
+    }
+  ]
+}
+```
+
+### 4. Autocomplete
+**Endpoint:** `GET /autocomplete`
+
+**Descrizione:** Fornisce suggerimenti mentre l'utente digita un codice ATECO
+
+**Parametri Query:**
+| Parametro | Tipo | Obbligatorio | Descrizione | Default |
+|-----------|------|--------------|-------------|---------|
+| `partial` | string | ✅ | Codice parziale (min 2 caratteri) | - |
+| `limit` | integer | ❌ | Numero massimo di suggerimenti (max 20) | 5 |
+
+**Esempio chiamata:**
+```
+GET /autocomplete?partial=20.1&limit=10
+```
+
+**Risposta:**
+```json
+{
+  "partial": "20.1",
+  "suggestions": [
+    {
+      "code": "20.11.0",
+      "title": "Fabbricazione di gas industriali",
+      "version": "2022"
+    },
+    {
+      "code": "20.14.0",
+      "title": "Fabbricazione di altri prodotti chimici di base organici",
+      "version": "2022"
+    }
+  ],
+  "count": 2
+}
+```
+
+### 5. Estrazione Visura Camerale
+**Endpoint:** `POST /api/extract-visura`
+
+**Descrizione:** Estrae dati strutturati da un PDF di visura camerale
+
+**Content-Type:** `multipart/form-data`
+
+**Parametri:**
+| Parametro | Tipo | Obbligatorio | Descrizione |
+|-----------|------|--------------|-------------|
+| `file` | file | ✅ | File PDF della visura (max 20MB) |
+
+**Esempio chiamata (JavaScript):**
+```javascript
+const formData = new FormData();
+formData.append('file', pdfFile);
+
+const response = await fetch('http://127.0.0.1:8000/api/extract-visura', {
+  method: 'POST',
+  body: formData
+});
+```
+
+**Risposta (successo):**
+```json
+{
+  "success": true,
+  "data": {
+    "codici_ateco": ["62.01.00", "62.02.00"],
+    "oggetto_sociale": "Sviluppo software e consulenza informatica",
+    "sede_legale": {
+      "indirizzo": "Via Roma 1",
+      "cap": "00100",
+      "comune": "Roma",
+      "provincia": "RM"
+    },
+    "tipo_business": "technology",
+    "confidence": 0.95,
+    "ateco_details": [
+      {
+        "code": "62.01.00",
+        "description": "Produzione di software non connesso all'edizione",
+        "normative": ["GDPR", "NIS2"],
+        "certificazioni": ["ISO 27001", "ISO 9001"]
+      }
+    ]
+  }
+}
+```
+
+**Risposta (errore):**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "EXTRACTION_ERROR",
+    "message": "Errore durante estrazione dati dal PDF",
+    "details": "Dettagli specifici dell'errore"
+  }
+}
+```
+
+**Codici di errore possibili:**
+- `INVALID_FILE_TYPE`: File non PDF
+- `FILE_TOO_LARGE`: File supera 20MB
+- `EMPTY_FILE`: File PDF vuoto
+- `MODULE_NOT_AVAILABLE`: Dipendenze mancanti per estrazione PDF
+- `EXTRACTION_ERROR`: Errore generico durante l'estrazione
+
+**Note:** Richiede l'installazione di dipendenze aggiuntive:
+```bash
+pip install pdfplumber PyPDF2 Pillow pdfminer.six
 ```
 
 ---
@@ -193,9 +366,14 @@ python ateco_lookup.py --file tabella_ATECO.xlsx --serve --host 0.0.0.0 --port 8
 python ateco_lookup.py --file tabella_ATECO.xlsx --serve --debug
 ```
 
+**Nota:** Per l'estrazione da PDF visure camerali, installa anche:
+```bash
+pip install pdfplumber PyPDF2 Pillow pdfminer.six
+```
+
 ### 4. Verifica funzionamento
 Apri il browser e vai a:
-- `http://127.0.0.1:8000/health` - dovrebbe rispondere `{"status": "ok"}`
+- `http://127.0.0.1:8000/health` - dovrebbe rispondere `{"status": "ok", "version": "2.0", "cache_enabled": true}`
 - `http://127.0.0.1:8000/docs` - documentazione interattiva Swagger UI (generata automaticamente da FastAPI)
 
 ---
@@ -212,6 +390,18 @@ curl "http://127.0.0.1:8000/lookup?code=20.14.0"
 
 # Ricerca per prefisso
 curl "http://127.0.0.1:8000/lookup?code=62&prefix=true&limit=5"
+
+# Autocomplete
+curl "http://127.0.0.1:8000/autocomplete?partial=20.1&limit=5"
+
+# Batch (richiede POST)
+curl -X POST http://127.0.0.1:8000/batch \
+  -H "Content-Type: application/json" \
+  -d '{"codes": ["20.14.0", "62.01"], "prefer": "2025"}'
+
+# Estrazione visura (richiede file PDF)
+curl -X POST http://127.0.0.1:8000/api/extract-visura \
+  -F "file=@visura.pdf"
 ```
 
 ### Con JavaScript/Fetch (dal frontend)
@@ -228,6 +418,9 @@ async function cercaATECO(codice) {
             console.log('Normative:', data.items[0].normative);
         } else {
             console.log('Nessun risultato trovato');
+            if (data.suggestions) {
+                console.log('Suggerimenti:', data.suggestions);
+            }
         }
     } catch (error) {
         console.error('Errore nella chiamata API:', error);
@@ -242,6 +435,52 @@ async function cercaPerPrefisso(prefisso) {
     const data = await response.json();
     console.log(`Trovati ${data.found} risultati`);
     return data.items;
+}
+
+// Esempio autocomplete
+async function getAutocompleteSuggestions(partial) {
+    const response = await fetch(
+        `http://127.0.0.1:8000/autocomplete?partial=${partial}&limit=5`
+    );
+    const data = await response.json();
+    return data.suggestions;
+}
+
+// Esempio batch lookup
+async function cercaMultipli(codes) {
+    const response = await fetch('http://127.0.0.1:8000/batch', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            codes: codes,
+            prefer: '2025'
+        })
+    });
+    const data = await response.json();
+    return data.results;
+}
+
+// Esempio estrazione visura
+async function estraiDatiVisura(pdfFile) {
+    const formData = new FormData();
+    formData.append('file', pdfFile);
+    
+    const response = await fetch('http://127.0.0.1:8000/api/extract-visura', {
+        method: 'POST',
+        body: formData
+    });
+    
+    const data = await response.json();
+    if (data.success) {
+        console.log('Codici ATECO estratti:', data.data.codici_ateco);
+        console.log('Dettagli ATECO:', data.data.ateco_details);
+        return data.data;
+    } else {
+        console.error('Errore estrazione:', data.error);
+        throw new Error(data.error.message);
+    }
 }
 ```
 
@@ -265,6 +504,41 @@ const atecoService = {
         return this.lookup(prefix, { prefix: true, limit });
     },
     
+    // Autocomplete
+    async autocomplete(partial, limit = 5) {
+        const response = await axios.get(`${API_BASE}/autocomplete`, {
+            params: { partial, limit }
+        });
+        return response.data.suggestions;
+    },
+    
+    // Batch lookup
+    async batchLookup(codes, prefer = null) {
+        const response = await axios.post(`${API_BASE}/batch`, {
+            codes,
+            prefer,
+            prefix: false
+        });
+        return response.data.results;
+    },
+    
+    // Estrazione visura
+    async extractVisura(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await axios.post(
+            `${API_BASE}/api/extract-visura`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        );
+        return response.data;
+    },
+    
     // Health check
     async checkHealth() {
         const response = await axios.get(`${API_BASE}/health`);
@@ -275,6 +549,15 @@ const atecoService = {
 // Uso nel componente
 const risultato = await atecoService.lookup('62.01.0');
 const risultatiMultipli = await atecoService.searchByPrefix('20', 5);
+const suggerimenti = await atecoService.autocomplete('20.1');
+const batch = await atecoService.batchLookup(['20.14', '62.01'], '2025');
+
+// Per file upload
+const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    const result = await atecoService.extractVisura(file);
+    console.log('Dati estratti:', result);
+};
 ```
 
 ---
@@ -330,7 +613,7 @@ Il file Excel `tabella_ATECO.xlsx` contiene tutti i codici. Le colonne principal
 Il backend ha CORS abilitato con `allow_origins=["*"]`. In produzione, modificare per accettare solo il dominio del frontend:
 
 ```python
-# In ateco_lookup.py, riga 263
+# In ateco_lookup.py, riga 356
 allow_origins=["https://tuodominio.com"]
 ```
 
@@ -356,10 +639,13 @@ try {
 ```
 
 ### Suggerimenti UI/UX
-1. **Autocomplete**: Usa `prefix=true` per implementare suggerimenti mentre l'utente digita
+1. **Autocomplete**: Usa l'endpoint `/autocomplete` dedicato per suggerimenti mentre l'utente digita
 2. **Debouncing**: Attendi 300-500ms dopo che l'utente smette di digitare prima di chiamare l'API
 3. **Loading state**: Mostra indicatore di caricamento durante le chiamate API
-4. **Cache locale**: Considera di cachare i risultati frequenti per ridurre le chiamate
+4. **Cache locale**: Considera di cachare i risultati frequenti per ridurre le chiamate (il backend ha già cache LRU)
+5. **Suggerimenti**: Quando non ci sono risultati, mostra i codici suggeriti dal campo `suggestions`
+6. **Batch requests**: Per ricerche multiple usa `/batch` invece di chiamate singole
+7. **Upload visure**: Implementa drag-and-drop per caricare PDF di visure camerali
 
 ---
 

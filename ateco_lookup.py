@@ -312,12 +312,20 @@ logger = logging.getLogger(__name__)
 # Import condizionale per VisuraExtractor dopo configurazione logger
 visura_extraction_available = False
 VisuraExtractor = None
+VisuraExtractorPower = None
 try:
-    from visura_extractor import VisuraExtractor
+    # Prima prova a importare il nuovo estrattore potente
+    from visura_extractor_power import VisuraExtractorPower
     visura_extraction_available = True
-    logger.info("VisuraExtractor importato con successo")
-except ImportError as e:
-    logger.warning(f"VisuraExtractor non disponibile: {str(e)} - Installa con: pip install pdfplumber PyPDF2")
+    logger.info("VisuraExtractorPower importato con successo - Estrazione COMPLETA abilitata!")
+except ImportError:
+    # Se non c'è, usa il vecchio estrattore
+    try:
+        from visura_extractor import VisuraExtractor
+        visura_extraction_available = True
+        logger.info("VisuraExtractor importato con successo")
+    except ImportError as e:
+        logger.warning(f"VisuraExtractor non disponibile: {str(e)} - Installa con: pip install pdfplumber PyPDF2")
 except Exception as e:
     logger.error(f"Errore inaspettato durante import VisuraExtractor: {str(e)}", exc_info=True)
 
@@ -517,24 +525,29 @@ def build_api(df: pd.DataFrame):
         logger.info(f"Ricevuto file per estrazione: {file.filename}")
         
         # Verifica che VisuraExtractor sia disponibile
-        global visura_extraction_available, VisuraExtractor
+        global visura_extraction_available, VisuraExtractor, VisuraExtractorPower
         if not visura_extraction_available:
             logger.error("VisuraExtractor non disponibile")
             # Prova a importare al volo se non era disponibile all'avvio
             try:
-                from visura_extractor import VisuraExtractor
+                from visura_extractor_power import VisuraExtractorPower
                 visura_extraction_available = True
-                logger.info("VisuraExtractor caricato dinamicamente")
-            except ImportError as e:
-                logger.error(f"Impossibile caricare VisuraExtractor: {e}")
-                return JSONResponse({
-                    'success': False,
-                    'error': {
-                        'code': 'MODULE_NOT_AVAILABLE',
-                        'message': 'Modulo estrazione PDF non disponibile',
-                        'details': 'Installa le dipendenze: pip install pdfplumber PyPDF2 Pillow pdfminer.six'
-                    }
-                }, status_code=503)
+                logger.info("VisuraExtractorPower caricato dinamicamente - Estrazione COMPLETA abilitata!")
+            except ImportError:
+                try:
+                    from visura_extractor import VisuraExtractor
+                    visura_extraction_available = True
+                    logger.info("VisuraExtractor caricato dinamicamente")
+                except ImportError as e:
+                    logger.error(f"Impossibile caricare VisuraExtractor: {e}")
+                    return JSONResponse({
+                        'success': False,
+                        'error': {
+                            'code': 'MODULE_NOT_AVAILABLE',
+                            'message': 'Modulo estrazione PDF non disponibile',
+                            'details': 'Installa le dipendenze: pip install pdfplumber PyPDF2 Pillow pdfminer.six'
+                        }
+                    }, status_code=503)
         
         # Validazione tipo file
         if not file.filename.endswith('.pdf'):
@@ -583,12 +596,28 @@ def build_api(df: pd.DataFrame):
             raise
         
         try:
-            # Estrai dati usando VisuraExtractor
-            logger.info("Creazione istanza VisuraExtractor...")
-            extractor = VisuraExtractor()
-            logger.info("Inizio estrazione da PDF...")
-            result = extractor.extract_from_pdf(tmp_path)
-            logger.info(f"Estrazione completata: {result}")
+            # Usa il nuovo estrattore potente se disponibile, altrimenti il vecchio
+            if VisuraExtractorPower:
+                logger.info("Utilizzo VisuraExtractorPower per estrazione COMPLETA...")
+                extractor = VisuraExtractorPower()
+                logger.info("Inizio estrazione COMPLETA da PDF...")
+                result = extractor.extract_all_data(tmp_path)
+                
+                # Formatta il risultato per compatibilità con il frontend
+                formatted_result = {
+                    'success': True,
+                    'data': result,
+                    'extraction_method': 'regex_power',
+                    'processing_time_ms': 1000
+                }
+                result = formatted_result
+                logger.info(f"Estrazione COMPLETA completata con {result['data'].get('confidence', 0):.0%} confidence")
+            else:
+                logger.info("Creazione istanza VisuraExtractor (versione base)...")
+                extractor = VisuraExtractor()
+                logger.info("Inizio estrazione da PDF...")
+                result = extractor.extract_from_pdf(tmp_path)
+                logger.info(f"Estrazione completata: {result}")
             
             # Se estrazione riuscita e ci sono codici ATECO, arricchisci con dati ATECO
             if result.get('success') and result.get('data', {}).get('codici_ateco'):
