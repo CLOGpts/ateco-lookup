@@ -313,21 +313,57 @@ logger = logging.getLogger(__name__)
 visura_extraction_available = False
 VisuraExtractor = None
 VisuraExtractorPower = None
+VisuraExtractorFixed = None
+
+# Variabili di stato per tracking importazioni
+visura_fixed_available = False
+visura_power_available = False
+visura_available = False
+
+# PRIORITÀ 1: Prova FIXED (versione corretta)
 try:
-    # Prima prova a importare il nuovo estrattore potente
-    from visura_extractor_power import VisuraExtractorPower
+    from visura_extractor_fixed import VisuraExtractorFixed
+    visura_fixed_available = True
     visura_extraction_available = True
-    logger.info("VisuraExtractorPower importato con successo - Estrazione COMPLETA abilitata!")
-except ImportError:
-    # Se non c'è, usa il vecchio estrattore
-    try:
-        from visura_extractor import VisuraExtractor
-        visura_extraction_available = True
-        logger.info("VisuraExtractor importato con successo")
-    except ImportError as e:
-        logger.warning(f"VisuraExtractor non disponibile: {str(e)} - Installa con: pip install pdfplumber PyPDF2")
+    logger.info("✅ VisuraExtractorFixed importato - VERSIONE CORRETTA")
+except ImportError as e:
+    logger.warning(f"VisuraExtractorFixed non disponibile: {e}")
 except Exception as e:
-    logger.error(f"Errore inaspettato durante import VisuraExtractor: {str(e)}", exc_info=True)
+    logger.error(f"Errore import VisuraExtractorFixed: {e}")
+
+# PRIORITÀ 2: Fallback su POWER
+try:
+    from visura_extractor_power import VisuraExtractorPower
+    visura_power_available = True
+    if not visura_extraction_available:
+        visura_extraction_available = True
+    logger.info("✅ VisuraExtractorPower importato come fallback")
+except ImportError as e:
+    logger.warning(f"VisuraExtractorPower non disponibile: {e}")
+except Exception as e:
+    logger.error(f"Errore import VisuraExtractorPower: {e}")
+
+# PRIORITÀ 3: Ultimo fallback su BASE
+try:
+    from visura_extractor import VisuraExtractor
+    visura_available = True
+    if not visura_extraction_available:
+        visura_extraction_available = True
+    logger.info("✅ VisuraExtractor base importato come ultimo fallback")
+except ImportError as e:
+    logger.warning(f"VisuraExtractor non disponibile: {e}")
+except Exception as e:
+    logger.error(f"Errore import VisuraExtractor: {e}")
+
+# Log stato finale
+if not visura_extraction_available:
+    logger.error("❌ NESSUN estrattore visure disponibile!")
+else:
+    available = []
+    if visura_fixed_available: available.append("Fixed")
+    if visura_power_available: available.append("Power") 
+    if visura_available: available.append("Base")
+    logger.info(f"📊 Estrattori disponibili: {', '.join(available)}")
 
 # Variabili globali per cache
 _global_df = None
@@ -545,30 +581,24 @@ def build_api(df: pd.DataFrame):
         """
         logger.info(f"Ricevuto file per estrazione: {file.filename}")
         
-        # Verifica che VisuraExtractor sia disponibile
-        global visura_extraction_available, VisuraExtractor, VisuraExtractorPower
+        # Verifica che almeno un estrattore sia disponibile
         if not visura_extraction_available:
-            logger.error("VisuraExtractor non disponibile")
-            # Prova a importare al volo se non era disponibile all'avvio
-            try:
-                from visura_extractor_power import VisuraExtractorPower
-                visura_extraction_available = True
-                logger.info("VisuraExtractorPower caricato dinamicamente - Estrazione COMPLETA abilitata!")
-            except ImportError:
-                try:
-                    from visura_extractor import VisuraExtractor
-                    visura_extraction_available = True
-                    logger.info("VisuraExtractor caricato dinamicamente")
-                except ImportError as e:
-                    logger.error(f"Impossibile caricare VisuraExtractor: {e}")
-                    return JSONResponse({
-                        'success': False,
-                        'error': {
-                            'code': 'MODULE_NOT_AVAILABLE',
-                            'message': 'Modulo estrazione PDF non disponibile',
-                            'details': 'Installa le dipendenze: pip install pdfplumber PyPDF2 Pillow pdfminer.six'
-                        }
-                    }, status_code=503)
+            logger.error("❌ Nessun estrattore visure disponibile!")
+            return JSONResponse({
+                'success': False,
+                'error': {
+                    'code': 'MODULE_NOT_AVAILABLE',
+                    'message': 'Nessun modulo estrazione PDF disponibile',
+                    'details': 'Verificare che visura_extractor_fixed.py, visura_extractor_power.py o visura_extractor.py siano presenti'
+                }
+            }, status_code=503)
+        
+        # Log quali estrattori sono disponibili
+        available = []
+        if visura_fixed_available: available.append("Fixed")
+        if visura_power_available: available.append("Power") 
+        if visura_available: available.append("Base")
+        logger.info(f"📊 Estrattori disponibili per questa richiesta: {', '.join(available)}")
         
         # Validazione tipo file
         if not file.filename.endswith('.pdf'):
