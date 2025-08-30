@@ -1,58 +1,31 @@
-# 📝 COMUNICAZIONI PER IL BACKEND
+✅ **Visura elaborata con successo!**
 
-## ✅ SITUAZIONE ATTUALE
-Il backend funziona BENISSIMO! Estrae:
-- Denominazione ✅
-- P.IVA ✅ 
-- PEC ✅
-- Capitale sociale ✅
-- ATECO ✅
+**📋 DATI AZIENDA**
+**Denominazione:** CELERYA SRL
+**Forma Giuridica:** SOCIETA' A RESPONSABILITA' LIMITATA
+**Partita IVA:** 12230960010
+**Codice Fiscale:** 12230960010
+**REA:** 1223096
 
-## 🔧 UNICO PROBLEMA: FRONTEND
-Il frontend NON mostrava "ATECO:" davanti al codice. **HO GIÀ RISOLTO** modificando:
-```javascript
-// PRIMA:
-.map(a => `**${a.codice}** - ${a.descrizione}`)
+**📧 CONTATTI**
+**PEC:** celerya@pec.it ✅
+**Email:** celerya@pec.it
+**Telefono:** N/D
 
-// ADESSO:
-.map(a => `**ATECO: ${a.codice}** - ${a.descrizione}`)
-```
+**🏢 ATTIVITÀ**
+**ATECO: 62.01** - Produzione di software
+**Oggetto Sociale:** LA SOCIETA' HA PER OGGETTO LO SVILUPPO, LA PRODUZIONE E LA...
+**Stato:** ATTIVA
+**Tipo Business:** B2C
 
-## ⚠️ NOTA IMPORTANTE
-NON TOCCARE IL BACKEND! È già super potente. Se vuoi migliorarlo ulteriormente, ecco il codice Python per validare meglio gli ATECO:
+**📍 SEDE LEGALE**
+BOSCONERO (LE) - CAP 10080
 
-```python
-import re
+**💶 CAPITALE SOCIALE**
+**Versato:** €12.940,85
 
-def is_valid_ateco_code(code):
-    """
-    Verifica che sia un codice ATECO valido
-    """
-    # Deve essere nel formato XX.XX o XX.XX.XX
-    if not re.match(r'^\d{2}\.\d{2}(?:\.\d{2})?$', code):
-        return False
-    
-    # I codici ATECO validi vanno da 01.xx a 99.xx
-    # MA escludiamo quelli che sembrano anni (19.xx, 20.xx, 21.xx)
-    first_part = int(code.split('.')[0])
-    
-    # Escludi range che potrebbero essere anni
-    if first_part in [19, 20, 21]:
-        second_part = int(code.split('.')[1])
-        # Se sembra un anno (es: 20.21, 20.22)
-        if 0 <= second_part <= 99:
-            return False
-    
-    # Escludi codici non standard
-    if first_part == 0 or first_part > 99:
-        return False
-    
-    return True
-```
+**📊 ESTRAZIONE**
+**Metodo:** backend
+**Confidenza:** 95%
 
-## 🎯 RIEPILOGO FINALE
-1. **Backend = POTENZA** ✅
-2. **Frontend = Fixed** ✅
-3. **Sistema funzionante al 95%** ✅
-
-Non servono altri file o modifiche. Il sistema è pronto!
+✅ Dati estratti e salvati nel pannello laterale.
