@@ -142,14 +142,15 @@ class VisuraExtractorPower:
             ],
         }
         
-        # Mappatura codici ATECO alle descrizioni
+        # Mappatura codici ATECO alle descrizioni COMPLETE
         self.ateco_descriptions = {
-            '62.01': 'Produzione di software',
+            '62.01': 'Produzione di software non connesso all\'edizione',
             '62.02': 'Consulenza nel settore delle tecnologie dell\'informatica',
-            '62.03': 'Gestione di strutture e apparecchiature informatiche',
-            '62.09': 'Altre attività dei servizi connessi alle tecnologie dell\'informatica',
+            '62.03': 'Gestione di strutture e apparecchiature informatiche hardware e software',
+            '62.09': 'Altre attività dei servizi connessi alle tecnologie dell\'informatica e all\'informatica',
             '63.11': 'Elaborazione dei dati, hosting e attività connesse',
             '63.12': 'Portali web',
+            '70.22': 'Consulenza imprenditoriale e altra consulenza amministrativo-gestionale',
             # Aggiungi altri codici ATECO secondo necessità
         }
     
@@ -297,6 +298,11 @@ class VisuraExtractorPower:
                     # Se non c'è descrizione valida, usa il dizionario
                     if not description or len(description) < 5:
                         description = self.ateco_descriptions.get(code, 'Attività economica')
+                    
+                    # Assicurati che la descrizione sia completa e non troncata
+                    if len(description) > 200:
+                        # Se troppo lunga, tronca ma aggiungi i puntini
+                        description = description[:197] + '...'
                     
                     # Aggiungi solo se non già presente
                     if code not in [a['codice'] for a in ateco_list]:
