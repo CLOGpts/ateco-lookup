@@ -33,12 +33,14 @@ Il backend **ATECO Lookup** è un servizio Python che permette di:
 ```
 
 ### Tecnologie utilizzate
-- **Python 3.x**
+- **Python 3.7+**: Versione minima richiesta
 - **FastAPI**: Framework web moderno per API REST
 - **Pandas**: Manipolazione dati Excel
-- **CORS abilitato**: Permette chiamate da domini diversi
+- **CORS abilitato**: Permette chiamate da domini diversi (configurabile)
 - **Cache LRU**: Ottimizzazione performance per ricerche frequenti
 - **pdfplumber/PyPDF2**: Estrazione dati da PDF (opzionale)
+- **python-multipart**: Supporto upload file
+- **PyYAML**: Lettura configurazione mapping settori
 
 ---
 
@@ -226,7 +228,33 @@ GET /autocomplete?partial=20.1&limit=10
 }
 ```
 
-### 5. Estrazione Visura Camerale
+### 5. Test Visura API
+**Endpoint:** `GET /api/test-visura`
+
+**Descrizione:** Endpoint di test per verificare che l'API di estrazione visure funzioni
+
+**Risposta:**
+```json
+{
+  "success": true,
+  "message": "API funzionante! VisuraExtractorPower disponibile: true",
+  "data": {
+    "denominazione": "TEST CELERYA SRL",
+    "partita_iva": "12345678901",
+    "pec": "test@pec.it",
+    "codici_ateco": [
+      {"codice": "62.01", "descrizione": "Produzione software", "principale": true}
+    ],
+    "sede_legale": {
+      "comune": "Torino",
+      "provincia": "TO"
+    },
+    "confidence": 0.99
+  }
+}
+```
+
+### 6. Estrazione Visura Camerale
 **Endpoint:** `POST /api/extract-visura`
 
 **Descrizione:** Estrae dati strutturati da un PDF di visura camerale
@@ -295,9 +323,14 @@ const response = await fetch('http://127.0.0.1:8000/api/extract-visura', {
 - `MODULE_NOT_AVAILABLE`: Dipendenze mancanti per estrazione PDF
 - `EXTRACTION_ERROR`: Errore generico durante l'estrazione
 
-**Note:** Richiede l'installazione di dipendenze aggiuntive:
+**Note importanti:**
+1. Il sistema usa priorità di fallback per gli estrattori:
+   - Prima prova `visura_extractor_fixed.py` (versione corretta)
+   - Se non disponibile, usa `visura_extractor_power.py`
+   - Come ultimo fallback usa `visura_extractor.py` base
+2. Richiede l'installazione di dipendenze aggiuntive:
 ```bash
-pip install pdfplumber PyPDF2 Pillow pdfminer.six
+pip install pdfplumber PyPDF2 Pillow pdfminer.six python-multipart
 ```
 
 ---
@@ -340,9 +373,14 @@ pip install pdfplumber PyPDF2 Pillow pdfminer.six
 pip install -r requirements.txt
 ```
 
-Oppure manualmente:
+Oppure manualmente (dipendenze base):
 ```bash
-pip install pandas openpyxl pyyaml fastapi uvicorn
+pip install pandas openpyxl pyyaml fastapi uvicorn python-multipart
+```
+
+Per funzionalità complete (inclusa estrazione PDF):
+```bash
+pip install pandas openpyxl pyyaml fastapi uvicorn python-multipart pdfplumber PyPDF2 Pillow pdfminer.six
 ```
 
 ### 2. File necessari
@@ -351,6 +389,9 @@ Assicurati di avere nella stessa cartella:
 - `tabella_ATECO.xlsx` (database codici ATECO)
 - `mapping.yaml` (mappatura settori/normative)
 - `requirements.txt` (dipendenze)
+- `visura_extractor_fixed.py` (opzionale, per estrazione PDF - versione consigliata)
+- `visura_extractor_power.py` (opzionale, per estrazione PDF - fallback)
+- `visura_extractor.py` (opzionale, per estrazione PDF - fallback base)
 
 ### 3. Avvio del server API
 ```bash
@@ -366,10 +407,7 @@ python ateco_lookup.py --file tabella_ATECO.xlsx --serve --host 0.0.0.0 --port 8
 python ateco_lookup.py --file tabella_ATECO.xlsx --serve --debug
 ```
 
-**Nota:** Per l'estrazione da PDF visure camerali, installa anche:
-```bash
-pip install pdfplumber PyPDF2 Pillow pdfminer.six
-```
+**Nota:** Il parametro `--debug` abilita logging dettagliato per troubleshooting.
 
 ### 4. Verifica funzionamento
 Apri il browser e vai a:
@@ -596,7 +634,17 @@ settori:
       - "Certificazione Y"
 ```
 
-Poi modifica la funzione `enrich()` in `ateco_lookup.py` (righe 183-215) per mappare i prefissi ATECO al nuovo settore.
+Poi modifica la funzione `enrich()` in `ateco_lookup.py` per mappare i prefissi ATECO al nuovo settore.
+
+### Settori attualmente configurati
+Il file `mapping.yaml` include già questi settori:
+- **chimico**: Industria chimica (REACH, CLP, Seveso)
+- **alimentare**: Industria alimentare (HACCP, etichettatura)
+- **sanitario**: Dispositivi medici e sanità (MDR, IVDR)
+- **automotive**: Industria automobilistica (UNECE, TISAX)
+- **industriale**: Manifattura e industria (IEC 62443, CRA)
+- **finance**: Servizi finanziari (DORA, PSD2, MiFID)
+- **ict**: Tecnologia e software (NIS2, GDPR, CRA)
 
 ### Modificare i dati ATECO
 Il file Excel `tabella_ATECO.xlsx` contiene tutti i codici. Le colonne principali sono:
