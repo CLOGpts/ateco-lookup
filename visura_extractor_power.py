@@ -308,8 +308,10 @@ class VisuraExtractorPower:
                     if code not in [a['codice'] for a in ateco_list]:
                         ateco_list.append({
                             'codice': code,
+                            'codice_completo': f'ATECO {code}',  # Codice con etichetta inclusa
                             'descrizione': description,
-                            'principale': len(ateco_list) == 0
+                            'principale': len(ateco_list) == 0,
+                            'label': 'ATECO'  # Aggiungi etichetta esplicita
                         })
         
         # Se non troviamo nulla con i pattern specifici, cerca con pattern più generici
@@ -332,8 +334,10 @@ class VisuraExtractorPower:
                     if code not in [a['codice'] for a in ateco_list]:
                         ateco_list.append({
                             'codice': code,
+                            'codice_completo': f'ATECO {code}',  # Codice con etichetta inclusa
                             'descrizione': description,
-                            'principale': len(ateco_list) == 0
+                            'principale': len(ateco_list) == 0,
+                            'label': 'ATECO'  # Aggiungi etichetta esplicita
                         })
                         break  # Prendi solo il primo valido se usiamo il pattern generico
         
