@@ -1,110 +1,79 @@
-"Ciao, il mio backend Python su Render estrae solo 4 campi dalle visure camerali PDF.
-  Ho bisogno che estragga TUTTI i campi importanti, soprattutto:
-  - Denominazione azienda
-  - Partita IVA
-  - PEC
-  - REA
-  - Capitale sociale
+# 🔴 MESSAGGIO PER CLAUDE BACKEND - ERRORE 500 CRITICO
 
-  Ti allego:
-  1. comunicazioni.txt - con il TODO e cosa manca
-  2. BACKEND_POWER_UPGRADE.py - con il codice completo da integrare
+Ciao, hai fatto un ottimo lavoro con l'integrazione ma il backend crasha con **ERRORE 500** quando provo a caricare una visura!
 
-  Puoi aiutarmi a integrare questo codice nel mio backend FastAPI esistente?
-  Il backend attualmente usa pdfplumber ma trova solo ATECO e sede.
-  Vorrei che usasse i regex potenti del file BACKEND_POWER_UPGRADE.py"
+## ❌ ERRORE:
+```
+ateco-lookup.onrender.com/api/extract-visura:1  Failed to load resource: the server responded with a status of 500
+Backend extraction failed: Error: Backend error: 500
+```
 
-  🎯 RISULTATO ATTESO:
+## 🔍 COSA FARE SUBITO:
 
-  Il Claude del backend dovrebbe:
-  1. Prendere la classe VisuraExtractorPower dal file
-  2. Integrarla nel tuo endpoint FastAPI esistente
-  3. Sostituire il metodo di estrazione attuale
-  4. Testare che restituisca tutti i campi
+1. **CONTROLLA I LOG SU RENDER DASHBOARD**
+   - Vai su Render → Service → Logs
+   - Cerca l'errore esatto (probabilmente ModuleNotFoundError o TypeError)
+   - Copia l'errore completo
 
-  ⚠️ IMPORTANTE:
+2. **VERIFICA requirements.txt**
+   Assicurati che contenga:
+   ```
+   pdfplumber==0.9.0
+   ```
 
-  Digli anche che il frontend si aspetta questa struttura:
-  {
-    "success": true,
-    "data": {
-      "denominazione": "CELERYA SRL",
-      "partita_iva": "12230960010",
-      "pec": "celerya@pec.it",
-      "codici_ateco": [...],
-      "sede_legale": {...},
-      // altri campi...
-    }
+3. **AGGIUNGI LOGGING DI DEBUG**
+   Nell'endpoint `/api/extract-visura` aggiungi:
+   ```python
+   try:
+       print(f"📥 Ricevuto file: {file.filename}")
+       # ... codice estrazione ...
+   except Exception as e:
+       print(f"❌ ERRORE: {str(e)}")
+       import traceback
+       print(traceback.format_exc())
+   ```
+
+4. **TEST RAPIDO**
+   Temporaneamente sostituisci l'endpoint con uno che ritorna dati fissi per verificare che almeno l'endpoint risponda:
+   ```python
+   @app.post("/api/extract-visura")
+   async def extract_visura(file: UploadFile = File(...)):
+       return {
+           "success": True,
+           "data": {
+               "denominazione": "TEST",
+               "partita_iva": "12345678901",
+               "pec": "test@pec.it",
+               "confidence": 0.9
+           }
+       }
+   ```
+
+5. **CONTROLLA CHE I FILE ESISTANO**
+   - `visura_extractor_power.py` deve essere nella root del progetto
+   - L'import deve funzionare: `from visura_extractor_power import VisuraExtractorPower`
+
+## 📊 IL FRONTEND SI ASPETTA:
+```json
+{
+  "success": true,
+  "data": {
+    "denominazione": "...",
+    "partita_iva": "...",
+    "pec": "...",
+    "codici_ateco": [...],
+    "sede_legale": {...},
+    "confidence": 0.9
   }
+}
+```
 
-  Così il backend nuovo sarà compatibile con il frontend che abbiamo già sistemato!
+## 🚨 URGENTE:
+Il sistema non funziona finché non risolviamo l'errore 500. L'AI di fallback funziona ma costa troppo!
 
-# 📋 TODO - RENDERE IL BACKEND UNA POTENZA
+Fammi sapere:
+1. Cosa dicono i log di Render
+2. Se pdfplumber è in requirements.txt
+3. Se riesci a farlo funzionare con dati di test
 
-## 🔴 PRIORITÀ MASSIMA - Backend Python
-
-1. **Integrare il nuovo estrattore potente** (`BACKEND_POWER_UPGRADE.py`)
-   - Sostituire il codice attuale di estrazione PDF
-   - Aggiungere tutti i pattern regex per trovare i campi
-   - Testare con diverse visure camerali
-
-2. **Campi che il backend DEVE estrarre:**
-   - ✅ Denominazione/Ragione sociale (CELERYA SRL)
-   - ✅ Partita IVA (12230960010) 
-   - ✅ PEC (celerya@pec.it)
-   - ✅ Codice Fiscale
-   - ✅ Numero REA (TO-1275874)
-   - ✅ Forma giuridica (SRL, SPA, etc)
-   - ✅ Capitale sociale versato (€11.077,42)
-   - ✅ ATECO con descrizioni complete
-   - ✅ Sede legale completa
-   - ✅ Amministratori e cariche
-
-## 🟡 MIGLIORAMENTI FRONTEND
-
-3. **Ottimizzare il flusso di estrazione:**
-   - Se il backend estrae tutti i dati → NON usare AI
-   - Se mancano dati critici → Fallback su AI
-   - Mostrare chiaramente quale metodo ha estratto i dati
-
-4. **Visualizzazione dati estratti:**
-   - Mostrare tutti i 30+ campi nel pannello laterale
-   - Indicatori visuali per campi mancanti
-   - Export dei dati in formato JSON/PDF
-
-## 🟢 TESTING E VALIDAZIONE
-
-5. **Test con diverse visure:**
-   - Visure di diverse Camere di Commercio
-   - Visure con formati diversi
-   - Visure incomplete o parziali
-
-6. **Metriche di successo:**
-   - Backend deve estrarre almeno 80% dei campi
-   - Tempo estrazione < 2 secondi
-   - Confidence score > 0.8
-
-## 📊 SITUAZIONE ATTUALE
-
-**Backend estrae solo:**
-- ATECO con descrizione ✅
-- Sede legale ✅  
-- Oggetto sociale ✅
-- Tipo business ✅
-
-**Backend NON estrae (e deve usare AI):**
-- Denominazione ❌
-- Partita IVA ❌
-- PEC ❌
-- REA ❌
-- Capitale sociale ❌
-- Forma giuridica ❌
-
-## 🚀 OBIETTIVO FINALE
-
-Backend Python deve estrarre TUTTI i dati senza bisogno dell'AI, risparmiando:
-- Costi API Gemini
-- Tempo di elaborazione
-- Complessità del sistema
-
-Il file `BACKEND_POWER_UPGRADE.py` contiene tutto il codice necessario per rendere il backend una potenza!
+Grazie!

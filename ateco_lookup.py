@@ -514,6 +514,27 @@ def build_api(df: pd.DataFrame):
             "count": len(suggestions[:limit])
         })
     
+    @app.get("/api/test-visura")
+    def test_visura():
+        """Endpoint di test per verificare che l'API funzioni"""
+        return JSONResponse({
+            "success": True,
+            "message": "API funzionante! VisuraExtractorPower disponibile: " + str(VisuraExtractorPower is not None),
+            "data": {
+                "denominazione": "TEST CELERYA SRL",
+                "partita_iva": "12345678901",
+                "pec": "test@pec.it",
+                "codici_ateco": [
+                    {"codice": "62.01", "descrizione": "Produzione software", "principale": True}
+                ],
+                "sede_legale": {
+                    "comune": "Torino",
+                    "provincia": "TO"
+                },
+                "confidence": 0.99
+            }
+        })
+    
     @app.post("/api/extract-visura")
     async def extract_visura(file: UploadFile = File(...)):
         """
@@ -596,22 +617,40 @@ def build_api(df: pd.DataFrame):
             raise
         
         try:
+            file_size = file.size if hasattr(file, 'size') and file.size else 'unknown'
+            logger.info(f"📥 Ricevuto file per estrazione: {file.filename} ({file_size} bytes)")
+            
             # Usa il nuovo estrattore potente se disponibile, altrimenti il vecchio
             if VisuraExtractorPower:
-                logger.info("Utilizzo VisuraExtractorPower per estrazione COMPLETA...")
-                extractor = VisuraExtractorPower()
-                logger.info("Inizio estrazione COMPLETA da PDF...")
-                result = extractor.extract_all_data(tmp_path)
-                
-                # Formatta il risultato per compatibilità con il frontend
-                formatted_result = {
-                    'success': True,
-                    'data': result,
-                    'extraction_method': 'regex_power',
-                    'processing_time_ms': 1000
-                }
-                result = formatted_result
-                logger.info(f"Estrazione COMPLETA completata con {result['data'].get('confidence', 0):.0%} confidence")
+                logger.info("✅ Utilizzo VisuraExtractorPower per estrazione COMPLETA...")
+                try:
+                    extractor = VisuraExtractorPower()
+                    logger.info("📄 Inizio estrazione COMPLETA da PDF...")
+                    result = extractor.extract_all_data(tmp_path)
+                    
+                    # Log dei campi estratti per debug
+                    logger.info(f"📊 Campi estratti: denominazione={result.get('denominazione')}, p.iva={result.get('partita_iva')}, pec={result.get('pec')}")
+                    
+                    # Formatta il risultato per compatibilità con il frontend
+                    formatted_result = {
+                        'success': True,
+                        'data': result,
+                        'extraction_method': 'regex_power',
+                        'processing_time_ms': 1000
+                    }
+                    result = formatted_result
+                    logger.info(f"✅ Estrazione COMPLETA completata con {result['data'].get('confidence', 0):.0%} confidence")
+                except Exception as power_error:
+                    logger.error(f"❌ Errore in VisuraExtractorPower: {str(power_error)}")
+                    import traceback
+                    logger.error(f"Traceback: {traceback.format_exc()}")
+                    # Fallback al vecchio estrattore
+                    if VisuraExtractor:
+                        logger.info("⚠️ Fallback a VisuraExtractor base...")
+                        extractor = VisuraExtractor()
+                        result = extractor.extract_from_pdf(tmp_path)
+                    else:
+                        raise power_error
             else:
                 logger.info("Creazione istanza VisuraExtractor (versione base)...")
                 extractor = VisuraExtractor()
@@ -622,25 +661,42 @@ def build_api(df: pd.DataFrame):
             # Se estrazione riuscita e ci sono codici ATECO, arricchisci con dati ATECO
             if result.get('success') and result.get('data', {}).get('codici_ateco'):
                 ateco_enrichment = []
-                for code in result['data']['codici_ateco']:
-                    # Usa la funzione search_smart esistente per arricchire
-                    res = search_smart(df, code, prefer="2025-camerale")
-                    if not res.empty:
-                        lookup_result = enrich(flatten(res.iloc[0]))
-                        ateco_enrichment.append({
-                            'code': code,
-                            'description': (lookup_result.get('TITOLO_ATECO_2025_RAPPRESENTATIVO') or 
-                                         lookup_result.get('TITOLO_ATECO_2022') or 
-                                         "Descrizione non trovata"),
-                            'normative': lookup_result.get('normative', []),
-                            'certificazioni': lookup_result.get('certificazioni', [])
-                        })
+                codici_ateco = result['data']['codici_ateco']
+                
+                # Gestisci sia lista di stringhe che lista di dizionari
+                for item in codici_ateco:
+                    if isinstance(item, dict):
+                        # Se è già un dizionario con codice e descrizione, usa quello
+                        code = item.get('codice', '')
+                        if code:
+                            # Arricchisci con normative dal database ATECO
+                            res = search_smart(df, code, prefer="2025-camerale")
+                            if not res.empty:
+                                lookup_result = enrich(flatten(res.iloc[0]))
+                                item['normative'] = lookup_result.get('normative', [])
+                                item['certificazioni'] = lookup_result.get('certificazioni', [])
+                            ateco_enrichment.append(item)
+                    else:
+                        # Se è una stringa, cerca nel database
+                        code = str(item)
+                        res = search_smart(df, code, prefer="2025-camerale")
+                        if not res.empty:
+                            lookup_result = enrich(flatten(res.iloc[0]))
+                            ateco_enrichment.append({
+                                'codice': code,
+                                'descrizione': (lookup_result.get('TITOLO_ATECO_2025_RAPPRESENTATIVO') or 
+                                             lookup_result.get('TITOLO_ATECO_2022') or 
+                                             "Descrizione non trovata"),
+                                'normative': lookup_result.get('normative', []),
+                                'certificazioni': lookup_result.get('certificazioni', [])
+                            })
                 
                 # Aggiungi arricchimento al risultato
-                result['data']['ateco_details'] = ateco_enrichment
-                logger.info(f"Arricchiti {len(ateco_enrichment)} codici ATECO")
+                if ateco_enrichment:
+                    result['data']['ateco_details'] = ateco_enrichment
+                    logger.info(f"✅ Arricchiti {len(ateco_enrichment)} codici ATECO")
             
-            logger.info(f"Estrazione completata con successo: {result.get('data', {}).get('confidence', 0):.0%} confidence")
+            logger.info(f"🎉 Estrazione completata con successo: {result.get('data', {}).get('confidence', 0):.0%} confidence")
             return JSONResponse(result)
             
         except Exception as e:
