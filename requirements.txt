@@ -5,3 +5,6 @@ uvicorn
 pyyaml
 python-multipart
 pdfplumber
+PyPDF2
+Pillow>=9.0.0
+pdfminer.six>=20211012

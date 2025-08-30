@@ -50,17 +50,7 @@ try:
 except ImportError:
     FASTAPI_AVAILABLE = False
 
-# Import condizionale per VisuraExtractor
-try:
-    from visura_extractor import VisuraExtractor
-    visura_extraction_available = True
-    logger.info("VisuraExtractor importato con successo")
-except ImportError as e:
-    visura_extraction_available = False
-    logger.error(f"Impossibile importare VisuraExtractor: {str(e)}")
-except Exception as e:
-    visura_extraction_available = False
-    logger.error(f"Errore inaspettato durante import VisuraExtractor: {str(e)}")
+# Import condizionale per VisuraExtractor - verrà fatto dopo la configurazione del logger
 
 # ----------------------- Caricamento mapping esterno -------------------------
 def load_mapping(path: Path = Path("mapping.yaml")) -> dict:
@@ -319,6 +309,17 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Import condizionale per VisuraExtractor dopo configurazione logger
+visura_extraction_available = False
+try:
+    from visura_extractor import VisuraExtractor
+    visura_extraction_available = True
+    logger.info("VisuraExtractor importato con successo")
+except ImportError as e:
+    logger.warning(f"VisuraExtractor non disponibile: {str(e)} - Installa con: pip install pdfplumber PyPDF2")
+except Exception as e:
+    logger.error(f"Errore inaspettato durante import VisuraExtractor: {str(e)}", exc_info=True)
+
 # Variabili globali per cache
 _global_df = None
 _df_hash = None
@@ -328,13 +329,18 @@ def build_api(df: pd.DataFrame):
         raise ImportError("FastAPI non disponibile. Installa con: pip install fastapi uvicorn")
     
     if not visura_extraction_available:
-        logger.warning("VisuraExtractor non disponibile - installa pdfplumber")
+        logger.warning("VisuraExtractor non disponibile")
         # Verifica quale dipendenza manca
         try:
             import pdfplumber
             logger.info("pdfplumber è installato")
         except ImportError:
-            logger.error("pdfplumber NON è installato - aggiungi a requirements.txt")
+            logger.warning("pdfplumber NON è installato")
+        try:
+            import PyPDF2
+            logger.info("PyPDF2 è installato")
+        except ImportError:
+            logger.warning("PyPDF2 NON è installato")
     
     class BatchRequest(BaseModel):
         codes: List[str]
@@ -486,14 +492,21 @@ def build_api(df: pd.DataFrame):
         # Verifica che VisuraExtractor sia disponibile
         if not visura_extraction_available:
             logger.error("VisuraExtractor non disponibile")
-            return JSONResponse({
-                'success': False,
-                'error': {
-                    'code': 'MODULE_NOT_AVAILABLE',
-                    'message': 'Modulo estrazione PDF non disponibile',
-                    'details': 'Installa pdfplumber: pip install pdfplumber'
-                }
-            }, status_code=503)
+            # Prova a importare al volo se non era disponibile all'avvio
+            try:
+                from visura_extractor import VisuraExtractor
+                visura_extraction_available = True
+                logger.info("VisuraExtractor caricato dinamicamente")
+            except ImportError as e:
+                logger.error(f"Impossibile caricare VisuraExtractor: {e}")
+                return JSONResponse({
+                    'success': False,
+                    'error': {
+                        'code': 'MODULE_NOT_AVAILABLE',
+                        'message': 'Modulo estrazione PDF non disponibile',
+                        'details': 'Installa le dipendenze: pip install pdfplumber PyPDF2 Pillow pdfminer.six'
+                    }
+                }, status_code=503)
         
         # Validazione tipo file
         if not file.filename.endswith('.pdf'):
@@ -538,9 +551,11 @@ def build_api(df: pd.DataFrame):
             if result.get('success') and result.get('data', {}).get('codici_ateco'):
                 ateco_enrichment = []
                 for code in result['data']['codici_ateco']:
-                    # Usa la funzione lookup esistente per arricchire
-                    lookup_result = ateco_lookup(df, code, prefer="2025-camerale")
-                    if lookup_result:
+                    # Usa la funzione search_smart esistente per arricchire
+                    res = search_smart(df, code, prefer="2025-camerale")
+                    if not res.empty:
+                        lookup_result = enrich(flatten(res.iloc[0]))
+                    if not res.empty:
                         ateco_enrichment.append({
                             'code': code,
                             'description': lookup_result.get('TITOLO_ATECO_2025_RAPPRESENTATIVO') or 

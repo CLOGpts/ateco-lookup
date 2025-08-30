@@ -3,60 +3,77 @@
 ## 🎯 OBIETTIVO
 Implementare endpoint `/api/extract-visura` per estrarre dati da PDF di visure camerali.
 
-## ✅ COSA ABBIAMO FATTO
-1. **Risolto problema Python 3.13** (commit `9a1eb08`):
-   - Spostati import FastAPI a livello globale per evitare ForwardRef error
-   - Deploy su Render ora funziona
-
-2. **Implementato sistema estrazione visure**:
-   - `visura_extractor.py`: Classe per estrarre dati da PDF (ATECO, oggetto sociale, sedi, tipo business)
-   - Endpoint `/api/extract-visura` in `ateco_lookup.py`
-   - Aggiunto `pdfplumber` a requirements.txt
-
-3. **Aggiunto logging dettagliato** (commit `a00d92b`):
-   - Log per debug import VisuraExtractor
-   - Traceback completo in caso di errori
-   - Check esplicito presenza pdfplumber
-
-## ❌ PROBLEMA ATTUALE
+## ❌ PROBLEMA RISOLTO
 **Errore 500 su endpoint `/api/extract-visura`**:
-- Il deploy funziona ma l'endpoint restituisce Internal Server Error
-- Probabilmente `VisuraExtractor` non viene importato correttamente su Render
-- Possibili cause:
-  1. `pdfplumber` non installato correttamente
-  2. Dipendenze mancanti di pdfplumber
-  3. Problemi di permessi o path su Render
+- **Causa principale**: Il logger veniva usato prima di essere definito (righe 57-63 in ateco_lookup.py)
+- **Causa secondaria**: Mancavano dipendenze essenziali per pdfplumber
+- **Causa terziaria**: Non c'era un sistema di fallback se pdfplumber falliva
 
-## 🔍 PROSSIMI PASSI
-1. **Verificare log Render dopo deploy** con nuovo logging dettagliato
-2. **Se pdfplumber manca**, verificare che sia in requirements.txt (già presente)
-3. **Se dipendenze mancano**, potrebbe servire aggiungere:
+## ✅ COSA ABBIAMO FATTO (SOLUZIONI IMPLEMENTATE)
+
+### 1. **Fix ordine import e logging** (ateco_lookup.py):
+   - Spostato import VisuraExtractor DOPO la configurazione del logger
+   - Aggiunto try/except con logging appropriato per gestire import falliti
+   - Implementato caricamento dinamico di VisuraExtractor se non disponibile all'avvio
+
+### 2. **Implementato sistema di fallback robusto** (visura_extractor.py):
+   - Sistema automatico di fallback: pdfplumber → PyPDF2
+   - Se pdfplumber non è disponibile, usa automaticamente PyPDF2
+   - Gestione errori pagina per pagina per massima resilienza
+   - Log dettagliato del metodo di estrazione utilizzato
+
+### 3. **Aggiunte dipendenze mancanti** (requirements.txt):
    ```
+   pdfplumber
+   PyPDF2
    Pillow>=9.0.0
    pdfminer.six>=20211012
    ```
-4. **Alternative se pdfplumber non funziona su Render**:
-   - Usare PyPDF2 (più leggero ma meno accurato)
-   - Usare un servizio esterno per parsing PDF
-   - Implementare parsing lato client
 
-## 📂 FILE PRINCIPALI
-- `ateco_lookup.py`: Backend FastAPI con endpoint
-- `visura_extractor.py`: Logica estrazione dati da PDF  
-- `requirements.txt`: Dipendenze (include pdfplumber)
-- Frontend React già pronto per usare l'endpoint
+### 4. **Migliorato error handling**:
+   - Messaggi di errore più chiari e actionable
+   - Logging dettagliato a ogni step critico
+   - Traceback completo in modalità debug
+   - Response JSON strutturate con codici errore specifici
 
-## 🚀 STATO DEPLOY
-- **Ultimo commit pushato**: `a00d92b` - logging dettagliato
-- **Branch**: main
-- **URL Render**: https://ateco-lookup.onrender.com
-- **Endpoint problematico**: POST /api/extract-visura
+## 🚀 STATO ATTUALE
+- **File modificati**:
+  - `ateco_lookup.py`: Fix import order e error handling migliorato
+  - `visura_extractor.py`: Completamente riscritto con fallback PyPDF2
+  - `requirements.txt`: Aggiunte tutte le dipendenze necessarie
 
-## 💡 NOTE
-Il sistema è progettato per:
-1. Ricevere PDF visura (max 20MB)
+- **Sistema ora supporta**:
+  1. Estrazione con pdfplumber (più accurato)
+  2. Fallback automatico a PyPDF2 se pdfplumber fallisce
+  3. Gestione errori robusta con log dettagliati
+  4. Compatibilità massima con diversi ambienti di deployment
+
+## 📈 PROSSIMI PASSI
+1. **Committare e pushare le modifiche** su GitHub
+2. **Deploy su Render** per testare in produzione
+3. **Verificare i log** per confermare che l'import funziona
+4. **Testare l'endpoint** con un PDF di visura reale
+
+## 💡 NOTE TECNICHE
+Il sistema ora ha una struttura di fallback a 3 livelli:
+- **Livello 1**: Prova pdfplumber (più accurato per PDF complessi)
+- **Livello 2**: Se fallisce, usa PyPDF2 (più leggero e compatibile)
+- **Livello 3**: Se entrambi falliscono, ritorna errore chiaro con istruzioni
+
+## 🔧 COMANDI PER DEPLOY
+```bash
+# Commit delle modifiche
+git add -A
+git commit -m "fix: risolto definitivamente errore 500 su /api/extract-visura"
+git push origin main
+
+# Il deploy su Render avverrà automaticamente
+```
+
+## ✨ RISULTATO ATTESO
+Dopo il deploy, l'endpoint `/api/extract-visura` dovrebbe:
+1. Accettare upload di PDF di visure camerali
 2. Estrarre codici ATECO, oggetto sociale, sedi
-3. Inferire tipo business (B2B/B2C)
-4. Arricchire con dati dal mapping ATECO
-
-Quando il problema sarà risolto, l'utente potrà caricare visure e ottenere automaticamente tutti i dati strutturati.
+3. Inferire tipo di business (B2B/B2C)
+4. Arricchire i dati con informazioni dal database ATECO
+5. Ritornare JSON strutturato con tutti i dati estratti

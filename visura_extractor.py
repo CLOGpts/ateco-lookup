@@ -2,22 +2,45 @@
 """
 Estrattore dati da Visure Camerali PDF
 Estrae: Codici ATECO, Oggetto Sociale, Sedi, Tipo Business
+Supporta fallback da pdfplumber a PyPDF2 per massima compatibilità
 """
 import re
 import time
 import logging
 from typing import Dict, List, Optional, Tuple
-import pdfplumber
 from functools import lru_cache
 
 # Configurazione logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Import con fallback
+PDF_LIBRARY = None
+try:
+    import pdfplumber
+    PDF_LIBRARY = 'pdfplumber'
+    logger.info("Using pdfplumber for PDF extraction")
+except ImportError as e:
+    logger.warning(f"pdfplumber not available: {e}")
+    try:
+        import PyPDF2
+        PDF_LIBRARY = 'PyPDF2'
+        logger.info("Falling back to PyPDF2 for PDF extraction")
+    except ImportError as e2:
+        logger.error(f"Neither pdfplumber nor PyPDF2 available: {e2}")
+        PDF_LIBRARY = None
+
 class VisuraExtractor:
     """Classe per estrarre dati strutturati da visure camerali PDF"""
     
     def __init__(self):
+        # Verifica disponibilità librerie
+        if PDF_LIBRARY is None:
+            raise ImportError(
+                "Nessuna libreria PDF disponibile. "
+                "Installa pdfplumber o PyPDF2: pip install pdfplumber PyPDF2"
+            )
+        
         # Compila regex una volta sola per performance
         self.patterns = {
             'ateco': re.compile(r'\b\d{2}[\.]\d{2}(?:[\.]\d{1,2})?\b'),
@@ -43,6 +66,69 @@ class VisuraExtractor:
             'bar', 'ristorante', 'pizzeria', 'parrucchiere', 'estetista'
         ]
     
+    def _extract_text_from_pdf(self, pdf_path: str) -> tuple[str, int]:
+        """
+        Estrae testo dal PDF usando la libreria disponibile
+        
+        Returns:
+            Tuple di (testo_completo, numero_pagine)
+        """
+        full_text = ""
+        pages_count = 0
+        
+        if PDF_LIBRARY == 'pdfplumber':
+            try:
+                with pdfplumber.open(pdf_path) as pdf:
+                    pages_count = len(pdf.pages)
+                    for page_num, page in enumerate(pdf.pages, 1):
+                        text = page.extract_text()
+                        if text:
+                            full_text += f"\n--- PAGINA {page_num} ---\n"
+                            full_text += text
+                logger.info(f"Extracted text using pdfplumber: {len(full_text)} chars from {pages_count} pages")
+            except Exception as e:
+                logger.error(f"pdfplumber extraction failed: {e}")
+                # Prova fallback a PyPDF2 se disponibile
+                if 'PyPDF2' in globals():
+                    logger.info("Attempting fallback to PyPDF2...")
+                    return self._extract_with_pypdf2(pdf_path)
+                raise
+                
+        elif PDF_LIBRARY == 'PyPDF2':
+            return self._extract_with_pypdf2(pdf_path)
+        
+        return full_text, pages_count
+    
+    def _extract_with_pypdf2(self, pdf_path: str) -> tuple[str, int]:
+        """
+        Estrazione con PyPDF2 come fallback
+        """
+        import PyPDF2
+        full_text = ""
+        pages_count = 0
+        
+        try:
+            with open(pdf_path, 'rb') as file:
+                pdf_reader = PyPDF2.PdfReader(file)
+                pages_count = len(pdf_reader.pages)
+                
+                for page_num, page in enumerate(pdf_reader.pages, 1):
+                    try:
+                        text = page.extract_text()
+                        if text:
+                            full_text += f"\n--- PAGINA {page_num} ---\n"
+                            full_text += text
+                    except Exception as page_error:
+                        logger.warning(f"Error extracting page {page_num}: {page_error}")
+                        continue
+                        
+            logger.info(f"Extracted text using PyPDF2: {len(full_text)} chars from {pages_count} pages")
+        except Exception as e:
+            logger.error(f"PyPDF2 extraction failed: {e}")
+            raise
+            
+        return full_text, pages_count
+    
     def extract_from_pdf(self, pdf_path: str) -> Dict:
         """
         Estrae tutti i dati rilevanti dal PDF della visura
@@ -56,55 +142,59 @@ class VisuraExtractor:
         start_time = time.time()
         
         try:
-            with pdfplumber.open(pdf_path) as pdf:
-                # Unisci tutto il testo del PDF
-                full_text = ""
-                for page_num, page in enumerate(pdf.pages, 1):
-                    text = page.extract_text()
-                    if text:
-                        full_text += f"\n--- PAGINA {page_num} ---\n"
-                        full_text += text
-                
-                if not full_text.strip():
-                    return self._error_response("PDF_VUOTO", "Il PDF non contiene testo estraibile")
-                
-                # Log per debug
-                logger.info(f"Estratto {len(full_text)} caratteri da {len(pdf.pages)} pagine")
-                
-                # Estrai tutti i dati
-                codici_ateco = self.extract_ateco(full_text)
-                oggetto_sociale = self.extract_oggetto_sociale(full_text)
-                sedi = self.extract_sedi(full_text)
-                tipo_business = self.infer_business_type(full_text, oggetto_sociale)
-                
-                # Calcola confidence score
-                confidence = self._calculate_confidence(
-                    codici_ateco, oggetto_sociale, sedi
-                )
-                
-                # Prepara risposta
-                result = {
-                    'success': True,
-                    'data': {
-                        'codici_ateco': codici_ateco,
-                        'oggetto_sociale': oggetto_sociale,
-                        'sedi': sedi,
-                        'tipo_business': tipo_business,
-                        'confidence': confidence
-                    },
-                    'extraction_method': 'regex',
-                    'processing_time_ms': int((time.time() - start_time) * 1000),
-                    'pages_processed': len(pdf.pages)
-                }
-                
-                # Se confidence troppo bassa, suggerisci controllo manuale
-                if confidence < 0.5:
-                    result['warning'] = "Confidence bassa, verificare manualmente i dati estratti"
-                
-                return result
-                
+            # Estrai testo con la libreria disponibile
+            full_text, pages_count = self._extract_text_from_pdf(pdf_path)
+            
+            if not full_text.strip():
+                return self._error_response("PDF_VUOTO", "Il PDF non contiene testo estraibile")
+            
+            # Log per debug
+            logger.info(f"Processing {len(full_text)} characters from {pages_count} pages")
+            
+            # Estrai tutti i dati
+            codici_ateco = self.extract_ateco(full_text)
+            oggetto_sociale = self.extract_oggetto_sociale(full_text)
+            sedi = self.extract_sedi(full_text)
+            tipo_business = self.infer_business_type(full_text, oggetto_sociale)
+            
+            # Calcola confidence score
+            confidence = self._calculate_confidence(
+                codici_ateco, oggetto_sociale, sedi
+            )
+            
+            # Prepara risposta
+            result = {
+                'success': True,
+                'data': {
+                    'codici_ateco': codici_ateco,
+                    'oggetto_sociale': oggetto_sociale,
+                    'sedi': sedi,
+                    'tipo_business': tipo_business,
+                    'confidence': confidence
+                },
+                'extraction_method': PDF_LIBRARY,
+                'processing_time_ms': int((time.time() - start_time) * 1000),
+                'pages_processed': pages_count
+            }
+            
+            # Se confidence troppo bassa, suggerisci controllo manuale
+            if confidence < 0.5:
+                result['warning'] = "Confidence bassa, verificare manualmente i dati estratti"
+            
+            logger.info(f"Extraction completed successfully with {confidence:.0%} confidence")
+            return result
+            
+        except ImportError as e:
+            logger.error(f"Missing dependency: {e}")
+            return self._error_response(
+                "MISSING_DEPENDENCY",
+                f"Dipendenza mancante: {str(e)}. Installa con: pip install pdfplumber PyPDF2"
+            )
+        except FileNotFoundError as e:
+            logger.error(f"File not found: {e}")
+            return self._error_response("FILE_NOT_FOUND", f"File non trovato: {pdf_path}")
         except Exception as e:
-            logger.error(f"Errore durante estrazione: {str(e)}")
+            logger.error(f"Unexpected error during extraction: {str(e)}", exc_info=True)
             return self._error_response("EXTRACTION_ERROR", str(e))
     
     def extract_ateco(self, text: str) -> List[str]:
@@ -142,7 +232,7 @@ class VisuraExtractor:
                 seen.add(code)
                 unique_codici.append(code)
         
-        logger.info(f"Trovati {len(unique_codici)} codici ATECO: {unique_codici}")
+        logger.info(f"Found {len(unique_codici)} ATECO codes: {unique_codici}")
         return unique_codici
     
     def extract_oggetto_sociale(self, text: str) -> str:
@@ -175,7 +265,7 @@ class VisuraExtractor:
             if len(oggetto) > 1000:
                 oggetto = oggetto[:997] + "..."
         
-        logger.info(f"Estratto oggetto sociale di {len(oggetto)} caratteri")
+        logger.info(f"Extracted social object of {len(oggetto)} characters")
         return oggetto
     
     def extract_sedi(self, text: str) -> Dict:
@@ -222,8 +312,8 @@ class VisuraExtractor:
                         ul_info['cap'] = caps[i]
                     sedi['unita_locali'].append(ul_info)
         
-        logger.info(f"Trovata sede legale: {sedi['sede_legale'] is not None}")
-        logger.info(f"Trovate {len(sedi['unita_locali'])} unità locali")
+        logger.info(f"Found legal seat: {sedi['sede_legale'] is not None}")
+        logger.info(f"Found {len(sedi['unita_locali'])} local units")
         
         return sedi
     
