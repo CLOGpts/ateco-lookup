@@ -592,7 +592,9 @@ def build_api(df: pd.DataFrame):
         Returns:
             JSON con codici ATECO, oggetto sociale, sedi e tipo business
         """
-        logger.info(f"Ricevuto file per estrazione: {file.filename}")
+        # WRAPPER TOTALE PER CATTURARE QUALSIASI ERRORE
+        try:
+            logger.info(f"Ricevuto file per estrazione: {file.filename}")
         
         # Verifica che almeno un estrattore sia disponibile
         if not visura_extraction_available:
@@ -608,6 +610,7 @@ def build_api(df: pd.DataFrame):
         
         # Log quali estrattori sono disponibili
         available = []
+        if visura_final_available: available.append("FINAL-STRICT")
         if visura_fixed_available: available.append("Fixed")
         if visura_power_available: available.append("Power") 
         if visura_available: available.append("Base")
@@ -819,8 +822,9 @@ def build_api(df: pd.DataFrame):
         finally:
             # Pulisci file temporaneo
             try:
-                os.unlink(tmp_path)
-                logger.debug(f"File temporaneo eliminato: {tmp_path}")
+                if 'tmp_path' in locals() and tmp_path:
+                    os.unlink(tmp_path)
+                    logger.debug(f"File temporaneo eliminato: {tmp_path}")
             except:
                 pass
 
