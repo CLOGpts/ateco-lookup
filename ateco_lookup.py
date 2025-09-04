@@ -592,9 +592,7 @@ def build_api(df: pd.DataFrame):
         Returns:
             JSON con codici ATECO, oggetto sociale, sedi e tipo business
         """
-        # WRAPPER TOTALE PER CATTURARE QUALSIASI ERRORE
-        try:
-            logger.info(f"Ricevuto file per estrazione: {file.filename}")
+        logger.info(f"Ricevuto file per estrazione: {file.filename}")
         
         # Verifica che almeno un estrattore sia disponibile
         if not visura_extraction_available:
