@@ -587,14 +587,15 @@ def build_api(df: pd.DataFrame):
     @app.post("/api/extract-visura")
     async def extract_visura(file: UploadFile = File(...)):
         """
-        Estrae dati strutturati da una visura camerale PDF
+        Estrae SOLO 3 campi STRICT da visura PDF
         
         Returns:
-            JSON con codici ATECO, oggetto sociale, sedi e tipo business
+            JSON con P.IVA, ATECO, Oggetto Sociale (o null)
         """
-        # BYPASS DI EMERGENZA - RITORNA SEMPRE SUCCESSO VUOTO
-        logger.warning("⚠️ MODALITÀ BYPASS EMERGENZA ATTIVA")
-        return JSONResponse({
+        logger.info(f"📄 Ricevuto file: {file.filename}")
+        
+        # Inizializza risultato vuoto
+        result = {
             'success': True,
             'data': {
                 'partita_iva': None,
@@ -603,248 +604,154 @@ def build_api(df: pd.DataFrame):
                 'codici_ateco': [],
                 'confidence': {
                     'score': 0,
-                    'details': {
-                        'message': 'Backend in manutenzione - usare AI'
-                    }
+                    'details': {}
                 }
             },
-            'method': 'bypass_emergency'
-        })
+            'method': 'backend'
+        }
         
-        # CODICE ORIGINALE SOTTO (TEMPORANEAMENTE DISABILITATO)
-        logger.info(f"Ricevuto file per estrazione: {file.filename}")
-        
-        # Verifica che almeno un estrattore sia disponibile
-        if not visura_extraction_available:
-            logger.error("❌ Nessun estrattore visure disponibile!")
-            return JSONResponse({
-                'success': False,
-                'error': {
-                    'code': 'MODULE_NOT_AVAILABLE',
-                    'message': 'Nessun modulo estrazione PDF disponibile',
-                    'details': 'Verificare che visura_extractor_fixed.py, visura_extractor_power.py o visura_extractor.py siano presenti'
-                }
-            }, status_code=503)
-        
-        # Log quali estrattori sono disponibili
-        available = []
-        if visura_final_available: available.append("FINAL-STRICT")
-        if visura_fixed_available: available.append("Fixed")
-        if visura_power_available: available.append("Power") 
-        if visura_available: available.append("Base")
-        logger.info(f"📊 Estrattori disponibili per questa richiesta: {', '.join(available)}")
-        
-        # Validazione tipo file
-        if not file.filename.endswith('.pdf'):
-            logger.warning(f"File non PDF ricevuto: {file.filename}")
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "code": "INVALID_FILE_TYPE",
-                    "message": "Solo file PDF sono accettati",
-                    "details": f"File ricevuto: {file.filename}"
-                }
-            )
-        
-        # Validazione dimensione (20MB max)
-        if file.size and file.size > 20 * 1024 * 1024:
-            logger.warning(f"File troppo grande: {file.size} bytes")
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "code": "FILE_TOO_LARGE",
-                    "message": "File troppo grande (max 20MB)",
-                    "details": f"Dimensione: {file.size} bytes"
-                }
-            )
-        
-        # Salva temporaneamente il file
+        # ESTRAZIONE ROBUSTA CON GESTIONE ERRORI TOTALE
         tmp_path = None
         try:
+            # 1. SALVA FILE TEMPORANEO
             with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
                 content = await file.read()
                 if not content:
-                    logger.error("File PDF vuoto")
-                    raise HTTPException(
-                        status_code=400,
-                        detail={
-                            "code": "EMPTY_FILE",
-                            "message": "Il file PDF è vuoto",
-                            "details": "Nessun contenuto nel file caricato"
-                        }
-                    )
+                    logger.warning("File vuoto")
+                    return JSONResponse(result)
                 tmp.write(content)
                 tmp_path = tmp.name
-                logger.info(f"File salvato temporaneamente: {tmp_path} ({len(content)} bytes)")
+                logger.info(f"File salvato: {tmp_path} ({len(content)} bytes)")
+            
+            # 2. ESTRAI TESTO DAL PDF (con fallback multipli)
+            text = ""
+            
+            # Prova con pdfplumber
+            try:
+                import pdfplumber
+                with pdfplumber.open(tmp_path) as pdf:
+                    for page in pdf.pages:
+                        page_text = page.extract_text()
+                        if page_text:
+                            text += page_text + "\n"
+                logger.info("✅ Estrazione con pdfplumber riuscita")
+            except Exception as e:
+                logger.warning(f"pdfplumber fallito: {e}")
+                
+                # Fallback su PyPDF2
+                try:
+                    import PyPDF2
+                    with open(tmp_path, 'rb') as pdf_file:
+                        pdf_reader = PyPDF2.PdfReader(pdf_file)
+                        for page in pdf_reader.pages:
+                            text += page.extract_text() + "\n"
+                    logger.info("✅ Estrazione con PyPDF2 riuscita")
+                except Exception as e2:
+                    logger.error(f"Anche PyPDF2 fallito: {e2}")
+                    # Se niente funziona, ritorna vuoto (userà AI)
+                    return JSONResponse(result)
+            
+            if not text:
+                logger.warning("Nessun testo estratto")
+                return JSONResponse(result)
+            
+            # 3. ESTRAI I 3 CAMPI STRICT
+            import re
+            
+            # PARTITA IVA (11 cifre)
+            piva_patterns = [
+                r'(?:Partita IVA|P\.?\s?IVA|VAT)[\s:]+(\d{11})',
+                r'(?:Codice Fiscale|C\.F\.)[\s:]+(\d{11})',
+                r'\b(\d{11})\b'
+            ]
+            partita_iva = None
+            for pattern in piva_patterns:
+                match = re.search(pattern, text, re.IGNORECASE)
+                if match:
+                    piva = match.group(1)
+                    if re.match(r'^\d{11}$', piva):
+                        partita_iva = piva
+                        logger.info(f"✅ P.IVA trovata: {partita_iva}")
+                        break
+            
+            # CODICE ATECO (XX.XX o XX.XX.XX)
+            ateco_patterns = [
+                r'(?:Codice ATECO|ATECO|Attività prevalente)[\s:]+(\d{2}[.\s]\d{2}(?:[.\s]\d{1,2})?)',
+                r'(?:Codice attività)[\s:]+(\d{2}[.\s]\d{2}(?:[.\s]\d{1,2})?)',
+                r'\b(\d{2}\.\d{2}(?:\.\d{1,2})?)\b'
+            ]
+            codice_ateco = None
+            for pattern in ateco_patterns:
+                match = re.search(pattern, text, re.IGNORECASE)
+                if match:
+                    ateco = match.group(1)
+                    ateco_clean = re.sub(r'\s+', '.', ateco)
+                    if re.match(r'^\d{2}\.\d{2}(?:\.\d{1,2})?$', ateco_clean):
+                        # Escludi anni (20.xx, 19.xx, 21.xx)
+                        first_part = int(ateco_clean.split('.')[0])
+                        if first_part not in [19, 20, 21]:
+                            codice_ateco = ateco_clean
+                            logger.info(f"✅ ATECO trovato: {codice_ateco}")
+                            break
+            
+            # OGGETTO SOCIALE (min 30 caratteri con parole business)
+            oggetto_patterns = [
+                r'(?:OGGETTO SOCIALE|Oggetto sociale|Oggetto)[\s:]+([^\n]{30,})',
+                r'(?:Attività|ATTIVITA)[\s:]+([^\n]{30,})'
+            ]
+            oggetto_sociale = None
+            business_words = ['produzione', 'commercio', 'servizi', 'consulenza', 
+                            'vendita', 'gestione', 'prestazione', 'attività']
+            for pattern in oggetto_patterns:
+                match = re.search(pattern, text, re.IGNORECASE)
+                if match:
+                    oggetto = match.group(1).strip()
+                    if len(oggetto) >= 30:
+                        has_business = any(w in oggetto.lower() for w in business_words)
+                        if has_business:
+                            if len(oggetto) > 500:
+                                oggetto = oggetto[:500] + '...'
+                            oggetto_sociale = oggetto
+                            logger.info(f"✅ Oggetto trovato: {oggetto_sociale[:50]}...")
+                            break
+            
+            # 4. CALCOLA CONFIDENCE REALE
+            score = 0
+            if partita_iva:
+                score += 33
+                result['data']['partita_iva'] = partita_iva
+                result['data']['confidence']['details']['partita_iva'] = 'valid'
+            if codice_ateco:
+                score += 33
+                result['data']['codice_ateco'] = codice_ateco
+                # Aggiungi anche in formato array per compatibilità
+                result['data']['codici_ateco'] = [{
+                    'codice': codice_ateco,
+                    'descrizione': '',
+                    'principale': True
+                }]
+                result['data']['confidence']['details']['ateco'] = 'valid'
+            if oggetto_sociale:
+                score += 34
+                result['data']['oggetto_sociale'] = oggetto_sociale
+                result['data']['confidence']['details']['oggetto_sociale'] = 'valid'
+            
+            result['data']['confidence']['score'] = score
+            logger.info(f"📊 Estrazione completata: {score}% confidence")
+            
         except Exception as e:
-            logger.error(f"Errore nel salvare il file temporaneo: {str(e)}")
-            raise
+            logger.error(f"❌ Errore estrazione: {str(e)}")
+            # In caso di QUALSIASI errore, ritorna risultato vuoto (non crasha)
         
-        try:
-            file_size = file.size if hasattr(file, 'size') and file.size else 'unknown'
-            logger.info(f"📥 Ricevuto file per estrazione: {file.filename} ({file_size} bytes)")
-            
-            # Usa l'estrattore migliore disponibile (priorità: FINAL > Fixed > Power > Base)
-            if VisuraExtractorFinal and visura_final_available:
-                logger.info("🔒 Utilizzo VisuraExtractorFinal - VERSIONE STRICT (SOLO 3 CAMPI)")
-                try:
-                    extractor = VisuraExtractorFinal()
-                    logger.info("📄 Inizio estrazione STRICT da PDF...")
-                    result = extractor.extract_three_fields(tmp_path)
-                    
-                    # Log dei campi estratti per debug
-                    data = result.get('data', {})
-                    logger.info(f"📊 Campi estratti STRICT: P.IVA={data.get('partita_iva')}, ATECO={data.get('codice_ateco')}, OggSoc={'SI' if data.get('oggetto_sociale') else 'NO'}")
-                    logger.info(f"✅ Estrazione FINAL completata con {data.get('confidence', {}).get('score', 0)}% confidence")
-                except Exception as final_error:
-                    logger.error(f"❌ Errore in VisuraExtractorFinal: {str(final_error)}")
-                    # Fallback su Fixed
-                    if VisuraExtractorFixed and visura_fixed_available:
-                        logger.info("⚠️ Fallback a VisuraExtractorFixed...")
-                        extractor = VisuraExtractorFixed()
-                        result = extractor.extract_from_pdf(tmp_path)
-                    else:
-                        raise final_error
-            elif VisuraExtractorFixed and visura_fixed_available:
-                logger.info("🚀 Utilizzo VisuraExtractorFixed - VERSIONE CORRETTA che risolve TUTTI i problemi...")
-                try:
-                    extractor = VisuraExtractorFixed()
-                    logger.info("📄 Inizio estrazione FIXED da PDF...")
-                    result = extractor.extract_from_pdf(tmp_path)
-                    
-                    # Log dei campi estratti per debug
-                    data = result.get('data', {})
-                    logger.info(f"📊 Campi estratti FIXED: denominazione={data.get('denominazione')}, REA={data.get('numero_rea')}, ATECO={len(data.get('codici_ateco', []))} codici")
-                    
-                    # Log errori validazione se presenti
-                    if result.get('validation_errors'):
-                        logger.warning(f"⚠️ Errori validazione: {result['validation_errors']}")
-                    
-                    logger.info(f"✅ Estrazione FIXED completata con {result.get('confidence', 0):.0%} confidence")
-                except Exception as fixed_error:
-                    logger.error(f"❌ Errore in VisuraExtractorFixed: {str(fixed_error)}")
-                    import traceback
-                    logger.error(f"Traceback: {traceback.format_exc()}")
-                    # Fallback su Power
-                    if VisuraExtractorPower:
-                        logger.info("⚠️ Fallback a VisuraExtractorPower...")
-                        extractor = VisuraExtractorPower()
-                        result = extractor.extract_all_data(tmp_path)
-                        # Formatta per compatibilità
-                        formatted_result = {
-                            'success': True,
-                            'data': result,
-                            'extraction_method': 'regex_power',
-                            'processing_time_ms': 1000
-                        }
-                        result = formatted_result
-                    elif VisuraExtractor:
-                        logger.info("⚠️ Fallback a VisuraExtractor base...")
-                        extractor = VisuraExtractor()
-                        result = extractor.extract_from_pdf(tmp_path)
-                    else:
-                        raise fixed_error
-            elif VisuraExtractorPower:
-                logger.info("⚠️ Utilizzo VisuraExtractorPower (Fixed non disponibile)...")
-                try:
-                    extractor = VisuraExtractorPower()
-                    logger.info("📄 Inizio estrazione POWER da PDF...")
-                    result = extractor.extract_all_data(tmp_path)
-                    
-                    # Log dei campi estratti per debug
-                    logger.info(f"📊 Campi estratti: denominazione={result.get('denominazione')}, p.iva={result.get('partita_iva')}, pec={result.get('pec')}")
-                    
-                    # Formatta il risultato per compatibilità con il frontend
-                    formatted_result = {
-                        'success': True,
-                        'data': result,
-                        'extraction_method': 'regex_power',
-                        'processing_time_ms': 1000
-                    }
-                    result = formatted_result
-                    logger.info(f"✅ Estrazione POWER completata con {result['data'].get('confidence', 0):.0%} confidence")
-                except Exception as power_error:
-                    logger.error(f"❌ Errore in VisuraExtractorPower: {str(power_error)}")
-                    import traceback
-                    logger.error(f"Traceback: {traceback.format_exc()}")
-                    # Fallback al vecchio estrattore
-                    if VisuraExtractor:
-                        logger.info("⚠️ Fallback a VisuraExtractor base...")
-                        extractor = VisuraExtractor()
-                        result = extractor.extract_from_pdf(tmp_path)
-                    else:
-                        raise power_error
-            else:
-                logger.info("Creazione istanza VisuraExtractor (versione base)...")
-                extractor = VisuraExtractor()
-                logger.info("Inizio estrazione da PDF...")
-                result = extractor.extract_from_pdf(tmp_path)
-                logger.info(f"Estrazione completata: {result}")
-            
-            # Se estrazione riuscita e ci sono codici ATECO, arricchisci con dati ATECO
-            if result.get('success') and result.get('data', {}).get('codici_ateco'):
-                ateco_enrichment = []
-                codici_ateco = result['data']['codici_ateco']
-                
-                # Gestisci sia lista di stringhe che lista di dizionari
-                for item in codici_ateco:
-                    if isinstance(item, dict):
-                        # Se è già un dizionario con codice e descrizione, usa quello
-                        code = item.get('codice', '')
-                        if code:
-                            # Arricchisci con normative dal database ATECO
-                            res = search_smart(df, code, prefer="2025-camerale")
-                            if not res.empty:
-                                lookup_result = enrich(flatten(res.iloc[0]))
-                                item['normative'] = lookup_result.get('normative', [])
-                                item['certificazioni'] = lookup_result.get('certificazioni', [])
-                            ateco_enrichment.append(item)
-                    else:
-                        # Se è una stringa, cerca nel database
-                        code = str(item)
-                        res = search_smart(df, code, prefer="2025-camerale")
-                        if not res.empty:
-                            lookup_result = enrich(flatten(res.iloc[0]))
-                            ateco_enrichment.append({
-                                'codice': code,
-                                'descrizione': (lookup_result.get('TITOLO_ATECO_2025_RAPPRESENTATIVO') or 
-                                             lookup_result.get('TITOLO_ATECO_2022') or 
-                                             "Descrizione non trovata"),
-                                'normative': lookup_result.get('normative', []),
-                                'certificazioni': lookup_result.get('certificazioni', [])
-                            })
-                
-                # Aggiungi arricchimento al risultato
-                if ateco_enrichment:
-                    result['data']['ateco_details'] = ateco_enrichment
-                    logger.info(f"✅ Arricchiti {len(ateco_enrichment)} codici ATECO")
-            
-            logger.info(f"🎉 Estrazione completata con successo: {result.get('data', {}).get('confidence', 0):.0%} confidence")
-            return JSONResponse(result)
-            
-        except Exception as e:
-            logger.error(f"Errore durante estrazione: {str(e)}", exc_info=True)
-            import traceback
-            tb = traceback.format_exc()
-            logger.error(f"Traceback completo: {tb}")
-            return JSONResponse({
-                'success': False,
-                'error': {
-                    'code': 'EXTRACTION_ERROR',
-                    'message': 'Errore durante estrazione dati dal PDF',
-                    'details': str(e),
-                    'traceback': tb if logger.level <= 10 else None
-                }
-            }, status_code=500)
-            
         finally:
             # Pulisci file temporaneo
-            try:
-                if 'tmp_path' in locals() and tmp_path:
+            if tmp_path:
+                try:
                     os.unlink(tmp_path)
-                    logger.debug(f"File temporaneo eliminato: {tmp_path}")
-            except:
-                pass
+                except:
+                    pass
+        
+        return JSONResponse(result)
 
     return app
 
