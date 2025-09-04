@@ -324,7 +324,7 @@ visura_available = False
 
 # PRIORITÀ 0: Prova FINAL (versione STRICT - SOLO 3 CAMPI)
 try:
-    from visura_extractor_FINAL import VisuraExtractorFinal
+    from visura_extractor_FINAL_embedded import VisuraExtractorFinal
     visura_final_available = True
     visura_extraction_available = True
     logger.info("✅ VisuraExtractorFinal importato - VERSIONE STRICT (SOLO 3 CAMPI)")
