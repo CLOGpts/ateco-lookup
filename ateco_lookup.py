@@ -356,17 +356,9 @@ except ImportError as e:
 except Exception as e:
     logger.error(f"Errore import VisuraExtractorPower: {e}")
 
-# PRIORITÀ 3: Ultimo fallback su BASE
-try:
-    from visura_extractor import VisuraExtractor
-    visura_available = True
-    if not visura_extraction_available:
-        visura_extraction_available = True
-    logger.info("✅ VisuraExtractor base importato come ultimo fallback")
-except ImportError as e:
-    logger.warning(f"VisuraExtractor non disponibile: {e}")
-except Exception as e:
-    logger.error(f"Errore import VisuraExtractor: {e}")
+# PRIORITÀ 3: Modulo base rimosso - non più necessario
+visura_available = False
+VisuraExtractor = None
 
 # Log stato finale
 if not visura_extraction_available:

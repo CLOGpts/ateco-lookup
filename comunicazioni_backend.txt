@@ -1,47 +1,31 @@
-useVisuraExtraction.ts:353  POST https://ateco-lookup.onrender.com/api/extract-visura 500 (Internal Server Error)
-extractWithBackend @ useVisuraExtraction.ts:353
-(anonymous) @ useVisuraExtraction.ts:890
-(anonymous) @ useUpload.ts:71
-(anonymous) @ useUpload.ts:56
-onChange @ UploadCenter.tsx:54
-callCallback2 @ chunk-PJEEZAML.js?v=f4da23c9:3674
-invokeGuardedCallbackDev @ chunk-PJEEZAML.js?v=f4da23c9:3699
-invokeGuardedCallback @ chunk-PJEEZAML.js?v=f4da23c9:3733
-invokeGuardedCallbackAndCatchFirstError @ chunk-PJEEZAML.js?v=f4da23c9:3736
-executeDispatch @ chunk-PJEEZAML.js?v=f4da23c9:7014
-processDispatchQueueItemsInOrder @ chunk-PJEEZAML.js?v=f4da23c9:7034
-processDispatchQueue @ chunk-PJEEZAML.js?v=f4da23c9:7043
-dispatchEventsForPlugins @ chunk-PJEEZAML.js?v=f4da23c9:7051
-(anonymous) @ chunk-PJEEZAML.js?v=f4da23c9:7174
-batchedUpdates$1 @ chunk-PJEEZAML.js?v=f4da23c9:18913
-batchedUpdates @ chunk-PJEEZAML.js?v=f4da23c9:3579
-dispatchEventForPluginEventSystem @ chunk-PJEEZAML.js?v=f4da23c9:7173
-dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-PJEEZAML.js?v=f4da23c9:5478
-dispatchEvent @ chunk-PJEEZAML.js?v=f4da23c9:5472
-dispatchDiscreteEvent @ chunk-PJEEZAML.js?v=f4da23c9:5449Understand this error
-useVisuraExtraction.ts:359 🔴 BACKEND ERROR - Il backend ha restituito errore
-extractWithBackend @ useVisuraExtraction.ts:359
-await in extractWithBackend
-(anonymous) @ useVisuraExtraction.ts:890
-(anonymous) @ useUpload.ts:71
-(anonymous) @ useUpload.ts:56
-onChange @ UploadCenter.tsx:54
-callCallback2 @ chunk-PJEEZAML.js?v=f4da23c9:3674
-invokeGuardedCallbackDev @ chunk-PJEEZAML.js?v=f4da23c9:3699
-invokeGuardedCallback @ chunk-PJEEZAML.js?v=f4da23c9:3733
-invokeGuardedCallbackAndCatchFirstError @ chunk-PJEEZAML.js?v=f4da23c9:3736
-executeDispatch @ chunk-PJEEZAML.js?v=f4da23c9:7014
-processDispatchQueueItemsInOrder @ chunk-PJEEZAML.js?v=f4da23c9:7034
-processDispatchQueue @ chunk-PJEEZAML.js?v=f4da23c9:7043
-dispatchEventsForPlugins @ chunk-PJEEZAML.js?v=f4da23c9:7051
-(anonymous) @ chunk-PJEEZAML.js?v=f4da23c9:7174
-batchedUpdates$1 @ chunk-PJEEZAML.js?v=f4da23c9:18913
-batchedUpdates @ chunk-PJEEZAML.js?v=f4da23c9:3579
-dispatchEventForPluginEventSystem @ chunk-PJEEZAML.js?v=f4da23c9:7173
-dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-PJEEZAML.js?v=f4da23c9:5478
-dispatchEvent @ chunk-PJEEZAML.js?v=f4da23c9:5472
-dispatchDiscreteEvent @ chunk-PJEEZAML.js?v=f4da23c9:5449Understand this error
-useVisuraExtraction.ts:525 ❌ Backend extraction failed: Error: Backend error: 500
-    at extractWithBackend (useVisuraExtraction.ts:360:15)
-    at async useVisuraExtraction.ts:890:18
-    at async useUpload.ts:71:27
+✅ **Visura elaborata con successo!**
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**🔒 SISTEMA STRICT - 3 CAMPI FONDAMENTALI**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**1️⃣ PARTITA IVA**
+✅ **00888380490** (Validata)
+
+**2️⃣ CODICE ATECO** 
+✅ **95.11** - riparazione e manutenzione di computer e periferiche
+🎯 **ATECO auto-popolato nella sidebar!**
+
+**3️⃣ OGGETTO SOCIALE**
+✅ PRODUZIONE E COMMERCIALIZZAZIONE DI PROGRAMMI E SISTEMI OPERATI VI PER ELABORATORI ELETTRONICI E LA LORO MANUTENZIONE E ASSISTENZA; PRODUZIONE COMMERCIALIZZAZIONE ACQUISIZIONE DI RAPPORTI DI AGENZIA R...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**📊 CONFIDENCE REALE**
+🟢🟢🟢 **100%** - 3/3 campi validi
+✅ Tutti i campi estratti e validati
+
+**🔧 METODO ESTRAZIONE**
+📊 Metodo Misto
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ **Dati salvati nel pannello laterale**
+✅ **ATECO automaticamente inserito nella sidebar!**
+
+📌 *Sistema certificato - Nessun dato inventato - Meglio null che sbagliato*
