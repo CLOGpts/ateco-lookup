@@ -592,6 +592,26 @@ def build_api(df: pd.DataFrame):
         Returns:
             JSON con codici ATECO, oggetto sociale, sedi e tipo business
         """
+        # BYPASS DI EMERGENZA - RITORNA SEMPRE SUCCESSO VUOTO
+        logger.warning("⚠️ MODALITÀ BYPASS EMERGENZA ATTIVA")
+        return JSONResponse({
+            'success': True,
+            'data': {
+                'partita_iva': None,
+                'codice_ateco': None,
+                'oggetto_sociale': None,
+                'codici_ateco': [],
+                'confidence': {
+                    'score': 0,
+                    'details': {
+                        'message': 'Backend in manutenzione - usare AI'
+                    }
+                }
+            },
+            'method': 'bypass_emergency'
+        })
+        
+        # CODICE ORIGINALE SOTTO (TEMPORANEAMENTE DISABILITATO)
         logger.info(f"Ricevuto file per estrazione: {file.filename}")
         
         # Verifica che almeno un estrattore sia disponibile
