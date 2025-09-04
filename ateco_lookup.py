@@ -314,11 +314,24 @@ visura_extraction_available = False
 VisuraExtractor = None
 VisuraExtractorPower = None
 VisuraExtractorFixed = None
+VisuraExtractorFinal = None
 
 # Variabili di stato per tracking importazioni
+visura_final_available = False
 visura_fixed_available = False
 visura_power_available = False
 visura_available = False
+
+# PRIORITÀ 0: Prova FINAL (versione STRICT - SOLO 3 CAMPI)
+try:
+    from visura_extractor_FINAL import VisuraExtractorFinal
+    visura_final_available = True
+    visura_extraction_available = True
+    logger.info("✅ VisuraExtractorFinal importato - VERSIONE STRICT (SOLO 3 CAMPI)")
+except ImportError as e:
+    logger.warning(f"VisuraExtractorFinal non disponibile: {e}")
+except Exception as e:
+    logger.error(f"Errore import VisuraExtractorFinal: {e}")
 
 # PRIORITÀ 1: Prova FIXED (versione corretta)
 try:
@@ -650,8 +663,28 @@ def build_api(df: pd.DataFrame):
             file_size = file.size if hasattr(file, 'size') and file.size else 'unknown'
             logger.info(f"📥 Ricevuto file per estrazione: {file.filename} ({file_size} bytes)")
             
-            # Usa l'estrattore migliore disponibile (priorità: Fixed > Power > Base)
-            if VisuraExtractorFixed and visura_fixed_available:
+            # Usa l'estrattore migliore disponibile (priorità: FINAL > Fixed > Power > Base)
+            if VisuraExtractorFinal and visura_final_available:
+                logger.info("🔒 Utilizzo VisuraExtractorFinal - VERSIONE STRICT (SOLO 3 CAMPI)")
+                try:
+                    extractor = VisuraExtractorFinal()
+                    logger.info("📄 Inizio estrazione STRICT da PDF...")
+                    result = extractor.extract_three_fields(tmp_path)
+                    
+                    # Log dei campi estratti per debug
+                    data = result.get('data', {})
+                    logger.info(f"📊 Campi estratti STRICT: P.IVA={data.get('partita_iva')}, ATECO={data.get('codice_ateco')}, OggSoc={'SI' if data.get('oggetto_sociale') else 'NO'}")
+                    logger.info(f"✅ Estrazione FINAL completata con {data.get('confidence', {}).get('score', 0)}% confidence")
+                except Exception as final_error:
+                    logger.error(f"❌ Errore in VisuraExtractorFinal: {str(final_error)}")
+                    # Fallback su Fixed
+                    if VisuraExtractorFixed and visura_fixed_available:
+                        logger.info("⚠️ Fallback a VisuraExtractorFixed...")
+                        extractor = VisuraExtractorFixed()
+                        result = extractor.extract_from_pdf(tmp_path)
+                    else:
+                        raise final_error
+            elif VisuraExtractorFixed and visura_fixed_available:
                 logger.info("🚀 Utilizzo VisuraExtractorFixed - VERSIONE CORRETTA che risolve TUTTI i problemi...")
                 try:
                     extractor = VisuraExtractorFixed()
