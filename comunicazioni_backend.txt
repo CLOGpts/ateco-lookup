@@ -1,76 +1,47 @@
-=====================================
-COMUNICAZIONE DA BACKEND A FRONTEND
-Data: 04/09/2025
-=====================================
-
-✅ MODIFICHE COMPLETATE CON SUCCESSO
-
-Ho aggiornato il sistema di estrazione visure con le nuove regole STRICT.
-
-## COSA HO FATTO:
-
-1. **INTEGRATO IL NUOVO ESTRATTORE**
-   - Aggiunto `visura_extractor_FINAL.py` al sistema
-   - Configurato come prima opzione per l'endpoint `/api/extract-visura`
-   - Mantenuti tutti i fallback esistenti per sicurezza
-
-2. **MODIFICHE ISOLATE - NULLA È STATO ROTTO**
-   - ✅ Sistema ATECO lookup: INTATTO e funzionante
-   - ✅ Server Excel: INTATTO e funzionante  
-   - ✅ Tutti gli altri endpoint: INTATTI e funzionanti
-   - SOLO l'endpoint `/api/extract-visura` è stato modificato
-
-3. **BACKUP DI SICUREZZA**
-   - Creato `ateco_lookup_BACKUP_FUNZIONANTE.py`
-   - In caso di problemi: `cp ateco_lookup_BACKUP_FUNZIONANTE.py ateco_lookup.py`
-
-## NUOVO OUTPUT VISURA - FORMATO STRICT:
-
-```json
-{
-  "success": true,
-  "data": {
-    "partita_iva": "12345678901",    // o null se non trovata/invalida
-    "codice_ateco": "62.01",         // o null se non trovato/invalido
-    "oggetto_sociale": "Produzione software...",  // o null se non trovato
-    "confidence": {
-      "score": 100,  // SOLO: 0, 33, 66 o 100 (MAI inventato!)
-      "details": {
-        "partita_iva": "valid",
-        "ateco": "valid", 
-        "oggetto_sociale": "valid"
-      },
-      "assessment": "✅ Tutti e 3 i campi trovati e validi"
-    }
-  },
-  "method": "backend"
-}
-```
-
-## REGOLE APPLICATE:
-
-1. **SOLO 3 CAMPI**: Partita IVA, Codice ATECO, Oggetto Sociale
-2. **VALIDAZIONE RIGOROSA**:
-   - P.IVA: DEVE essere 11 cifre numeriche
-   - ATECO: DEVE essere formato XX.XX o XX.XX.XX
-   - Oggetto: DEVE avere min 30 caratteri e contenere parole business
-3. **CONFIDENCE REALE**:
-   - 0%: Nessun campo trovato
-   - 33%: 1 campo trovato
-   - 66%: 2 campi trovati  
-   - 100%: Tutti e 3 i campi trovati
-4. **MEGLIO NULL CHE SBAGLIATO**: Se non sicuro → null
-
-## TEST EFFETTUATI:
-
-- Server Excel: ✅ Funziona (7 categorie caricate)
-- Eventi Excel: ✅ Funziona (10 eventi per Damage_Danni)
-- Altri endpoint: ✅ Non toccati
-
-## PER IL FRONTEND:
-
-L'endpoint `/api/extract-visura` ora ritorna SOLO dati validati e certi.
-Se un campo non è trovato o non passa la validazione, sarà `null`.
-La confidence ora è SEMPRE uno di: 0, 33, 66, 100.
-
-NESSUN'ALTRA FUNZIONALITÀ È STATA MODIFICATA. 
+useVisuraExtraction.ts:353  POST https://ateco-lookup.onrender.com/api/extract-visura 500 (Internal Server Error)
+extractWithBackend @ useVisuraExtraction.ts:353
+(anonymous) @ useVisuraExtraction.ts:890
+(anonymous) @ useUpload.ts:71
+(anonymous) @ useUpload.ts:56
+onChange @ UploadCenter.tsx:54
+callCallback2 @ chunk-PJEEZAML.js?v=f4da23c9:3674
+invokeGuardedCallbackDev @ chunk-PJEEZAML.js?v=f4da23c9:3699
+invokeGuardedCallback @ chunk-PJEEZAML.js?v=f4da23c9:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-PJEEZAML.js?v=f4da23c9:3736
+executeDispatch @ chunk-PJEEZAML.js?v=f4da23c9:7014
+processDispatchQueueItemsInOrder @ chunk-PJEEZAML.js?v=f4da23c9:7034
+processDispatchQueue @ chunk-PJEEZAML.js?v=f4da23c9:7043
+dispatchEventsForPlugins @ chunk-PJEEZAML.js?v=f4da23c9:7051
+(anonymous) @ chunk-PJEEZAML.js?v=f4da23c9:7174
+batchedUpdates$1 @ chunk-PJEEZAML.js?v=f4da23c9:18913
+batchedUpdates @ chunk-PJEEZAML.js?v=f4da23c9:3579
+dispatchEventForPluginEventSystem @ chunk-PJEEZAML.js?v=f4da23c9:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-PJEEZAML.js?v=f4da23c9:5478
+dispatchEvent @ chunk-PJEEZAML.js?v=f4da23c9:5472
+dispatchDiscreteEvent @ chunk-PJEEZAML.js?v=f4da23c9:5449Understand this error
+useVisuraExtraction.ts:359 🔴 BACKEND ERROR - Il backend ha restituito errore
+extractWithBackend @ useVisuraExtraction.ts:359
+await in extractWithBackend
+(anonymous) @ useVisuraExtraction.ts:890
+(anonymous) @ useUpload.ts:71
+(anonymous) @ useUpload.ts:56
+onChange @ UploadCenter.tsx:54
+callCallback2 @ chunk-PJEEZAML.js?v=f4da23c9:3674
+invokeGuardedCallbackDev @ chunk-PJEEZAML.js?v=f4da23c9:3699
+invokeGuardedCallback @ chunk-PJEEZAML.js?v=f4da23c9:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-PJEEZAML.js?v=f4da23c9:3736
+executeDispatch @ chunk-PJEEZAML.js?v=f4da23c9:7014
+processDispatchQueueItemsInOrder @ chunk-PJEEZAML.js?v=f4da23c9:7034
+processDispatchQueue @ chunk-PJEEZAML.js?v=f4da23c9:7043
+dispatchEventsForPlugins @ chunk-PJEEZAML.js?v=f4da23c9:7051
+(anonymous) @ chunk-PJEEZAML.js?v=f4da23c9:7174
+batchedUpdates$1 @ chunk-PJEEZAML.js?v=f4da23c9:18913
+batchedUpdates @ chunk-PJEEZAML.js?v=f4da23c9:3579
+dispatchEventForPluginEventSystem @ chunk-PJEEZAML.js?v=f4da23c9:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-PJEEZAML.js?v=f4da23c9:5478
+dispatchEvent @ chunk-PJEEZAML.js?v=f4da23c9:5472
+dispatchDiscreteEvent @ chunk-PJEEZAML.js?v=f4da23c9:5449Understand this error
+useVisuraExtraction.ts:525 ❌ Backend extraction failed: Error: Backend error: 500
+    at extractWithBackend (useVisuraExtraction.ts:360:15)
+    at async useVisuraExtraction.ts:890:18
+    at async useUpload.ts:71:27
