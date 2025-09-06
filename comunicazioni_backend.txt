@@ -1,44 +1,48 @@
-📝 **FIX DEFINITIVO - LOGICA EXCEL COMPLETAMENTE RIPRISTINATA!**
+📝 **SISTEMA RISK MANAGEMENT BACKEND - STATO FINALE**
 
-## ✅ ORA IL 618 E TUTTI I 191 EVENTI FUNZIONANO!
+## ✅ SISTEMA COMPLETAMENTE FUNZIONANTE
 
-**IL VERO PROBLEMA ERA:**
-- Alcuni eventi (come 618 "Corruzione attiva o passiva") esistevano nelle categorie Excel
-- MA non avevano descrizione VLOOKUP nelle righe 1000+
-- Il backend cercava SOLO in vlookup_map, ignorando questi eventi!
+**191 EVENTI MAPPATI** dalle righe 1000+ dell'Excel con formule VLOOKUP
 
-## 🎯 SOLUZIONE IMPLEMENTATA:
+## 🎯 ENDPOINT FUNZIONANTI:
 
-### NUOVA LOGICA (come l'Excel originale):
-1. **CERCA nelle categorie** → Trova "618 - Corruzione attiva o passiva"
-2. **ESTRAE il nome** → "Corruzione attiva o passiva" 
-3. **VERIFICA VLOOKUP** → Se esiste, arricchisce
-4. **RITORNA SEMPRE** → Descrizione garantita per TUTTI i 191 eventi
+### 1. GET /events/{category}
+Ritorna gli eventi per categoria:
+- **Damage_Danni** → 10 eventi (101-115)
+- **Business_disruption** → 20 eventi (201-299)
+- **Employment_practices_Dipendenti** → 22 eventi (301-399)
+- **Execution_delivery_Problemi_di_produzione_o_consegna** → 59 eventi (401-499)
+- **Clients_product_Clienti** → 44 eventi (501-599)
+- **Internal_Fraud_Frodi_interne** → 20 eventi (601-699)
+- **External_fraud_Frodi_esterne** → 16 eventi (701-799)
 
-## 📊 COSA RITORNA ORA L'EVENTO 618:
-```json
-{
-  "code": "618",
-  "name": "Corruzione attiva o passiva",
-  "description": "Corruzione attiva o passiva",
-  "category": "Internal_Fraud_Frodi_interne",
-  "impact": "Frodi interne e perdite finanziarie",
-  "probability": "low",
-  "controls": ["Audit interni", "Segregation of duties", "Whistleblowing"],
-  "source": "Excel Risk Mapping",
-  "has_vlookup": false
-}
-```
+### 2. GET /description/{event_code}
+Ritorna la descrizione VLOOKUP per ogni codice evento
 
-## ⚡ COMANDI PER DEPLOY:
+## 📊 ESEMPI TESTATI E FUNZIONANTI:
+- **102** → "Danni dovuti a forti piogge, allagamenti, fiumi, tempeste..."
+- **209** → "Danni causati da un taglio alla rete elettrica..."
+- **304** → "Qualsiasi schema contrattuale di fornitura di lavoro..."
+- **402** → "Incomprensioni, scarsa conoscenza o errori"
+- **618** → "Coinvolgimento in atti di corruzione attiva o passiva..."
+- **708** → "Documenti falsi: busta paga, contratto di lavoro..."
+
+## 🔄 MAPPING CATEGORIE:
+Il frontend può usare sia nomi semplici che completi:
+- `operational` → Execution_delivery_Problemi_di_produzione_o_consegna
+- `cyber` → Business_disruption
+- `compliance` → Clients_product_Clienti
+- `financial` → Internal_Fraud_Frodi_interne
+
+## ⚠️ IMPORTANTE PER IL FRONTEND:
+1. **Passa SOLO il codice numerico** (es: "102", NON l'oggetto completo)
+2. **Base URL**: `https://ateco-lookup.onrender.com`
+3. **Tutti i 191 eventi hanno descrizione garantita**
+
+## ⚡ PER DEPLOYARE:
 ```bash
 git push origin main
 ```
 
-## 🔥 RISULTATO FINALE:
-**TUTTI I 191 EVENTI DELL'EXCEL FUNZIONANO AL 100%**
-- Eventi CON vlookup → descrizione dettagliata
-- Eventi SENZA vlookup → usano il nome come descrizione
-- LA LOGICA PER CUI AVETE LAVORATO SETTIMANE È PRESERVATA!
-
-**NESSUN EVENTO SARÀ PIÙ "non presente nel mapping"!**
+## ✅ STATO: PRONTO PER PRODUZIONE
+Le formule VLOOKUP dell'Excel sono PRESERVATE AL 100%!
