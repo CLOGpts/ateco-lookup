@@ -760,6 +760,130 @@ def build_api(df: pd.DataFrame):
             "source": "Generic"
         })
     
+    # NUOVO ENDPOINT: Fornisce i 5 campi di valutazione Risk Assessment
+    @app.get("/risk-assessment-fields")
+    def get_risk_assessment_fields():
+        """Endpoint per ottenere la struttura dei 5 campi di Perdita Finanziaria Attesa"""
+        return {
+            "fields": [
+                {
+                    "id": "impatto_finanziario",
+                    "column": "H",
+                    "question": "Qual è l'impatto finanziario stimato?",
+                    "type": "select",
+                    "options": [
+                        "N/A",
+                        "0 - 1K€",
+                        "1 - 10K€",
+                        "10 - 50K€",
+                        "50 - 100K€",
+                        "100 - 500K€",
+                        "500K€ - 1M€",
+                        "1 - 3M€",
+                        "3 - 5M€"
+                    ],
+                    "required": True
+                },
+                {
+                    "id": "perdita_economica",
+                    "column": "I",
+                    "question": "Qual è il livello di perdita economica attesa?",
+                    "type": "select_color",
+                    "options": [
+                        {"value": "G", "label": "Bassa/Nulla", "color": "green", "emoji": "🟢"},
+                        {"value": "Y", "label": "Media", "color": "yellow", "emoji": "🟡"},
+                        {"value": "O", "label": "Importante", "color": "orange", "emoji": "🟠"},
+                        {"value": "R", "label": "Grave", "color": "red", "emoji": "🔴"}
+                    ],
+                    "required": True
+                },
+                {
+                    "id": "impatto_immagine",
+                    "column": "J",
+                    "question": "L'evento ha impatto sull'immagine aziendale?",
+                    "type": "boolean",
+                    "options": ["Si", "No"],
+                    "required": True
+                },
+                {
+                    "id": "impatto_regolamentare",
+                    "column": "L",
+                    "question": "Ci sono possibili conseguenze regolamentari o legali civili?",
+                    "type": "boolean",
+                    "options": ["Si", "No"],
+                    "description": "Multe, sanzioni amministrative, cause civili",
+                    "required": True
+                },
+                {
+                    "id": "impatto_criminale",
+                    "column": "M",
+                    "question": "Ci sono possibili conseguenze penali?",
+                    "type": "boolean",
+                    "options": ["Si", "No"],
+                    "description": "Denunce penali, procedimenti criminali",
+                    "required": True
+                }
+            ]
+        }
+    
+    # NUOVO ENDPOINT: Salva risk assessment e calcola score
+    @app.post("/save-risk-assessment")
+    def save_risk_assessment(data: dict):
+        """Endpoint per salvare la valutazione del rischio e calcolare il risk score"""
+        try:
+            # Calcola risk score
+            score = 0
+            
+            # Impatto finanziario (max 40 punti)
+            impatto_map = {
+                'N/A': 0, '0 - 1K€': 5, '1 - 10K€': 10, '10 - 50K€': 15,
+                '50 - 100K€': 20, '100 - 500K€': 25, '500K€ - 1M€': 30,
+                '1 - 3M€': 35, '3 - 5M€': 40
+            }
+            score += impatto_map.get(data.get('impatto_finanziario', 'N/A'), 0)
+            
+            # Perdita economica (max 30 punti)
+            perdita_map = {'G': 5, 'Y': 15, 'O': 25, 'R': 30}
+            score += perdita_map.get(data.get('perdita_economica', 'G'), 0)
+            
+            # Impatti booleani (10 punti ciascuno)
+            if data.get('impatto_immagine') == 'Si': score += 10
+            if data.get('impatto_regolamentare') == 'Si': score += 10
+            if data.get('impatto_criminale') == 'Si': score += 10
+            
+            # Genera analisi
+            if score >= 70:
+                level = "CRITICO"
+                action = "Richiede azione immediata"
+            elif score >= 50:
+                level = "ALTO"
+                action = "Priorità alta, pianificare mitigazione"
+            elif score >= 30:
+                level = "MEDIO"
+                action = "Monitorare e valutare opzioni"
+            else:
+                level = "BASSO"
+                action = "Rischio accettabile, monitoraggio standard"
+            
+            analysis = f"Livello di rischio: {level} (Score: {score}/100). {action}"
+            
+            # Log dei dati ricevuti
+            logging.info(f"Risk Assessment - Evento: {data.get('event_code')} - Score: {score}")
+            
+            return {
+                "status": "success",
+                "message": "Risk assessment salvato",
+                "risk_score": score,
+                "analysis": analysis
+            }
+            
+        except Exception as e:
+            logging.error(f"Errore in save_risk_assessment: {e}")
+            return JSONResponse({
+                "status": "error",
+                "message": str(e)
+            }, status_code=400)
+    
     # ENDPOINT ALTERNATIVO PER FRONTEND CHE INVIA OGGETTI
     @app.post("/description")
     def get_event_description_post(event: dict):
