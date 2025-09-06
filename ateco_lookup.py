@@ -649,6 +649,28 @@ def build_api(df: pd.DataFrame):
     @app.get("/description/{event_code}")  
     def get_event_description(event_code: str):
         """Endpoint per ottenere descrizione dettagliata di un evento - DATI EXCEL REALI"""
+        # FIX: Gestisce sia codici semplici che oggetti serializzati
+        # Se riceve [object Object] o JSON, estrai il codice
+        import re
+        
+        # Pulisci event_code da caratteri strani
+        if '[object' in event_code.lower() or '{' in event_code:
+            # Frontend ha passato un oggetto invece del codice
+            # Prova a estrarre un numero dal parametro
+            numbers = re.findall(r'\d+', event_code)
+            if numbers:
+                event_code = numbers[0]
+            else:
+                return JSONResponse({
+                    "error": "Invalid event code format",
+                    "received": event_code,
+                    "expected": "Event code like '101', '201', etc.",
+                    "hint": "Frontend should pass event.code, not the entire event object"
+                }, status_code=400)
+        
+        # Normalizza il codice (rimuovi spazi, trattini extra)
+        event_code = event_code.strip()
+        
         # Cerca prima nelle descrizioni Excel
         if event_code in EXCEL_DESCRIPTIONS:
             description = EXCEL_DESCRIPTIONS[event_code]
@@ -720,6 +742,97 @@ def build_api(df: pd.DataFrame):
         return JSONResponse({
             "code": event_code,
             "name": "Evento non mappato",
+            "description": f"Evento {event_code} non presente nel mapping Excel",
+            "impact": "Da valutare",
+            "probability": "unknown",
+            "controls": ["Da definire in base all'analisi specifica"],
+            "source": "Generic"
+        })
+    
+    # ENDPOINT ALTERNATIVO PER FRONTEND CHE INVIA OGGETTI
+    @app.post("/description")
+    def get_event_description_post(event: dict):
+        """Endpoint POST per ricevere l'evento come JSON invece che come parametro URL"""
+        # Estrai il codice dall'oggetto evento
+        event_code = None
+        
+        # Prova diversi formati possibili
+        if isinstance(event, dict):
+            event_code = event.get('code') or event.get('event_code') or event.get('id')
+        
+        if not event_code:
+            return JSONResponse({
+                "error": "Event code not found in request",
+                "received": event,
+                "expected_format": {"code": "101"}
+            }, status_code=400)
+        
+        # Usa la stessa logica dell'endpoint GET
+        event_code = str(event_code).strip()
+        
+        # Cerca nelle descrizioni Excel
+        if event_code in EXCEL_DESCRIPTIONS:
+            description = EXCEL_DESCRIPTIONS[event_code]
+            # Trova il nome dell'evento
+            event_name = event.get('name')  # Usa il nome dall'oggetto se disponibile
+            if not event_name:
+                for cat_events in EXCEL_CATEGORIES.values():
+                    for ev in cat_events:
+                        if ev.startswith(event_code + ' - '):
+                            event_name = ev.split(' - ', 1)[1]
+                            break
+                    if event_name:
+                        break
+            
+            # Determina impatto e probabilità
+            if event_code.startswith('1'):
+                impact = "Danni fisici e materiali"
+                probability = "low"
+                controls = ["Assicurazione danni", "Manutenzione preventiva", "Procedure di emergenza"]
+            elif event_code.startswith('2'):
+                impact = "Interruzione operativa e perdita dati"
+                probability = "medium"
+                controls = ["Backup e recovery", "Ridondanza sistemi", "Monitoring continuo"]
+            elif event_code.startswith('3'):
+                impact = "Problemi con dipendenti e clima aziendale"
+                probability = "medium"
+                controls = ["HR policies", "Formazione continua", "Welfare aziendale"]
+            elif event_code.startswith('4'):
+                impact = "Errori di processo e consegna"
+                probability = "high"
+                controls = ["Quality control", "Process automation", "KPI monitoring"]
+            elif event_code.startswith('5'):
+                impact = "Perdita clienti e sanzioni"
+                probability = "medium"
+                controls = ["Customer satisfaction", "Compliance monitoring", "Legal review"]
+            elif event_code.startswith('6'):
+                impact = "Frodi interne e perdite finanziarie"
+                probability = "low"
+                controls = ["Audit interni", "Segregation of duties", "Whistleblowing"]
+            elif event_code.startswith('7'):
+                impact = "Frodi esterne e attacchi cyber"
+                probability = "medium"
+                controls = ["Cybersecurity", "Fraud detection", "Identity verification"]
+            else:
+                impact = "Da valutare caso per caso"
+                probability = "unknown"
+                controls = ["Controlli standard da definire"]
+            
+            return JSONResponse({
+                "code": event_code,
+                "name": event_name or "Evento " + event_code,
+                "description": description,
+                "impact": impact,
+                "probability": probability,
+                "controls": controls,
+                "severity": event.get('severity', 'medium'),
+                "source": "Excel Risk Mapping"
+            })
+        
+        # Se non trovato nell'Excel
+        return JSONResponse({
+            "code": event_code,
+            "name": event.get('name', 'Evento non mappato'),
             "description": f"Evento {event_code} non presente nel mapping Excel",
             "impact": "Da valutare",
             "probability": "unknown",
