@@ -1,19 +1,18 @@
 # Documentazione Backend Estrazione Visure Camerali
-## Per Sviluppatore Frontend
+## Sistema STRICT - Solo 3 Campi Fondamentali
 
 ---
 
 ## 🎯 Panoramica del Sistema
 
 ### Cosa fa questo backend
-Il backend **Visura Extractor** è un sistema Python avanzato che permette di:
-1. **Estrarre dati strutturati** da PDF di visure camerali
-2. **Identificare automaticamente** tutti i campi principali (denominazione, P.IVA, codici ATECO, etc.)
-3. **Validare e normalizzare** i dati estratti secondo standard italiani
-4. **Calcolare confidence score** per l'affidabilità dell'estrazione
-5. **Gestire fallback intelligenti** tra 3 versioni di estrattori
-6. **Arricchire i dati ATECO** con descrizioni complete
-7. **Classificare il tipo di business** automaticamente
+Il backend **Visura Extractor STRICT** è un sistema Python bulletproof che:
+1. **Estrae SOLO 3 campi fondamentali** da PDF di visure camerali
+2. **MAI inventa dati** - meglio NULL che dati sbagliati
+3. **Zero crash garantiti** - gestione errori totale
+4. **Confidence REALE** basata sui campi effettivamente trovati
+5. **Fallback multipli** per librerie PDF (pdfplumber → PyPDF2 → pdfminer)
+6. **Validazione rigorosa** di ogni campo estratto
 
 ### Architettura del Sistema
 ```
@@ -23,225 +22,184 @@ Il backend **Visura Extractor** è un sistema Python avanzato che permette di:
            │ POST /api/extract-visura
            ▼
 ┌─────────────────────┐
-│   FastAPI Server    │  ← ateco_lookup.py
+│   FastAPI Server    │ ← ateco_lookup.py
 ├─────────────────────┤
-│  Sistema Fallback   │  ← Priorità estrattori
+│  Estrazione STRICT  │ ← Integrata direttamente
 ├─────────────────────┤
-│ 1. Fixed (v3.0)     │  ← visura_extractor_fixed.py ⭐
-│ 2. Power (v2.0)     │  ← visura_extractor_power.py
-│ 3. Ultimate (v1.0)  │  ← visura_extractor_ultimate.py
+│ 1. Partita IVA      │ ← 11 cifre validate
+│ 2. Codice ATECO     │ ← Formato XX.XX
+│ 3. Oggetto Sociale  │ ← Min 30 caratteri
 └─────────────────────┘
 ```
 
 ### Tecnologie utilizzate
 - **Python 3.7+**: Linguaggio principale
-- **pdfplumber**: Estrazione testo da PDF con precisione
+- **pdfplumber**: Estrazione testo primaria (con fallback)
 - **PyPDF2**: Fallback per PDF complessi
-- **regex (re)**: Pattern matching avanzato
-- **FastAPI**: API REST (integrazione con ateco_lookup.py)
-- **Sistema di fallback**: 3 livelli di estrattori per massima affidabilità
+- **pdfminer.six**: Ultimo fallback disponibile
+- **regex (re)**: Pattern matching rigoroso
+- **FastAPI**: API REST (integrazione in ateco_lookup.py)
 
 ---
 
-## 🚀 Sistema di Estrazione a 3 Livelli
+## 🔒 Sistema STRICT - I 3 Campi Fondamentali
 
-### Priorità e Caratteristiche
+### 1️⃣ **Partita IVA**
+**Validazione:** DEVE essere esattamente 11 cifre
+```python
+Pattern: r'(?:Partita IVA|P\.?\s?IVA|VAT)[\s:]+(\d{11})'
+Validazione: re.match(r'^\d{11}$', piva)
+```
+**Comportamento:**
+- ✅ Trova e valida 11 cifre esatte
+- ❌ Ritorna NULL se non trova o non valida
+- ❌ MAI inventa o deduce
 
-#### 1️⃣ **VisuraExtractorFixed** (PRIORITÀ MASSIMA)
-**File:** `visura_extractor_fixed.py`
-**Versione:** 3.0
-**Caratteristiche:**
-- ✅ Segue ESATTAMENTE le specifiche frontend
-- ✅ Mapping completo comuni→province (114 comuni)
-- ✅ Validazione province italiane (tutte 106)
-- ✅ Descrizioni ATECO complete per settori principali
-- ✅ Estrazione numero REA con provincia corretta
-- ✅ Calcolo confidence score preciso
-- ✅ Validazione finale con error reporting
+### 2️⃣ **Codice ATECO**
+**Validazione:** Formato XX.XX o XX.XX.XX
+```python
+Pattern: r'(?:Codice ATECO|ATECO|Attività prevalente)[\s:]+(\d{2}[.\s]\d{2}(?:[.\s]\d{1,2})?)'
+Validazione: re.match(r'^\d{2}\.\d{2}(?:\.\d{1,2})?$', ateco)
+```
+**Comportamento:**
+- ✅ Estrae codice principale con formato corretto
+- ✅ Normalizza separatori (spazi → punti)
+- ❌ Ritorna NULL se formato non valido
 
-**Campi estratti:**
-1. Denominazione/Ragione sociale
-2. Forma giuridica (SRL, SPA, SNC, etc.)
-3. Partita IVA (validata 11 cifre)
-4. Codice Fiscale (11-16 caratteri)
-5. Sede legale (indirizzo, CAP, comune, provincia)
-6. Numero REA (con provincia)
-7. Codici ATECO (con descrizioni e flag principale)
-8. PEC (validata formato email)
-9. Email ordinaria
-10. Telefono
-11. Sito web
-12. Capitale sociale
-13. Oggetto sociale
-14. Stato attività
-15. Data costituzione
-16. Amministratori
-
-#### 2️⃣ **VisuraExtractorPower** (FALLBACK 1)
-**File:** `visura_extractor_power.py`
-**Versione:** 2.0
-**Caratteristiche:**
-- 🔧 Pattern regex ottimizzati per ogni campo
-- 🔧 Estrazione multi-pattern per maggiore copertura
-- 🔧 Classificazione automatica tipo business
-- 🔧 Estrazione dati finanziari (fatturato, dipendenti)
-- 🔧 Supporto sedi secondarie
-
-**Campi aggiuntivi:**
-- Fatturato
-- Numero dipendenti
-- Sedi secondarie/unità locali
-- Data ultimo bilancio
-- Tipo business (tech, manufacturing, retail, etc.)
-
-#### 3️⃣ **VisuraExtractorUltimate** (FALLBACK 2)
-**File:** `visura_extractor_ultimate.py`
-**Versione:** 1.0
-**Caratteristiche:**
-- 🛠️ Estrazione base affidabile
-- 🛠️ Dizionario ATECO esteso
-- 🛠️ Logging dettagliato per debug
-- 🛠️ Validazione province rigorosa
+### 3️⃣ **Oggetto Sociale**
+**Validazione:** Minimo 30 caratteri, deve contenere parole business
+```python
+Parole chiave: ['produzione', 'commercio', 'servizi', 'consulenza', ...]
+Lunghezza: len(oggetto) >= 30
+Truncate: max 500 caratteri
+```
+**Comportamento:**
+- ✅ Estrae descrizione attività se presente
+- ✅ Valida che sia testo business reale
+- ❌ Ritorna NULL se troppo corto o non pertinente
 
 ---
 
-## 📊 Struttura Dati Risposta
+## 📊 Sistema di Confidence REALE
+
+### Calcolo Confidence Score
+```
+Confidence = Somma dei campi trovati:
+- Partita IVA trovata e valida: +33%
+- Codice ATECO trovato e valido: +33%
+- Oggetto Sociale trovato e valido: +34%
+```
+
+### Livelli di Confidence
+| Score | Significato | Assessment |
+|-------|-------------|------------|
+| 100% | 3/3 campi trovati | ✅ Tutti e 3 i campi trovati e validi |
+| 66-67% | 2/3 campi trovati | ⚠️ 2 campi su 3 trovati |
+| 33-34% | 1/3 campi trovati | ⚠️ Solo 1 campo trovato |
+| 0% | 0/3 campi trovati | ❌ Nessun campo valido trovato |
+
+---
+
+## 🚀 Struttura Risposta API
 
 ### Risposta Standard (Successo)
 ```json
 {
   "success": true,
-  "confidence": 0.95,
   "data": {
-    "denominazione": "CELERYA SRL",
-    "forma_giuridica": "SRL",
-    "partita_iva": "12345678901",
-    "codice_fiscale": "12345678901",
-    "sede_legale": {
-      "indirizzo": "Via Roma 123",
-      "cap": "10100",
-      "comune": "Torino",
-      "provincia": "TO"
-    },
-    "numero_rea": "TO-1234567",
-    "codici_ateco": [
-      {
-        "codice": "62.01",
-        "descrizione": "Produzione di software non connesso all'edizione",
-        "principale": true
+    "partita_iva": "12345678901",     // o null
+    "codice_ateco": "62.01",           // o null
+    "oggetto_sociale": "Produzione...", // o null
+    "codici_ateco": [],                // array vuoto per compatibilità
+    "confidence": {
+      "score": 100,
+      "details": {
+        "partita_iva": "valid",
+        "ateco": "valid",
+        "oggetto_sociale": "valid"
       },
-      {
-        "codice": "62.02",
-        "descrizione": "Consulenza nel settore delle tecnologie dell'informatica",
-        "principale": false
-      }
-    ],
-    "pec": "info@pec.celerya.it",
-    "email": "info@celerya.it",
-    "telefono": "011-1234567",
-    "sito_web": "www.celerya.it",
-    "capitale_sociale": {
-      "valore": 10000.00,
-      "valuta": "EUR",
-      "versato": "interamente versato"
-    },
-    "oggetto_sociale": "Sviluppo software, consulenza informatica...",
-    "stato_attivita": "ATTIVA",
-    "data_costituzione": "01/01/2020",
-    "amministratori": [
-      {
-        "nome": "Mario Rossi",
-        "carica": "Amministratore Unico",
-        "codice_fiscale": "RSSMRA80A01H501Z"
-      }
-    ],
-    "tipo_business": "technology",
-    "validation_errors": []
-  }
+      "assessment": "✅ Tutti e 3 i campi trovati e validi"
+    }
+  },
+  "method": "backend"
 }
 ```
 
-### Risposta Errore
+### Risposta con Campi Mancanti
+```json
+{
+  "success": true,
+  "data": {
+    "partita_iva": "12345678901",
+    "codice_ateco": null,              // Non trovato
+    "oggetto_sociale": null,           // Non trovato
+    "codici_ateco": [],
+    "confidence": {
+      "score": 33,
+      "details": {
+        "partita_iva": "valid",
+        "ateco": "not_found",
+        "oggetto_sociale": "not_found"
+      },
+      "assessment": "⚠️ Solo 1 campo trovato"
+    }
+  },
+  "method": "backend"
+}
+```
+
+### Risposta Errore (mai dovrebbe accadere)
 ```json
 {
   "success": false,
   "error": {
     "code": "EXTRACTION_ERROR",
     "message": "Errore durante l'estrazione",
-    "details": "Dettagli specifici dell'errore"
+    "details": "Dettagli specifici"
   }
 }
 ```
 
-### Codici di Errore
-| Codice | Descrizione | Soluzione |
-|--------|-------------|-----------|
-| `INVALID_FILE_TYPE` | File non è PDF | Inviare solo file .pdf |
-| `FILE_TOO_LARGE` | File supera 20MB | Ridurre dimensione file |
-| `EMPTY_FILE` | PDF vuoto o corrotto | Verificare il file |
-| `MODULE_NOT_AVAILABLE` | Estrattore non disponibile | Verificare installazione dipendenze |
-| `EXTRACTION_ERROR` | Errore generico estrazione | Controllare formato visura |
-| `NO_DATA_FOUND` | Nessun dato estratto | Visura non riconosciuta |
+---
+
+## 🛡️ Sistema Bulletproof - Zero Crash
+
+### Gestione Errori Multilivello
+```python
+# LIVELLO 1: Try/except totale sulla funzione
+try:
+    # estrazione
+except Exception as e:
+    return risultato_vuoto
+
+# LIVELLO 2: Fallback librerie PDF
+try:
+    pdfplumber.open(pdf)
+except:
+    try:
+        PyPDF2.PdfReader(pdf)
+    except:
+        try:
+            pdfminer.extract_text(pdf)
+        except:
+            return testo_vuoto
+
+# LIVELLO 3: Ogni estrazione campo protetta
+try:
+    extract_partita_iva()
+except:
+    partita_iva = None
+```
+
+### Principio: Meglio NULL che Crash
+- **MAI** solleva eccezioni non gestite
+- **MAI** inventa dati mancanti
+- **SEMPRE** ritorna struttura valida
+- **SEMPRE** log errori per debug
 
 ---
 
-## 🔍 Logica di Estrazione
-
-### 1. Flusso di Estrazione
-```
-PDF Upload → Validazione → Selezione Estrattore → Estrazione → Validazione → Arricchimento → Response
-```
-
-### 2. Sistema di Fallback
-```python
-# Ordine di priorità
-1. Prova VisuraExtractorFixed (più preciso)
-   ↓ (se fallisce)
-2. Prova VisuraExtractorPower (più feature)
-   ↓ (se fallisce)  
-3. Prova VisuraExtractorUltimate (base affidabile)
-   ↓ (se tutti falliscono)
-4. Ritorna errore MODULE_NOT_AVAILABLE
-```
-
-### 3. Validazione Dati
-
-#### Partita IVA
-- DEVE essere esattamente 11 cifre
-- Pattern: `^\d{11}$`
-- Verifica checksum (opzionale)
-
-#### Codice Fiscale
-- 11 cifre (aziende) o 16 caratteri (persone)
-- Pattern: `^[A-Z0-9]{11,16}$`
-
-#### Provincia
-- DEVE essere sigla valida (2 lettere)
-- Verificata contro lista 106 province italiane
-
-#### PEC/Email
-- Validazione formato email standard
-- PEC spesso contiene "pec" nel dominio
-
-#### Numero REA
-- Formato: `XX-1234567` (provincia-numero)
-- XX deve essere provincia valida
-
-### 4. Calcolo Confidence Score
-```python
-confidence = base_score * fattori:
-- Denominazione trovata: +0.2
-- P.IVA valida: +0.2
-- Sede completa: +0.15
-- ATECO trovati: +0.15
-- PEC trovata: +0.1
-- REA valido: +0.1
-- Altri campi: +0.1
-```
-
----
-
-## 🛠️ Installazione e Configurazione
+## 🔧 Installazione e Configurazione
 
 ### Prerequisiti
 ```bash
@@ -249,52 +207,60 @@ confidence = base_score * fattori:
 python --version
 
 # Dipendenze richieste
-pip install pdfplumber PyPDF2 Pillow pdfminer.six
+pip install -r requirements.txt
+```
+
+### requirements.txt
+```
+pandas
+openpyxl
+fastapi
+uvicorn
+pyyaml
+python-multipart
+pdfplumber
+PyPDF2
+Pillow>=9.0.0
+pdfminer.six>=20211012
 ```
 
 ### File Necessari
 ```
 project/
-├── ateco_lookup.py              # Server API principale
-├── visura_extractor_fixed.py    # Estrattore v3 (priorità)
-├── visura_extractor_power.py    # Estrattore v2 (fallback)
-├── visura_extractor_ultimate.py # Estrattore v1 (fallback)
-└── requirements.txt              # Dipendenze
+├── ateco_lookup.py                      # Server API con estrazione integrata
+├── visura_extractor_FINAL_embedded.py   # Modulo estrazione standalone
+└── requirements.txt                     # Dipendenze
 ```
 
-### Test Estrattore Standalone
-```python
-# Test diretto
-from visura_extractor_fixed import VisuraExtractorFixed
-
-extractor = VisuraExtractorFixed()
-result = extractor.extract_from_pdf("visura.pdf")
-print(result)
+### Avvio Server
+```bash
+# Avvia il backend
+python ateco_lookup.py --file master_ateco_*.xlsx --serve --port 8000
 ```
 
 ---
 
 ## 🧪 Testing e Debug
 
-### Endpoint di Test
-```bash
-# Test se l'API è attiva
-curl http://localhost:8000/api/test-visura
+### Test Estrazione Diretta
+```python
+from visura_extractor_FINAL_embedded import VisuraExtractorFinal
 
-# Response attesa
-{
-  "success": true,
-  "message": "API funzionante! VisuraExtractorPower disponibile: true",
-  "data": {
-    "denominazione": "TEST CELERYA SRL",
-    ...
-  }
-}
+extractor = VisuraExtractorFinal()
+result = extractor.extract_three_fields("visura.pdf")
+print(f"P.IVA: {result['data']['partita_iva']}")
+print(f"ATECO: {result['data']['codice_ateco']}")
+print(f"Confidence: {result['data']['confidence']['score']}%")
 ```
 
-### Upload Visura
+### Upload via cURL
+```bash
+curl -X POST http://localhost:8000/api/extract-visura \
+  -F "file=@visura.pdf"
+```
+
+### Upload via JavaScript
 ```javascript
-// JavaScript/Fetch
 const formData = new FormData();
 formData.append('file', pdfFile);
 
@@ -305,184 +271,136 @@ const response = await fetch('http://localhost:8000/api/extract-visura', {
 
 const result = await response.json();
 if (result.success) {
-  console.log('Dati estratti:', result.data);
-  console.log('Confidence:', result.confidence);
-} else {
-  console.error('Errore:', result.error);
+  console.log('P.IVA:', result.data.partita_iva || 'Non trovata');
+  console.log('ATECO:', result.data.codice_ateco || 'Non trovato');
+  console.log('Confidence:', result.data.confidence.score + '%');
 }
 ```
 
-### Esempio con Axios
+---
+
+## 📝 Note Importanti per il Frontend
+
+### Gestione Campi NULL
 ```javascript
-import axios from 'axios';
+// SEMPRE controllare per null
+const partitaIva = result.data.partita_iva || 'Non disponibile';
+const codiceAteco = result.data.codice_ateco || 'Non disponibile';
+const oggettoSociale = result.data.oggetto_sociale || 'Non disponibile';
 
-async function extractVisura(file) {
-  const formData = new FormData();
-  formData.append('file', file);
-  
-  try {
-    const response = await axios.post(
-      'http://localhost:8000/api/extract-visura',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }
-    );
-    
-    if (response.data.success) {
-      return response.data.data;
-    } else {
-      throw new Error(response.data.error.message);
-    }
-  } catch (error) {
-    console.error('Errore estrazione:', error);
-    throw error;
-  }
-}
+// Mostra confidence per trasparenza
+const confidenceText = result.data.confidence.assessment;
+const confidenceColor = result.data.confidence.score === 100 ? 'green' : 
+                        result.data.confidence.score > 50 ? 'yellow' : 'red';
 ```
 
----
+### Best Practices
+1. **NON assumere** che tutti i campi siano presenti
+2. **Mostrare sempre** il confidence score all'utente
+3. **Permettere** inserimento manuale per campi mancanti
+4. **Validare** lato client prima di salvare
+5. **Considerare** confidence < 66% come "necessita revisione"
 
-## 📝 Mapping Comuni → Province
-
-Il sistema include un dizionario completo di 114+ comuni italiani mappati alle rispettive province:
-
-```python
-# Esempi di mapping
-'TORINO' → 'TO'
-'MILANO' → 'MI'
-'ROMA' → 'RM'
-'BOSCONERO' → 'TO'  # Comune specifico menzionato
+### UI Consigliata
 ```
-
-Questo garantisce che il numero REA sia sempre formattato correttamente con la provincia giusta.
-
----
-
-## 🎯 Classificazione Business Type
-
-Il sistema classifica automaticamente il tipo di business basandosi su:
-- Codici ATECO
-- Oggetto sociale
-- Denominazione
-
-### Tipi di Business
-| Tipo | Descrizione | Codici ATECO |
-|------|-------------|--------------|
-| `technology` | Software, IT, Tech | 62.xx, 63.xx |
-| `manufacturing` | Produzione, Industria | 10-33 |
-| `retail` | Commercio dettaglio | 47.xx |
-| `wholesale` | Commercio ingrosso | 46.xx |
-| `construction` | Costruzioni, Edilizia | 41-43 |
-| `hospitality` | Ristorazione, Hotel | 55-56 |
-| `professional` | Servizi professionali | 69-74 |
-| `finance` | Servizi finanziari | 64-66 |
-| `real_estate` | Immobiliare | 68.xx |
-| `healthcare` | Sanità, Salute | 86-88 |
-| `education` | Istruzione | 85.xx |
-| `agriculture` | Agricoltura | 01-03 |
-| `transport` | Trasporti | 49-53 |
-
----
-
-## 🔧 Personalizzazione
-
-### Aggiungere Nuovi Pattern
-```python
-# In visura_extractor_fixed.py
-def _extract_campo_custom(self, text: str) -> Optional[str]:
-    patterns = [
-        r'(?:CAMPO CUSTOM)[\s:]+([^\n]+)',
-        # Aggiungi nuovi pattern qui
-    ]
-    
-    for pattern in patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            return match.group(1).strip()
-    return None
-```
-
-### Estendere Codici ATECO
-```python
-# In visura_extractor_fixed.py
-self.ateco_descriptions.update({
-    '95.11': 'Riparazione di computer e periferiche',
-    # Aggiungi nuovi codici qui
-})
+┌──────────────────────────────┐
+│ Estrazione Visura            │
+├──────────────────────────────┤
+│ P.IVA: [___________] ✅      │
+│ ATECO: [_____] ❌ Non trovato │
+│ Oggetto: [________] ⚠️       │
+│                              │
+│ Confidence: 66% ⚠️           │
+│ "2 campi su 3 trovati"       │
+│                              │
+│ [Modifica] [Conferma]        │
+└──────────────────────────────┘
 ```
 
 ---
 
 ## 🆘 Troubleshooting
 
-### Problema: "No module named 'pdfplumber'"
-**Soluzione:**
-```bash
-pip install pdfplumber PyPDF2 Pillow pdfminer.six
-```
-
-### Problema: Estrazione restituisce campi vuoti
+### Problema: Tutti i campi sono NULL
 **Possibili cause:**
-1. PDF non è una visura camerale standard
-2. PDF scansionato (non testo selezionabile)
-3. Formato visura non riconosciuto
+1. PDF non è una visura camerale
+2. PDF è scansionato (immagine, non testo)
+3. Formato visura molto diverso dal previsto
 
 **Soluzione:**
 - Verificare che il PDF contenga testo selezionabile
-- Controllare i log per pattern non matchati
-- Aggiungere nuovi pattern se necessario
+- Provare con una visura camerale standard
+- Controllare i log del backend per dettagli
 
-### Problema: Provincia non riconosciuta
+### Problema: Confidence sempre basso
+**Causa:** Il sistema trova solo 1-2 campi su 3
 **Soluzione:**
-- Verificare che la provincia sia nella lista `province_valide`
-- Aggiungere mapping comune→provincia se mancante
+- È normale per visure non standard
+- Permettere all'utente di completare manualmente
+- Non è un errore, è trasparenza
 
-### Problema: Confidence score basso
-**Significato:** Pochi campi estratti con successo
+### Problema: P.IVA presente ma non estratta
+**Verifica:**
+```bash
+# Controlla se il pattern matcha
+grep -E "Partita IVA|P\.?\s?IVA" visura.pdf
+```
 **Soluzione:**
-- Verificare qualità del PDF
-- Controllare che sia una visura completa
-- Aggiornare pattern di estrazione
+- Il formato potrebbe essere diverso
+- Contattare per aggiungere nuovo pattern
 
 ---
 
-## 📧 Note per l'Integrazione Frontend
+## 🎯 Filosofia del Sistema STRICT
 
-### Best Practices
-1. **Validazione pre-upload**: Verificare che sia un PDF prima di inviare
-2. **Limite dimensione**: Max 20MB per file
-3. **Loading state**: Mostrare spinner durante l'estrazione (può richiedere 2-5 secondi)
-4. **Gestione errori**: Mostrare messaggi user-friendly basati su error.code
-5. **Confidence threshold**: Considerare affidabili risultati con confidence > 0.7
-6. **Fallback manuale**: Permettere correzione manuale dei campi estratti
+### Principi Fondamentali
+1. **Verità > Completezza**: Meglio 1 campo certo che 3 incerti
+2. **NULL > Errore**: Mai inventare dati
+3. **Trasparenza**: Sempre comunicare cosa è stato trovato
+4. **Robustezza**: Il sistema non deve mai crashare
+5. **Semplicità**: Solo 3 campi, fatti bene
 
-### Esempio UI Flow
-```
-1. User seleziona PDF → Validazione client-side
-2. Upload con progress bar → POST /api/extract-visura
-3. Mostra risultati → Evidenzia campi con bassa confidence
-4. Permetti editing → User può correggere campi
-5. Salva dati validati → Invia al tuo backend
-```
+### Perché STRICT?
+- **Affidabilità legale**: I dati estratti sono verificabili
+- **Fiducia utente**: L'utente sa cosa è stato trovato
+- **Manutenibilità**: Codice semplice e chiaro
+- **Scalabilità**: Facile aggiungere validazioni
 
 ---
 
 ## 📋 Checklist Integrazione
 
-- [ ] Installate dipendenze Python (`pdfplumber`, `PyPDF2`)
-- [ ] Presenti tutti e 3 i file extractor
-- [ ] Server FastAPI configurato e running
-- [ ] CORS abilitato per il dominio frontend
-- [ ] Endpoint `/api/extract-visura` raggiungibile
-- [ ] Test con visura campione funzionante
-- [ ] Gestione errori implementata nel frontend
-- [ ] UI per upload file implementata
-- [ ] Visualizzazione risultati con confidence
-- [ ] Possibilità di correzione manuale
+- [ ] Backend avviato su porta 8000
+- [ ] File `visura_extractor_FINAL_embedded.py` presente
+- [ ] Dipendenze Python installate
+- [ ] Test con visura PDF reale
+- [ ] Frontend gestisce campi NULL
+- [ ] UI mostra confidence score
+- [ ] Possibilità editing manuale campi
+- [ ] Validazione P.IVA (11 cifre) lato client
+- [ ] Gestione errori implementata
+- [ ] Test con visura che ritorna 0% confidence
 
 ---
 
-Il sistema è progettato per essere **robusto**, **affidabile** e **facilmente integrabile** con qualsiasi frontend moderno. Il sistema di fallback a 3 livelli garantisce massima compatibilità con diversi formati di visure camerali.
+## 🚀 Performance e Limiti
+
+### Performance
+- Tempo estrazione: 1-3 secondi per PDF
+- Dimensione max PDF: 20MB
+- Concurrent requests: gestite da FastAPI
+
+### Limiti Noti
+- Solo visure camerali italiane
+- Solo testo (no OCR per immagini)
+- Solo 3 campi fondamentali
+- Pattern predefiniti (estendibili)
+
+---
+
+Il sistema STRICT è progettato per essere **affidabile**, **trasparente** e **manutenibile**. 
+La filosofia "meglio NULL che sbagliato" garantisce che i dati estratti siano sempre verificabili e affidabili.
+
+**Versione:** 2.0 STRICT
+**Data:** Settembre 2024
+**Maintainer:** Team Celerya

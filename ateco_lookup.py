@@ -555,122 +555,177 @@ def build_api(df: pd.DataFrame):
             "count": len(suggestions[:limit])
         })
     
-    # ENDPOINT RISK MANAGEMENT - AGGIUNTI PER IL FRONTEND
+    # ENDPOINT RISK MANAGEMENT - CON LOGICA EXCEL REALE
+    # Carica i dati Excel corretti
+    try:
+        with open('MAPPATURE_EXCEL_PERFETTE.json', 'r', encoding='utf-8') as f:
+            risk_data = json.load(f)
+            EXCEL_CATEGORIES = risk_data['mappature_categoria_eventi']
+            EXCEL_DESCRIPTIONS = risk_data['vlookup_map']
+    except:
+        # Fallback se il file non esiste
+        EXCEL_CATEGORIES = {
+            "Damage_Danni": [],
+            "Business_disruption": [],
+            "Employment_practices_Dipendenti": [],
+            "Execution_delivery_Problemi_di_produzione_o_consegna": [],
+            "Clients_product_Clienti": [],
+            "Internal_Fraud_Frodi_interne": [],
+            "External_fraud_Frodi_esterne": []
+        }
+        EXCEL_DESCRIPTIONS = {}
+    
     @app.get("/events/{category}")
     def get_events(category: str):
-        """Endpoint per ottenere eventi di rischio per categoria"""
-        # Mappatura eventi di rischio per categoria
-        risk_events = {
-            "operational": [
-                {"code": "OP001", "name": "Frode interna", "severity": "high"},
-                {"code": "OP002", "name": "Errore umano", "severity": "medium"},
-                {"code": "OP003", "name": "Interruzione servizi IT", "severity": "high"},
-                {"code": "OP004", "name": "Danno asset fisici", "severity": "medium"},
-                {"code": "OP005", "name": "Violazione sicurezza", "severity": "critical"}
-            ],
-            "cyber": [
-                {"code": "CY001", "name": "Ransomware", "severity": "critical"},
-                {"code": "CY002", "name": "Data breach", "severity": "critical"},
-                {"code": "CY003", "name": "Phishing", "severity": "high"},
-                {"code": "CY004", "name": "DDoS", "severity": "high"},
-                {"code": "CY005", "name": "Malware", "severity": "high"}
-            ],
-            "compliance": [
-                {"code": "CM001", "name": "Violazione GDPR", "severity": "high"},
-                {"code": "CM002", "name": "Non conformità normativa", "severity": "medium"},
-                {"code": "CM003", "name": "Mancata certificazione", "severity": "low"},
-                {"code": "CM004", "name": "Violazione contrattuale", "severity": "medium"}
-            ],
-            "financial": [
-                {"code": "FN001", "name": "Perdita di liquidità", "severity": "critical"},
-                {"code": "FN002", "name": "Insolvenza clienti", "severity": "high"},
-                {"code": "FN003", "name": "Fluttuazione tassi", "severity": "medium"},
-                {"code": "FN004", "name": "Perdite operative", "severity": "high"}
-            ]
+        """Endpoint per ottenere eventi di rischio per categoria - LOGICA EXCEL REALE"""
+        # Mappa alias comuni alle categorie Excel reali
+        category_mapping = {
+            "operational": "Execution_delivery_Problemi_di_produzione_o_consegna",
+            "cyber": "Business_disruption",
+            "compliance": "Clients_product_Clienti",
+            "financial": "Internal_Fraud_Frodi_interne",
+            "damage": "Damage_Danni",
+            "employment": "Employment_practices_Dipendenti",
+            "external_fraud": "External_fraud_Frodi_esterne"
         }
         
-        if category.lower() not in risk_events:
-            raise HTTPException(status_code=404, detail=f"Category '{category}' not found")
+        # Usa categoria Excel reale se esiste, altrimenti prova mapping
+        real_category = category
+        if category in EXCEL_CATEGORIES:
+            real_category = category
+        elif category.lower() in category_mapping:
+            real_category = category_mapping[category.lower()]
+        elif category not in EXCEL_CATEGORIES:
+            # Prova a trovare categoria simile
+            for cat in EXCEL_CATEGORIES:
+                if category.lower() in cat.lower():
+                    real_category = cat
+                    break
+        
+        if real_category not in EXCEL_CATEGORIES:
+            return JSONResponse({
+                "error": f"Category '{category}' not found",
+                "available_categories": list(EXCEL_CATEGORIES.keys()),
+                "category_mapping": category_mapping
+            }, status_code=404)
+        
+        # Converti eventi Excel in formato frontend
+        events = []
+        for event_str in EXCEL_CATEGORIES[real_category]:
+            # Estrai codice e nome dall'evento (formato: "101 - Nome evento")
+            parts = event_str.split(' - ', 1)
+            if len(parts) == 2:
+                code = parts[0].strip()
+                name = parts[1].strip()
+                # Determina severity basandosi sul codice
+                if code.startswith('1'):
+                    severity = 'medium'
+                elif code.startswith('2'):
+                    severity = 'high'
+                elif code.startswith('3'):
+                    severity = 'low'
+                elif code.startswith('4'):
+                    severity = 'medium'
+                elif code.startswith('5'):
+                    severity = 'high'
+                elif code.startswith('6') or code.startswith('7'):
+                    severity = 'critical'
+                else:
+                    severity = 'medium'
+                
+                events.append({
+                    "code": code,
+                    "name": name,
+                    "severity": severity
+                })
         
         return JSONResponse({
-            "category": category, 
-            "events": risk_events[category.lower()]
+            "category": real_category,
+            "original_request": category,
+            "events": events,
+            "total": len(events)
         })
     
     @app.get("/description/{event_code}")  
     def get_event_description(event_code: str):
-        """Endpoint per ottenere descrizione dettagliata di un evento"""
-        event_descriptions = {
-            "OP001": {
-                "code": "OP001",
-                "name": "Frode interna",
-                "description": "Attività fraudolente perpetrate da dipendenti o collaboratori interni",
-                "impact": "Perdite finanziarie dirette, danno reputazionale, azioni legali",
-                "probability": "medium",
-                "controls": ["Segregazione dei compiti", "Audit interni periodici", "Whistleblowing"]
-            },
-            "OP002": {
-                "code": "OP002",
-                "name": "Errore umano", 
-                "description": "Errori non intenzionali nell'esecuzione di processi operativi",
-                "impact": "Inefficienze operative, rilavorazioni, perdite economiche minori",
-                "probability": "high",
-                "controls": ["Formazione continua", "Procedure operative standard", "Controlli automatizzati"]
-            },
-            "OP003": {
-                "code": "OP003",
-                "name": "Interruzione servizi IT",
-                "description": "Interruzione dei servizi informatici critici per l'operatività aziendale",
-                "impact": "Blocco operativo, perdita produttività, mancato servizio clienti",
-                "probability": "medium",
-                "controls": ["Disaster recovery", "Business continuity plan", "Ridondanza sistemi"]
-            },
-            "CY001": {
-                "code": "CY001",
-                "name": "Ransomware",
-                "description": "Attacco informatico che cripta i dati aziendali richiedendo riscatto",
-                "impact": "Blocco operativo totale, perdita dati, richiesta riscatto, danno reputazionale grave",
-                "probability": "medium",
-                "controls": ["Backup offline", "EDR/XDR", "Formazione anti-phishing", "Patch management"]
-            },
-            "CY002": {
-                "code": "CY002",
-                "name": "Data breach",
-                "description": "Accesso non autorizzato e furto di dati sensibili aziendali o dei clienti",
-                "impact": "Sanzioni GDPR, perdita fiducia clienti, azioni legali, danno competitivo",
-                "probability": "medium",
-                "controls": ["Crittografia dati", "DLP", "Access control", "SIEM"]
-            },
-            "CM001": {
-                "code": "CM001",
-                "name": "Violazione GDPR",
-                "description": "Non conformità al Regolamento Generale sulla Protezione dei Dati",
-                "impact": "Sanzioni fino al 4% del fatturato, danno reputazionale, perdita clienti",
-                "probability": "low",
-                "controls": ["Privacy by design", "DPO", "Registro trattamenti", "Valutazioni d'impatto"]
-            },
-            "FN001": {
-                "code": "FN001",
-                "name": "Perdita di liquidità",
-                "description": "Insufficiente disponibilità di cassa per far fronte agli impegni a breve termine",
-                "impact": "Insolvenza, blocco operativo, fallimento",
-                "probability": "low",
-                "controls": ["Cash flow monitoring", "Linee di credito", "Diversificazione entrate"]
-            }
-        }
-        
-        if event_code.upper() not in event_descriptions:
-            # Ritorna descrizione generica se non trovata
+        """Endpoint per ottenere descrizione dettagliata di un evento - DATI EXCEL REALI"""
+        # Cerca prima nelle descrizioni Excel
+        if event_code in EXCEL_DESCRIPTIONS:
+            description = EXCEL_DESCRIPTIONS[event_code]
+            # Trova il nome dell'evento dalle categorie
+            event_name = None
+            for cat_events in EXCEL_CATEGORIES.values():
+                for event in cat_events:
+                    if event.startswith(event_code + ' - '):
+                        event_name = event.split(' - ', 1)[1]
+                        break
+                if event_name:
+                    break
+            
+            # Determina impatto e probabilità basandosi sul codice
+            if event_code.startswith('1'):
+                impact = "Danni fisici e materiali"
+                probability = "low"
+            elif event_code.startswith('2'):
+                impact = "Interruzione operativa e perdita dati"
+                probability = "medium"
+            elif event_code.startswith('3'):
+                impact = "Problemi con dipendenti e clima aziendale"
+                probability = "medium"
+            elif event_code.startswith('4'):
+                impact = "Errori di processo e consegna"
+                probability = "high"
+            elif event_code.startswith('5'):
+                impact = "Perdita clienti e sanzioni"
+                probability = "medium"
+            elif event_code.startswith('6'):
+                impact = "Frodi interne e perdite finanziarie"
+                probability = "low"
+            elif event_code.startswith('7'):
+                impact = "Frodi esterne e attacchi cyber"
+                probability = "medium"
+            else:
+                impact = "Da valutare caso per caso"
+                probability = "unknown"
+            
+            # Determina controlli basandosi sulla categoria
+            if event_code.startswith('1'):
+                controls = ["Assicurazione danni", "Manutenzione preventiva", "Procedure di emergenza"]
+            elif event_code.startswith('2'):
+                controls = ["Backup e recovery", "Ridondanza sistemi", "Monitoring continuo"]
+            elif event_code.startswith('3'):
+                controls = ["HR policies", "Formazione continua", "Welfare aziendale"]
+            elif event_code.startswith('4'):
+                controls = ["Quality control", "Process automation", "KPI monitoring"]
+            elif event_code.startswith('5'):
+                controls = ["Customer satisfaction", "Compliance monitoring", "Legal review"]
+            elif event_code.startswith('6'):
+                controls = ["Audit interni", "Segregation of duties", "Whistleblowing"]
+            elif event_code.startswith('7'):
+                controls = ["Cybersecurity", "Fraud detection", "Identity verification"]
+            else:
+                controls = ["Controlli standard da definire"]
+            
             return JSONResponse({
                 "code": event_code,
-                "name": "Evento generico",
-                "description": f"Descrizione dettagliata per evento {event_code} non disponibile",
-                "impact": "Da valutare caso per caso",
-                "probability": "unknown",
-                "controls": ["Controlli standard da definire"]
+                "name": event_name or "Evento " + event_code,
+                "description": description,
+                "impact": impact,
+                "probability": probability,
+                "controls": controls,
+                "source": "Excel Risk Mapping"
             })
         
-        return JSONResponse(event_descriptions[event_code.upper()])
+        # Se non trovato nell'Excel, ritorna descrizione generica
+        return JSONResponse({
+            "code": event_code,
+            "name": "Evento non mappato",
+            "description": f"Evento {event_code} non presente nel mapping Excel",
+            "impact": "Da valutare",
+            "probability": "unknown",
+            "controls": ["Da definire in base all'analisi specifica"],
+            "source": "Generic"
+        })
     
     @app.get("/api/test-visura")
     def test_visura():
