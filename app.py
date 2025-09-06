@@ -1,275 +1,311 @@
 #!/usr/bin/env python3
 """
-FIX BACKEND VISURA - INTEGRAZIONE SISTEMA STRICT
-================================================
-Questo file va integrato nel backend su Render per fixare l'errore 500
+SERVER EXCEL CORRETTO - Con mappature ESATTE dall'Excel
+Basato sull'analisi delle righe 1000+ del foglio Analisi As-IS
 """
 
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import pdfplumber
-import re
-import os
-from typing import Dict, Optional
-import traceback
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import json
+import urllib.parse
 
-app = Flask(__name__)
-CORS(app)
+# Porta del server
+PORT = 8000
 
-class VisuraExtractorStrict:
-    """
-    Estrattore STRICT - Solo 3 campi fondamentali
-    """
+# Carica i dati CORRETTI dal JSON
+print("Caricamento dati corretti da MAPPATURE_EXCEL_PERFETTE.json...")
+with open('MAPPATURE_EXCEL_PERFETTE.json', 'r', encoding='utf-8') as f:
+    dati = json.load(f)
+
+CATEGORIA_EVENTI_MAP = dati['mappature_categoria_eventi']
+EVENT_DESCRIPTIONS = dati['vlookup_map']
+
+print(f"✓ Caricate {len(CATEGORIA_EVENTI_MAP)} categorie")
+print(f"✓ Caricate {len(EVENT_DESCRIPTIONS)} descrizioni VLOOKUP")
+
+# Mostra statistiche
+for cat, eventi in CATEGORIA_EVENTI_MAP.items():
+    if eventi:
+        print(f"  {cat}: {len(eventi)} eventi")
+
+class RequestHandler(BaseHTTPRequestHandler):
+    def do_OPTIONS(self):
+        """Gestisce richieste OPTIONS per CORS"""
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
     
-    def extract_three_fields(self, pdf_path: str) -> Dict:
-        """
-        Estrae SOLO Partita IVA, Codice ATECO, Oggetto Sociale
-        """
-        try:
-            # Estrai testo dal PDF
-            text = self._extract_pdf_text(pdf_path)
+    def do_GET(self):
+        """Gestisce richieste GET"""
+        # Parse del path
+        parsed_path = urllib.parse.urlparse(self.path)
+        path = parsed_path.path
+        
+        # Headers CORS
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        
+        # Router semplice
+        if path == '/categories':
+            # Restituisci lista categorie
+            response = {
+                'categories': list(CATEGORIA_EVENTI_MAP.keys()),
+                'total': len(CATEGORIA_EVENTI_MAP)
+            }
             
-            # Estrai i 3 campi fondamentali
-            partita_iva = self._extract_partita_iva(text)
-            codice_ateco = self._extract_codice_ateco(text)
-            oggetto_sociale = self._extract_oggetto_sociale(text)
+        elif path.startswith('/events/'):
+            # Estrai categoria dal path
+            categoria = urllib.parse.unquote(path.replace('/events/', ''))
             
-            # Calcola confidence REALE (0, 33, 66, 100)
-            confidence = self._calculate_real_confidence(
-                partita_iva, codice_ateco, oggetto_sociale
-            )
+            if categoria in CATEGORIA_EVENTI_MAP:
+                eventi = CATEGORIA_EVENTI_MAP[categoria]
+                response = {
+                    'category': categoria,
+                    'events': eventi,
+                    'total': len(eventi)
+                }
+            else:
+                response = {
+                    'error': f'Categoria non trovata: {categoria}',
+                    'available': list(CATEGORIA_EVENTI_MAP.keys())
+                }
+                
+        elif path.startswith('/description/'):
+            # Estrai codice evento dal path
+            evento = urllib.parse.unquote(path.replace('/description/', ''))
             
-            # Costruisci risposta compatibile con frontend
-            result = {
-                "success": True,
-                "denominazione": "ESTRATTA DA VISURA",  # Placeholder per compatibilità
-                "partita_iva": partita_iva,
-                "codici_ateco": [],
-                "oggetto_sociale": oggetto_sociale,
-                "confidence": confidence['score'] / 100,  # Converti in decimale
-                "extraction_method": "backend",
-                "sede_legale": {
-                    "comune": "N/D",
-                    "provincia": "N/D",
-                    "cap": "N/D"
+            if evento in EVENT_DESCRIPTIONS:
+                response = {
+                    'event_code': evento,
+                    'description': EVENT_DESCRIPTIONS[evento]
+                }
+            else:
+                response = {
+                    'event_code': evento,
+                    'description': None,
+                    'error': 'Descrizione non trovata'
+                }
+                
+        elif path == '/risk-assessment-fields':
+            # NUOVO ENDPOINT: Fornisce le opzioni per i 5 campi di Perdita Finanziaria
+            response = {
+                'fields': [
+                    {
+                        'id': 'impatto_finanziario',
+                        'column': 'H',
+                        'question': 'Qual è l\'impatto finanziario stimato?',
+                        'type': 'select',
+                        'options': [
+                            'N/A',
+                            '0 - 1K€',
+                            '1 - 10K€',
+                            '10 - 50K€',
+                            '50 - 100K€',
+                            '100 - 500K€',
+                            '500K€ - 1M€',
+                            '1 - 3M€',
+                            '3 - 5M€'
+                        ],
+                        'required': True
+                    },
+                    {
+                        'id': 'perdita_economica',
+                        'column': 'I',
+                        'question': 'Qual è il livello di perdita economica attesa?',
+                        'type': 'select_color',
+                        'options': [
+                            {'value': 'G', 'label': 'Bassa/Nulla', 'color': 'green', 'emoji': '🟢'},
+                            {'value': 'Y', 'label': 'Media', 'color': 'yellow', 'emoji': '🟡'},
+                            {'value': 'O', 'label': 'Importante', 'color': 'orange', 'emoji': '🟠'},
+                            {'value': 'R', 'label': 'Grave', 'color': 'red', 'emoji': '🔴'}
+                        ],
+                        'required': True
+                    },
+                    {
+                        'id': 'impatto_immagine',
+                        'column': 'J',
+                        'question': 'L\'evento ha impatto sull\'immagine aziendale?',
+                        'type': 'boolean',
+                        'options': ['Si', 'No'],
+                        'required': True
+                    },
+                    {
+                        'id': 'impatto_regolamentare',
+                        'column': 'L',
+                        'question': 'Ci sono possibili conseguenze regolamentari o legali civili?',
+                        'type': 'boolean',
+                        'options': ['Si', 'No'],
+                        'description': 'Multe, sanzioni amministrative, cause civili',
+                        'required': True
+                    },
+                    {
+                        'id': 'impatto_criminale',
+                        'column': 'M',
+                        'question': 'Ci sono possibili conseguenze penali?',
+                        'type': 'boolean',
+                        'options': ['Si', 'No'],
+                        'description': 'Denunce penali, procedimenti criminali',
+                        'required': True
+                    }
+                ]
+            }
+            
+        elif path == '/stats':
+            # Statistiche del sistema
+            response = {
+                'total_categories': len(CATEGORIA_EVENTI_MAP),
+                'total_events': sum(len(e) for e in CATEGORIA_EVENTI_MAP.values()),
+                'total_descriptions': len(EVENT_DESCRIPTIONS),
+                'events_per_category': {
+                    cat: len(eventi) for cat, eventi in CATEGORIA_EVENTI_MAP.items()
                 }
             }
             
-            # Aggiungi ATECO se trovato
-            if codice_ateco:
-                result["codici_ateco"] = [{
-                    "codice": codice_ateco,
-                    "descrizione": self._get_ateco_description(codice_ateco),
-                    "principale": True
-                }]
-            
-            return result
-            
-        except Exception as e:
-            print(f"❌ Errore estrazione: {e}")
-            traceback.print_exc()
-            return {
-                "success": False,
-                "error": str(e)
+        else:
+            # Endpoint non trovato
+            response = {
+                'error': 'Endpoint non trovato',
+                'available_endpoints': [
+                    '/categories',
+                    '/events/{category}',
+                    '/description/{event_code}',
+                    '/stats'
+                ]
             }
+        
+        # Invia risposta JSON
+        self.wfile.write(json.dumps(response, ensure_ascii=False).encode('utf-8'))
     
-    def _extract_pdf_text(self, pdf_path: str) -> str:
-        """Estrae tutto il testo dal PDF"""
-        text = ""
-        try:
-            with pdfplumber.open(pdf_path) as pdf:
-                for page in pdf.pages:
-                    page_text = page.extract_text()
-                    if page_text:
-                        text += page_text + "\n"
-        except Exception as e:
-            print(f"❌ Errore lettura PDF: {e}")
-        return text
-    
-    def _extract_partita_iva(self, text: str) -> Optional[str]:
-        """
-        Estrae PARTITA IVA con validazione rigorosa (11 cifre)
-        """
-        patterns = [
-            r'(?:Partita IVA|P\.?\s?IVA|VAT)[\s:]+(\d{11})',
-            r'(?:Codice Fiscale|C\.F\.)[\s:]+(\d{11})',
-            r'\b(\d{11})\b'
-        ]
+    def do_POST(self):
+        """Gestisce richieste POST per salvare i dati di risk assessment"""
+        parsed_path = urllib.parse.urlparse(self.path)
+        path = parsed_path.path
         
-        for pattern in patterns:
-            matches = re.finditer(pattern, text, re.IGNORECASE)
-            for match in matches:
-                piva = match.group(1)
-                if re.match(r'^\d{11}$', piva):
-                    return piva
-        
-        return None
-    
-    def _extract_codice_ateco(self, text: str) -> Optional[str]:
-        """
-        Estrae CODICE ATECO con validazione formato XX.XX
-        """
-        patterns = [
-            r'(?:Codice ATECO|ATECO|Attività prevalente)[\s:]+(\d{2}[.\s]\d{2}(?:[.\s]\d{1,2})?)',
-            r'(?:Codice attività|Codice)[\s:]+(\d{2}[.\s]\d{2}(?:[.\s]\d{1,2})?)',
-            r'(?:Importanza)[\s:]+[PI]\s*-[^\d]*(\d{2}[.\s]\d{2}(?:[.\s]\d{1,2})?)',
-            r'\b(\d{2}\.\d{2}(?:\.\d{1,2})?)\b'
-        ]
-        
-        for pattern in patterns:
-            matches = re.finditer(pattern, text, re.IGNORECASE)
-            for match in matches:
-                ateco = match.group(1)
-                # Normalizza formato
-                ateco_clean = re.sub(r'\s+', '.', ateco)
-                ateco_clean = re.sub(r'\.+', '.', ateco_clean)
-                
-                # Valida formato e escludi anni (19.xx, 20.xx, 21.xx)
-                if re.match(r'^\d{2}\.\d{2}(?:\.\d{1,2})?$', ateco_clean):
-                    first_part = int(ateco_clean.split('.')[0])
-                    # Escludi range che potrebbero essere anni
-                    if first_part not in [19, 20, 21]:
-                        return ateco_clean
-        
-        return None
-    
-    def _extract_oggetto_sociale(self, text: str) -> Optional[str]:
-        """
-        Estrae OGGETTO SOCIALE (min 30 caratteri)
-        """
-        patterns = [
-            r'(?:OGGETTO SOCIALE|Oggetto sociale|Oggetto)[\s:]+([^\n]+(?:\n(?![A-Z]{2,}:)[^\n]+)*)',
-            r'(?:Attività|ATTIVITA\'?)[\s:]+([^\n]+(?:\n(?!Data|Numero|Codice)[^\n]+)*)',
-            r'(?:Descrizione attività)[\s:]+([^\n]+(?:\n[^\n]+)*?)(?=\n\s*[A-Z]|\n\n|$)',
-        ]
-        
-        business_keywords = [
-            'produzione', 'commercio', 'servizi', 'consulenza', 'vendita',
-            'attività', 'gestione', 'intermediazione', 'commercializzazione',
-            'fornitura', 'prestazione', 'realizzazione', 'sviluppo'
-        ]
-        
-        for pattern in patterns:
-            match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE | re.DOTALL)
-            if match:
-                oggetto = match.group(1)
-                oggetto_clean = ' '.join(oggetto.split())
-                
-                # Valida lunghezza e contenuto
-                if len(oggetto_clean) >= 30:
-                    has_business = any(kw in oggetto_clean.lower() for kw in business_keywords)
-                    if has_business:
-                        # Tronca se troppo lungo
-                        if len(oggetto_clean) > 500:
-                            oggetto_clean = oggetto_clean[:500] + '...'
-                        return oggetto_clean
-        
-        return None
-    
-    def _calculate_real_confidence(self, piva, ateco, oggetto) -> Dict:
-        """
-        Calcola confidence ONESTA (0, 33, 66, 100)
-        """
-        score = 0
-        details = {}
-        
-        if piva:
-            score += 33
-            details['partita_iva'] = 'valid'
-        else:
-            details['partita_iva'] = 'not_found'
-        
-        if ateco:
-            score += 33
-            details['ateco'] = 'valid'
-        else:
-            details['ateco'] = 'not_found'
-        
-        if oggetto:
-            score += 34
-            details['oggetto_sociale'] = 'valid'
-        else:
-            details['oggetto_sociale'] = 'not_found'
-        
-        # Assessment
-        if score == 100:
-            assessment = "✅ Tutti e 3 i campi trovati e validi"
-        elif score >= 66:
-            assessment = "⚠️ 2 campi su 3 trovati"
-        elif score >= 33:
-            assessment = "⚠️ Solo 1 campo trovato"
-        else:
-            assessment = "❌ Nessun campo valido trovato"
-        
-        return {
-            "score": score,
-            "details": details,
-            "assessment": assessment
-        }
-    
-    def _get_ateco_description(self, codice: str) -> str:
-        """
-        Mappa descrizioni ATECO comuni
-        """
-        ateco_map = {
-            "62.01": "Produzione di software",
-            "62.02": "Consulenza informatica",
-            "62.03": "Gestione di strutture informatizzate",
-            "62.09": "Altre attività dei servizi connessi alle tecnologie dell'informatica",
-            "47.91": "Commercio al dettaglio per corrispondenza o Internet",
-            "46.51": "Commercio all'ingrosso di computer e software",
-            "70.22": "Consulenza imprenditoriale e gestionale"
-        }
-        return ateco_map.get(codice, "Attività economica")
-
-
-@app.route('/api/extract-visura', methods=['POST'])
-def extract_visura():
-    """
-    Endpoint per estrazione visura con sistema STRICT
-    """
-    try:
-        # Verifica che ci sia un file
-        if 'file' not in request.files:
-            return jsonify({"success": False, "error": "Nessun file fornito"}), 400
-        
-        file = request.files['file']
-        
-        # Salva temporaneamente il file
-        temp_path = f"/tmp/{file.filename}"
-        file.save(temp_path)
-        
-        # Estrai con sistema STRICT
-        extractor = VisuraExtractorStrict()
-        result = extractor.extract_three_fields(temp_path)
-        
-        # Rimuovi file temporaneo
-        try:
-            os.remove(temp_path)
-        except:
-            pass
-        
-        # Ritorna risultato
-        if result.get('success'):
-            return jsonify(result), 200
-        else:
-            return jsonify(result), 500
+        if path == '/save-risk-assessment':
+            # Leggi il body della richiesta
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
             
-    except Exception as e:
-        print(f"❌ ERRORE ENDPOINT: {e}")
-        traceback.print_exc()
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+            try:
+                # Parse JSON dal body
+                data = json.loads(post_data.decode('utf-8'))
+                
+                # Log dei dati ricevuti
+                print("\n📊 RISK ASSESSMENT RICEVUTO:")
+                print(f"  Evento: {data.get('event_code')} - {data.get('category')}")
+                print(f"  --- PERDITA FINANZIARIA ATTESA ---")
+                print(f"  H - Impatto finanziario: {data.get('impatto_finanziario')}")
+                print(f"  I - Perdita economica: {data.get('perdita_economica')}")
+                print(f"  J - Impatto immagine: {data.get('impatto_immagine')}")
+                print(f"  L - Impatto regolamentare: {data.get('impatto_regolamentare')}")
+                print(f"  M - Impatto criminale: {data.get('impatto_criminale')}")
+                
+                # Calcola un risk score basato sui dati
+                risk_score = self.calculate_risk_score(data)
+                
+                # Risposta di successo con analisi
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                
+                response = {
+                    'status': 'success',
+                    'message': 'Risk assessment salvato',
+                    'risk_score': risk_score,
+                    'analysis': self.generate_analysis(data, risk_score)
+                }
+                self.wfile.write(json.dumps(response, ensure_ascii=False).encode('utf-8'))
+                
+            except Exception as e:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                
+                response = {'status': 'error', 'message': str(e)}
+                self.wfile.write(json.dumps(response).encode('utf-8'))
+        else:
+            self.send_response(404)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            
+            response = {'error': 'Endpoint POST non trovato'}
+            self.wfile.write(json.dumps(response).encode('utf-8'))
+    
+    def calculate_risk_score(self, data):
+        """Calcola un risk score basato sui dati"""
+        score = 0
+        
+        # Impatto finanziario (max 40 punti)
+        impatto_map = {
+            'N/A': 0, '0 - 1K€': 5, '1 - 10K€': 10, '10 - 50K€': 15,
+            '50 - 100K€': 20, '100 - 500K€': 25, '500K€ - 1M€': 30,
+            '1 - 3M€': 35, '3 - 5M€': 40
+        }
+        score += impatto_map.get(data.get('impatto_finanziario', 'N/A'), 0)
+        
+        # Perdita economica (max 30 punti)
+        perdita_map = {'G': 5, 'Y': 15, 'O': 25, 'R': 30}
+        score += perdita_map.get(data.get('perdita_economica', 'G'), 0)
+        
+        # Impatti booleani (10 punti ciascuno)
+        if data.get('impatto_immagine') == 'Si': score += 10
+        if data.get('impatto_regolamentare') == 'Si': score += 10
+        if data.get('impatto_criminale') == 'Si': score += 10
+        
+        return score
+    
+    def generate_analysis(self, data, score):
+        """Genera un'analisi testuale del rischio"""
+        if score >= 70:
+            level = "CRITICO"
+            action = "Richiede azione immediata"
+        elif score >= 50:
+            level = "ALTO"
+            action = "Priorità alta, pianificare mitigazione"
+        elif score >= 30:
+            level = "MEDIO"
+            action = "Monitorare e valutare opzioni"
+        else:
+            level = "BASSO"
+            action = "Rischio accettabile, monitoraggio standard"
+        
+        return f"Livello di rischio: {level} (Score: {score}/100). {action}"
+    
+    def log_message(self, format, *args):
+        """Override per log personalizzato"""
+        message = format % args
+        # Solo log per richieste importanti (non OPTIONS)
+        if 'OPTIONS' not in message:
+            print(f"[{self.log_date_time_string()}] {message}")
 
-
-@app.route('/health', methods=['GET'])
-def health():
-    """Health check endpoint"""
-    return jsonify({"status": "healthy", "version": "STRICT-1.0"}), 200
-
+# Avvia il server
+def run_server():
+    server_address = ('', PORT)
+    httpd = HTTPServer(server_address, RequestHandler)
+    print(f"\n✅ SERVER EXCEL CORRETTO ATTIVO su http://localhost:{PORT}")
+    print("\nEndpoints disponibili:")
+    print(f"  http://localhost:{PORT}/categories")
+    print(f"  http://localhost:{PORT}/events/Damage_Danni")
+    print(f"  http://localhost:{PORT}/events/Business_disruption")
+    print(f"  http://localhost:{PORT}/events/Employment_practices_Dipendenti")
+    print(f"  http://localhost:{PORT}/events/Execution_delivery_Problemi_di_produzione_o_consegna")
+    print(f"  http://localhost:{PORT}/events/Clients_product_Clienti")
+    print(f"  http://localhost:{PORT}/events/Internal_Fraud_Frodi_interne")
+    print(f"  http://localhost:{PORT}/events/External_fraud_Frodi_esterne")
+    print(f"  http://localhost:{PORT}/description/[codice_evento]")
+    print(f"  http://localhost:{PORT}/stats")
+    print("\nPremi Ctrl+C per fermare il server")
+    
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\n\nServer fermato.")
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    run_server()
