@@ -555,6 +555,123 @@ def build_api(df: pd.DataFrame):
             "count": len(suggestions[:limit])
         })
     
+    # ENDPOINT RISK MANAGEMENT - AGGIUNTI PER IL FRONTEND
+    @app.get("/events/{category}")
+    def get_events(category: str):
+        """Endpoint per ottenere eventi di rischio per categoria"""
+        # Mappatura eventi di rischio per categoria
+        risk_events = {
+            "operational": [
+                {"code": "OP001", "name": "Frode interna", "severity": "high"},
+                {"code": "OP002", "name": "Errore umano", "severity": "medium"},
+                {"code": "OP003", "name": "Interruzione servizi IT", "severity": "high"},
+                {"code": "OP004", "name": "Danno asset fisici", "severity": "medium"},
+                {"code": "OP005", "name": "Violazione sicurezza", "severity": "critical"}
+            ],
+            "cyber": [
+                {"code": "CY001", "name": "Ransomware", "severity": "critical"},
+                {"code": "CY002", "name": "Data breach", "severity": "critical"},
+                {"code": "CY003", "name": "Phishing", "severity": "high"},
+                {"code": "CY004", "name": "DDoS", "severity": "high"},
+                {"code": "CY005", "name": "Malware", "severity": "high"}
+            ],
+            "compliance": [
+                {"code": "CM001", "name": "Violazione GDPR", "severity": "high"},
+                {"code": "CM002", "name": "Non conformità normativa", "severity": "medium"},
+                {"code": "CM003", "name": "Mancata certificazione", "severity": "low"},
+                {"code": "CM004", "name": "Violazione contrattuale", "severity": "medium"}
+            ],
+            "financial": [
+                {"code": "FN001", "name": "Perdita di liquidità", "severity": "critical"},
+                {"code": "FN002", "name": "Insolvenza clienti", "severity": "high"},
+                {"code": "FN003", "name": "Fluttuazione tassi", "severity": "medium"},
+                {"code": "FN004", "name": "Perdite operative", "severity": "high"}
+            ]
+        }
+        
+        if category.lower() not in risk_events:
+            raise HTTPException(status_code=404, detail=f"Category '{category}' not found")
+        
+        return JSONResponse({
+            "category": category, 
+            "events": risk_events[category.lower()]
+        })
+    
+    @app.get("/description/{event_code}")  
+    def get_event_description(event_code: str):
+        """Endpoint per ottenere descrizione dettagliata di un evento"""
+        event_descriptions = {
+            "OP001": {
+                "code": "OP001",
+                "name": "Frode interna",
+                "description": "Attività fraudolente perpetrate da dipendenti o collaboratori interni",
+                "impact": "Perdite finanziarie dirette, danno reputazionale, azioni legali",
+                "probability": "medium",
+                "controls": ["Segregazione dei compiti", "Audit interni periodici", "Whistleblowing"]
+            },
+            "OP002": {
+                "code": "OP002",
+                "name": "Errore umano", 
+                "description": "Errori non intenzionali nell'esecuzione di processi operativi",
+                "impact": "Inefficienze operative, rilavorazioni, perdite economiche minori",
+                "probability": "high",
+                "controls": ["Formazione continua", "Procedure operative standard", "Controlli automatizzati"]
+            },
+            "OP003": {
+                "code": "OP003",
+                "name": "Interruzione servizi IT",
+                "description": "Interruzione dei servizi informatici critici per l'operatività aziendale",
+                "impact": "Blocco operativo, perdita produttività, mancato servizio clienti",
+                "probability": "medium",
+                "controls": ["Disaster recovery", "Business continuity plan", "Ridondanza sistemi"]
+            },
+            "CY001": {
+                "code": "CY001",
+                "name": "Ransomware",
+                "description": "Attacco informatico che cripta i dati aziendali richiedendo riscatto",
+                "impact": "Blocco operativo totale, perdita dati, richiesta riscatto, danno reputazionale grave",
+                "probability": "medium",
+                "controls": ["Backup offline", "EDR/XDR", "Formazione anti-phishing", "Patch management"]
+            },
+            "CY002": {
+                "code": "CY002",
+                "name": "Data breach",
+                "description": "Accesso non autorizzato e furto di dati sensibili aziendali o dei clienti",
+                "impact": "Sanzioni GDPR, perdita fiducia clienti, azioni legali, danno competitivo",
+                "probability": "medium",
+                "controls": ["Crittografia dati", "DLP", "Access control", "SIEM"]
+            },
+            "CM001": {
+                "code": "CM001",
+                "name": "Violazione GDPR",
+                "description": "Non conformità al Regolamento Generale sulla Protezione dei Dati",
+                "impact": "Sanzioni fino al 4% del fatturato, danno reputazionale, perdita clienti",
+                "probability": "low",
+                "controls": ["Privacy by design", "DPO", "Registro trattamenti", "Valutazioni d'impatto"]
+            },
+            "FN001": {
+                "code": "FN001",
+                "name": "Perdita di liquidità",
+                "description": "Insufficiente disponibilità di cassa per far fronte agli impegni a breve termine",
+                "impact": "Insolvenza, blocco operativo, fallimento",
+                "probability": "low",
+                "controls": ["Cash flow monitoring", "Linee di credito", "Diversificazione entrate"]
+            }
+        }
+        
+        if event_code.upper() not in event_descriptions:
+            # Ritorna descrizione generica se non trovata
+            return JSONResponse({
+                "code": event_code,
+                "name": "Evento generico",
+                "description": f"Descrizione dettagliata per evento {event_code} non disponibile",
+                "impact": "Da valutare caso per caso",
+                "probability": "unknown",
+                "controls": ["Controlli standard da definire"]
+            })
+        
+        return JSONResponse(event_descriptions[event_code.upper()])
+    
     @app.get("/api/test-visura")
     def test_visura():
         """Endpoint di test per verificare che l'API funzioni"""
