@@ -1,8 +1,8 @@
-📋 **[object Object]**
+📋 **618**
 ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📄 **DESCRIZIONE COMPLETA:**
-Evento [object Object] non presente nel mapping Excel
+Evento 618 non presente nel mapping Excel
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━
 

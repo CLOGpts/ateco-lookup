@@ -671,18 +671,27 @@ def build_api(df: pd.DataFrame):
         # Normalizza il codice (rimuovi spazi, trattini extra)
         event_code = event_code.strip()
         
-        # Cerca prima nelle descrizioni Excel
-        if event_code in EXCEL_DESCRIPTIONS:
-            description = EXCEL_DESCRIPTIONS[event_code]
-            # Trova il nome dell'evento dalle categorie
-            event_name = None
-            for cat_events in EXCEL_CATEGORIES.values():
-                for event in cat_events:
-                    if event.startswith(event_code + ' - '):
-                        event_name = event.split(' - ', 1)[1]
-                        break
-                if event_name:
+        # PRIMA cerca l'evento nelle CATEGORIE (priorità massima)
+        event_name = None
+        event_full_string = None
+        category_found = None
+        for cat_name, cat_events in EXCEL_CATEGORIES.items():
+            for event in cat_events:
+                if event.startswith(event_code + ' - '):
+                    event_full_string = event
+                    event_name = event.split(' - ', 1)[1]
+                    category_found = cat_name
                     break
+            if event_name:
+                break
+        
+        # POI cerca eventuali descrizioni aggiuntive VLOOKUP
+        vlookup_description = EXCEL_DESCRIPTIONS.get(event_code)
+        
+        # Se l'evento esiste nelle categorie Excel
+        if event_name:
+            # Usa VLOOKUP se disponibile, altrimenti usa il nome dell'evento
+            final_description = vlookup_description if vlookup_description else event_name
             
             # Determina impatto e probabilità basandosi sul codice
             if event_code.startswith('1'):
@@ -730,12 +739,14 @@ def build_api(df: pd.DataFrame):
             
             return JSONResponse({
                 "code": event_code,
-                "name": event_name or "Evento " + event_code,
-                "description": description,
+                "name": event_name,
+                "description": final_description,
+                "category": category_found,
                 "impact": impact,
                 "probability": probability,
                 "controls": controls,
-                "source": "Excel Risk Mapping"
+                "source": "Excel Risk Mapping",
+                "has_vlookup": vlookup_description is not None
             })
         
         # Se non trovato nell'Excel, ritorna descrizione generica
@@ -770,19 +781,28 @@ def build_api(df: pd.DataFrame):
         # Usa la stessa logica dell'endpoint GET
         event_code = str(event_code).strip()
         
-        # Cerca nelle descrizioni Excel
-        if event_code in EXCEL_DESCRIPTIONS:
-            description = EXCEL_DESCRIPTIONS[event_code]
-            # Trova il nome dell'evento
-            event_name = event.get('name')  # Usa il nome dall'oggetto se disponibile
-            if not event_name:
-                for cat_events in EXCEL_CATEGORIES.values():
-                    for ev in cat_events:
-                        if ev.startswith(event_code + ' - '):
-                            event_name = ev.split(' - ', 1)[1]
-                            break
-                    if event_name:
-                        break
+        # PRIMA cerca l'evento nelle CATEGORIE (come GET)
+        event_name_from_excel = None
+        category_found = None
+        for cat_name, cat_events in EXCEL_CATEGORIES.items():
+            for ev in cat_events:
+                if ev.startswith(event_code + ' - '):
+                    event_name_from_excel = ev.split(' - ', 1)[1]
+                    category_found = cat_name
+                    break
+            if event_name_from_excel:
+                break
+        
+        # Usa il nome dall'oggetto se disponibile, altrimenti quello dall'Excel
+        event_name = event.get('name') or event_name_from_excel
+        
+        # Cerca descrizione VLOOKUP
+        vlookup_description = EXCEL_DESCRIPTIONS.get(event_code)
+        
+        # Se l'evento esiste nell'Excel
+        if event_name_from_excel:
+            # Usa VLOOKUP se disponibile, altrimenti usa il nome
+            final_description = vlookup_description if vlookup_description else event_name_from_excel
             
             # Determina impatto e probabilità
             if event_code.startswith('1'):
@@ -820,13 +840,15 @@ def build_api(df: pd.DataFrame):
             
             return JSONResponse({
                 "code": event_code,
-                "name": event_name or "Evento " + event_code,
-                "description": description,
+                "name": event_name,
+                "description": final_description,
+                "category": category_found,
                 "impact": impact,
                 "probability": probability,
                 "controls": controls,
                 "severity": event.get('severity', 'medium'),
-                "source": "Excel Risk Mapping"
+                "source": "Excel Risk Mapping",
+                "has_vlookup": vlookup_description is not None
             })
         
         # Se non trovato nell'Excel
