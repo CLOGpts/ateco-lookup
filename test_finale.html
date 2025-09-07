@@ -21,13 +21,176 @@
             padding: 20px;
         }
         
+        .main-wrapper {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            max-width: 1400px;
+            align-items: flex-start;
+        }
+        
         .container {
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            width: 100%;
+            flex: 1;
             max-width: 800px;
             overflow: hidden;
+        }
+        
+        .risk-assessment-panel {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 400px;
+            padding: 25px;
+            display: none;
+        }
+        
+        .risk-assessment-panel.active {
+            display: block;
+        }
+        
+        .risk-matrix-container {
+            margin-top: 20px;
+        }
+        
+        .company-header {
+            background: #90EE90;
+            color: #2d5016;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 0;
+        }
+        
+        .assessment-title {
+            background: #4169E1;
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+        
+        .risk-matrix {
+            display: grid;
+            grid-template-columns: 120px repeat(4, 1fr);
+            grid-template-rows: 30px repeat(4, 60px);
+            gap: 2px;
+            background: #ccc;
+            padding: 2px;
+            border: 2px solid #666;
+        }
+        
+        .matrix-header {
+            background: #4169E1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            padding: 4px;
+        }
+        
+        .matrix-row-label {
+            background: #4169E1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 11px;
+            padding: 4px;
+            text-align: center;
+        }
+        
+        .matrix-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .matrix-cell.low { background: #90EE90; }
+        .matrix-cell.medium { background: #FFFF00; }
+        .matrix-cell.high { background: #FFA500; }
+        .matrix-cell.critical { background: #FF0000; color: white; }
+        
+        .matrix-cell.active::after {
+            content: '●';
+            position: absolute;
+            font-size: 30px;
+            color: #000;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+        
+        .risk-summary {
+            margin-top: 20px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .risk-summary-header {
+            background: #6c757d;
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        
+        .risk-summary-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .risk-summary-table tr {
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .risk-summary-table td {
+            padding: 8px;
+            font-size: 13px;
+        }
+        
+        .risk-summary-table td:first-child {
+            font-weight: bold;
+            width: 60%;
+        }
+        
+        .risk-summary-table td:nth-child(2) {
+            text-align: center;
+            width: 20%;
+        }
+        
+        .risk-summary-table td:nth-child(3) {
+            text-align: center;
+            width: 20%;
+            font-weight: bold;
+        }
+        
+        .risk-color-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            margin-right: 6px;
+            vertical-align: middle;
         }
         
         .header {
@@ -234,9 +397,36 @@
         .flow-step.completed .flow-number {
             background: #10b981;
         }
+        
+        .section-group {
+            background: #f8faff;
+            border: 2px solid #e0e7ff;
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+            position: relative;
+        }
+        
+        .section-title {
+            position: absolute;
+            top: -14px;
+            left: 30px;
+            background: white;
+            padding: 0 15px;
+            color: #4c1d95;
+            font-weight: 700;
+            font-size: 16px;
+            border: 2px solid #e0e7ff;
+            border-radius: 8px;
+        }
+        
+        .section-group .field-group:last-child {
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <body>
+    <div class="main-wrapper">
     <div class="container">
         <div class="header">
             <h1>🎯 Test Sistema Excel - FINALE</h1>
@@ -319,6 +509,128 @@
                 </div>
             </div>
             
+            <!-- SEZIONE: Perdita Finanziaria Attesa -->
+            <div class="section-group">
+                <div class="section-title">📊 Perdita Finanziaria Attesa</div>
+                
+                <!-- CAMPO H: Impatto Finanziario -->
+                <div class="field-group">
+                <div class="field-label">
+                    Impatto finanziario
+                    <span class="column-badge">COL H</span>
+                </div>
+                <select id="impattoFinanziario">
+                    <option value="">-- Seleziona Impatto --</option>
+                    <option value="N/A">N/A</option>
+                    <option value="0 - 1K€">0 - 1K€</option>
+                    <option value="1 - 10K€">1 - 10K€</option>
+                    <option value="10 - 50K€">10 - 50K€</option>
+                    <option value="50 - 100K€">50 - 100K€</option>
+                    <option value="100 - 500K€">100 - 500K€</option>
+                    <option value="500K€ - 1M€">500K€ - 1M€</option>
+                    <option value="1 - 3M€">1 - 3M€</option>
+                    <option value="3 - 5M€">3 - 5M€</option>
+                </select>
+            </div>
+            
+            <!-- CAMPO I: Perdita economica attesa dall'evento -->
+            <div class="field-group">
+                <div class="field-label">
+                    Perdita economica attesa dall'evento
+                    <span class="column-badge">COL I</span>
+                </div>
+                <select id="perditaEconomica">
+                    <option value="">-- Seleziona Livello di Perdita --</option>
+                    <option value="G">🟢 Bassa/Nulla - Impatto minimo o trascurabile</option>
+                    <option value="Y">🟡 Media - Impatto moderato gestibile</option>
+                    <option value="O">🟠 Importante - Impatto significativo che richiede attenzione</option>
+                    <option value="R">🔴 Grave - Impatto critico che richiede azione immediata</option>
+                </select>
+            </div>
+            
+            <!-- CAMPO J: Impatto immagine -->
+            <div class="field-group">
+                <div class="field-label">
+                    Impatto immagine
+                    <span class="column-badge">COL J</span>
+                </div>
+                <select id="impattoImmagine">
+                    <option value="">-- Seleziona --</option>
+                    <option value="Si">Sì - L'evento ha impatto sull'immagine aziendale</option>
+                    <option value="No">No - L'evento non ha impatto sull'immagine aziendale</option>
+                </select>
+            </div>
+            
+            <!-- CAMPO L: Impatto regolamentare o legale civile -->
+            <div class="field-group">
+                <div class="field-label">
+                    Impatto regolamentare o legale civile
+                    <span class="column-badge">COL L</span>
+                </div>
+                <select id="impattoRegolamentare">
+                    <option value="">-- Seleziona --</option>
+                    <option value="Si">Sì - Possibili sanzioni o azioni legali civili</option>
+                    <option value="No">No - Nessun impatto regolamentare o legale civile</option>
+                </select>
+            </div>
+            
+            <!-- CAMPO M: Impatto criminale o penale -->
+            <div class="field-group">
+                <div class="field-label">
+                    Impatto criminale o penale
+                    <span class="column-badge">COL M</span>
+                </div>
+                <select id="impattoCriminale">
+                    <option value="">-- Seleziona --</option>
+                    <option value="Si">Sì - Possibili conseguenze penali o criminali</option>
+                    <option value="No">No - Nessun impatto criminale o penale</option>
+                </select>
+            </div>
+            </div>
+            <!-- Fine sezione Perdita Finanziaria Attesa -->
+            
+            <!-- CAMPO V: Perdita non economica non attesa ma accadibile -->
+            <div class="field-group">
+                <div class="field-label">
+                    Perdita non economica non attesa ma accadibile
+                    <span class="column-badge">COL V</span>
+                </div>
+                <select id="perditaNonEconomica">
+                    <option value="">-- Seleziona Livello di Perdita --</option>
+                    <option value="G">🟢 Bassa/Nulla - Impatto minimo o trascurabile</option>
+                    <option value="Y">🟡 Media - Impatto moderato gestibile</option>
+                    <option value="O">🟠 Importante - Impatto significativo che richiede attenzione</option>
+                    <option value="R">🔴 Grave - Impatto critico che richiede azione immediata</option>
+                </select>
+            </div>
+            
+            <!-- CAMPO W: Controllo -->
+            <div class="field-group">
+                <div class="field-label">
+                    Controllo
+                    <span class="column-badge">COL W</span>
+                </div>
+                <select id="controllo" onchange="updateDescrizioneControllo()">
+                    <option value="">-- Seleziona Livello di Controllo --</option>
+                    <option value="++">++ Adeguato</option>
+                    <option value="+">+ Sostanzialmente adeguato</option>
+                    <option value="-">- Parzialmente Adeguato</option>
+                    <option value="--">-- Non adeguato / assente</option>
+                </select>
+            </div>
+            
+            <!-- CAMPO X: Descrizione del controllo (automatico) -->
+            <div class="field-group">
+                <div class="field-label">
+                    Descrizione del controllo
+                    <span class="column-badge">COL X</span>
+                    <span style="color: #666; font-size: 12px; margin-left: 10px;">⚡ Automatico</span>
+                </div>
+                <div id="descrizioneControllo" style="padding: 10px; background: #f8f9fa; border-radius: 4px; min-height: 40px; color: #495057; font-style: italic;">
+                    Seleziona un livello di controllo per vedere la descrizione
+                </div>
+            </div>
+            
             <div class="success-box" id="successBox">
                 <h2>🎉 PERFETTO!</h2>
                 <p>Il sistema funziona esattamente come l'Excel!</p>
@@ -327,6 +639,94 @@
                 </p>
             </div>
         </div>
+    </div>
+    
+    <!-- Risk Assessment Panel -->
+    <div class="risk-assessment-panel" id="riskPanel">
+        <div class="company-header" id="companyNameDisplay">Company</div>
+        <div class="assessment-title">Assessment of Residual Risk</div>
+        
+        <div class="risk-matrix-container">
+            <div style="text-align: center; font-weight: bold; margin-bottom: 5px; color: #4169E1;">Inherent Risk</div>
+            <div style="display: flex; align-items: center;">
+                <div style="writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; color: #4169E1; margin-right: 10px; font-size: 13px;">
+                    Internal Controls Rating
+                </div>
+            <div class="risk-matrix">
+                <!-- Empty corner cell -->
+                <div style="grid-column: 1; grid-row: 1;"></div>
+                
+                <!-- Column headers -->
+                <div class="matrix-header" style="grid-column: 2; grid-row: 1;">Low</div>
+                <div class="matrix-header" style="grid-column: 3; grid-row: 1;">Medium</div>
+                <div class="matrix-header" style="grid-column: 4; grid-row: 1;">High</div>
+                <div class="matrix-header" style="grid-column: 5; grid-row: 1;">Critical</div>
+                
+                <!-- Row labels -->
+                <div class="matrix-row-label" style="grid-column: 1; grid-row: 2;">Not<br>Adequate/Absent<br>(--)</div>
+                <div class="matrix-row-label" style="grid-column: 1; grid-row: 3;">Partially Adequate<br>(-)</div>
+                <div class="matrix-row-label" style="grid-column: 1; grid-row: 4;">Substantially<br>Adequate<br>(+)</div>
+                <div class="matrix-row-label" style="grid-column: 1; grid-row: 5;">Adequate<br>(++)</div>
+                
+                <!-- Matrix cells (4x4) -->
+                <!-- Row 1: Not Adequate/Absent -->
+                <div class="matrix-cell low" data-position="A1" style="grid-column: 2; grid-row: 2;">0</div>
+                <div class="matrix-cell medium" data-position="B1" style="grid-column: 3; grid-row: 2;">0</div>
+                <div class="matrix-cell high" data-position="C1" style="grid-column: 4; grid-row: 2;">0</div>
+                <div class="matrix-cell critical" data-position="D1" style="grid-column: 5; grid-row: 2;">1</div>
+                
+                <!-- Row 2: Partially Adequate -->
+                <div class="matrix-cell low" data-position="A2" style="grid-column: 2; grid-row: 3;">0</div>
+                <div class="matrix-cell medium" data-position="B2" style="grid-column: 3; grid-row: 3;">0</div>
+                <div class="matrix-cell high" data-position="C2" style="grid-column: 4; grid-row: 3;">0</div>
+                <div class="matrix-cell high" data-position="D2" style="grid-column: 5; grid-row: 3;">0</div>
+                
+                <!-- Row 3: Substantially Adequate -->
+                <div class="matrix-cell low" data-position="A3" style="grid-column: 2; grid-row: 4;">0</div>
+                <div class="matrix-cell low" data-position="B3" style="grid-column: 3; grid-row: 4;">0</div>
+                <div class="matrix-cell medium" data-position="C3" style="grid-column: 4; grid-row: 4;">0</div>
+                <div class="matrix-cell high" data-position="D3" style="grid-column: 5; grid-row: 4;">0</div>
+                
+                <!-- Row 4: Adequate -->
+                <div class="matrix-cell low" data-position="A4" style="grid-column: 2; grid-row: 5;">0</div>
+                <div class="matrix-cell low" data-position="B4" style="grid-column: 3; grid-row: 5;">0</div>
+                <div class="matrix-cell low" data-position="C4" style="grid-column: 4; grid-row: 5;">0</div>
+                <div class="matrix-cell medium" data-position="D4" style="grid-column: 5; grid-row: 5;">0</div>
+            </div>
+            </div>
+        </div>
+        
+        <div class="risk-summary">
+            <div class="risk-summary-header">Rischi soggetti</div>
+            <table class="risk-summary-table">
+                <tr>
+                    <td><span class="risk-color-indicator" style="background: #90EE90;"></span>Low</td>
+                    <td>-</td>
+                    <td id="lowPercent">0,0%</td>
+                </tr>
+                <tr>
+                    <td><span class="risk-color-indicator" style="background: #FFFF00;"></span>Medium</td>
+                    <td>-</td>
+                    <td id="mediumPercent">0,0%</td>
+                </tr>
+                <tr>
+                    <td><span class="risk-color-indicator" style="background: #FFA500;"></span>High</td>
+                    <td>-</td>
+                    <td id="highPercent">0,0%</td>
+                </tr>
+                <tr>
+                    <td><span class="risk-color-indicator" style="background: #FF0000;"></span>Critical</td>
+                    <td id="criticalCount">1</td>
+                    <td id="criticalPercent">100,0%</td>
+                </tr>
+                <tr style="background: #e9ecef; font-weight: bold;">
+                    <td>Total</td>
+                    <td id="totalCount">1</td>
+                    <td>100%</td>
+                </tr>
+            </table>
+        </div>
+    </div>
     </div>
     
     <script>
@@ -419,9 +819,12 @@
             
             updateFlowStep(3);
             
+            // Estrai solo il numero dall'evento (es: "101 - Disastro..." -> "101")
+            const eventNumber = eventoCode.split(' - ')[0];
+            
             // Ottieni la descrizione via VLOOKUP
             try {
-                const response = await fetch(`${API_URL}/description/${encodeURIComponent(eventoCode)}`);
+                const response = await fetch(`${API_URL}/description/${encodeURIComponent(eventNumber)}`);
                 const data = await response.json();
                 
                 if (data.description) {
@@ -458,10 +861,192 @@
             }
         }
         
+        // Aggiorna automaticamente la descrizione del controllo (VLOOKUP simulata)
+        function updateDescrizioneControllo() {
+            const controllo = document.getElementById('controllo').value;
+            const descrizioneDiv = document.getElementById('descrizioneControllo');
+            
+            // Mappatura ESATTA da Excel - sia titolo che descrizione completa
+            const controlloMap = {
+                '++': {
+                    titolo: 'Adeguato',
+                    descrizione: 'Il sistema di controllo interno è efficace ed adeguato (controlli 1 e 2 sono attivi e consolidati)'
+                },
+                '+': {
+                    titolo: 'Sostanzialmente adeguato',
+                    descrizione: 'Alcune correzioni potrebbero rendere soddisfacente il sistema di controllo interno (controlli 1 e 2 presenti ma parzialmente strutturati)'
+                },
+                '-': {
+                    titolo: 'Parzialmente Adeguato',
+                    descrizione: 'Il sistema di controllo interno deve essere migliorato e il processo dovrebbe essere più strettamente controllato (controlli 1 e 2 NON formalizzati)'
+                },
+                '--': {
+                    titolo: 'Non adeguato / assente',
+                    descrizione: 'Il sistema di controllo interno dei processi deve essere riorganizzato immediatamente (livelli di controllo 1 e 2 NON attivi)'
+                }
+            };
+            
+            if (controllo && controlloMap[controllo]) {
+                const info = controlloMap[controllo];
+                descrizioneDiv.innerHTML = `
+                    <div style="margin-bottom: 5px;">
+                        <strong style="color: #28a745;">✓</strong> 
+                        <strong>${info.titolo}</strong>
+                    </div>
+                    <div style="color: #495057; font-size: 14px; line-height: 1.4;">
+                        ${info.descrizione}
+                    </div>
+                `;
+                descrizioneDiv.style.fontStyle = 'normal';
+                descrizioneDiv.style.backgroundColor = '#e8f5e9';
+                descrizioneDiv.style.border = '1px solid #4caf50';
+                descrizioneDiv.style.padding = '12px';
+            } else {
+                descrizioneDiv.innerHTML = 'Seleziona un livello di controllo per vedere la descrizione';
+                descrizioneDiv.style.fontStyle = 'italic';
+                descrizioneDiv.style.backgroundColor = '#f8f9fa';
+                descrizioneDiv.style.border = 'none';
+                descrizioneDiv.style.padding = '10px';
+            }
+        }
+        
+        // Funzione per calcolare il Risk Assessment
+        function calculateRiskAssessment() {
+            // Get all input values
+            const company = document.getElementById('company').value;
+            const perditaEconomica = document.getElementById('perditaEconomica').value; // Column I
+            const perditaNonEconomica = document.getElementById('perditaNonEconomica').value; // Column V
+            const controllo = document.getElementById('controllo').value; // Column W
+            
+            // Se non abbiamo tutti i valori necessari, nascondi il pannello
+            if (!perditaEconomica || !perditaNonEconomica || !controllo) {
+                document.getElementById('riskPanel').classList.remove('active');
+                return;
+            }
+            
+            // Mostra il pannello
+            document.getElementById('riskPanel').classList.add('active');
+            
+            // Aggiorna il nome dell'azienda
+            document.getElementById('companyNameDisplay').textContent = company || 'Company';
+            
+            // Conversione colori in valori numerici (G=4, Y=3, O=2, R=1)
+            const colorToValue = {
+                'G': 4,  // Verde = Basso
+                'Y': 3,  // Giallo = Medio
+                'O': 2,  // Arancione = Alto
+                'R': 1   // Rosso = Critico
+            };
+            
+            // Calcola i valori numerici
+            const valoreEconomico = colorToValue[perditaEconomica] || 0;
+            const valoreNonEconomico = colorToValue[perditaNonEconomica] || 0;
+            
+            // Calcola il rischio inerente (MIN tra i due valori, quindi il peggiore)
+            const rischioInerente = Math.min(valoreEconomico, valoreNonEconomico);
+            
+            // Mappa controllo a indice riga nella matrice
+            const controlloToRow = {
+                '--': 1,  // Not Adequate/Absent
+                '-': 2,   // Partially Adequate  
+                '+': 3,   // Substantially Adequate
+                '++': 4   // Adequate
+            };
+            
+            const rigaControllo = controlloToRow[controllo] || 1;
+            
+            // Calcola la posizione nella matrice
+            // Colonna: 4-rischioInerente+1 (perché 1=Critical=col5, 2=High=col4, 3=Medium=col3, 4=Low=col2)
+            const colonna = 5 - rischioInerente + 1;
+            const riga = rigaControllo + 1; // +1 perché la prima riga è l'header
+            
+            // Codice posizione (A1-D4)
+            const colonnaLettera = ['', '', 'A', 'B', 'C', 'D'][colonna] || 'D';
+            const posizioneCodice = colonnaLettera + rigaControllo;
+            
+            // Reset tutti i cells
+            document.querySelectorAll('.matrix-cell').forEach(cell => {
+                cell.classList.remove('active');
+                const currentValue = parseInt(cell.textContent) || 0;
+                if (cell.dataset.position === posizioneCodice) {
+                    cell.textContent = '1';
+                } else {
+                    cell.textContent = '0';
+                }
+            });
+            
+            // Attiva la cella corretta
+            const activeCell = document.querySelector(`[data-position="${posizioneCodice}"]`);
+            if (activeCell) {
+                activeCell.classList.add('active');
+                activeCell.textContent = '1';
+                
+                // Aggiorna il conteggio dei rischi
+                updateRiskCounts(activeCell);
+            }
+            
+            console.log('📊 Risk Assessment Calcolato:');
+            console.log(`   Perdita Economica (I): ${perditaEconomica} → ${valoreEconomico}`);
+            console.log(`   Perdita Non Economica (V): ${perditaNonEconomica} → ${valoreNonEconomico}`);
+            console.log(`   Rischio Inerente (MIN): ${rischioInerente}`);
+            console.log(`   Controllo (W): ${controllo} → Riga ${rigaControllo}`);
+            console.log(`   Posizione Matrice: ${posizioneCodice}`);
+        }
+        
+        // Aggiorna i conteggi dei rischi
+        function updateRiskCounts(activeCell) {
+            let riskLevel = '';
+            if (activeCell.classList.contains('low')) riskLevel = 'low';
+            else if (activeCell.classList.contains('medium')) riskLevel = 'medium';
+            else if (activeCell.classList.contains('high')) riskLevel = 'high';
+            else if (activeCell.classList.contains('critical')) riskLevel = 'critical';
+            
+            // Reset tutti i conteggi
+            document.getElementById('lowPercent').textContent = '0,0%';
+            document.getElementById('mediumPercent').textContent = '0,0%';
+            document.getElementById('highPercent').textContent = '0,0%';
+            document.getElementById('criticalPercent').textContent = '0,0%';
+            document.getElementById('criticalCount').textContent = '-';
+            
+            // Aggiorna il conteggio per il livello attuale
+            if (riskLevel === 'low') {
+                document.getElementById('lowPercent').textContent = '100,0%';
+            } else if (riskLevel === 'medium') {
+                document.getElementById('mediumPercent').textContent = '100,0%';
+            } else if (riskLevel === 'high') {
+                document.getElementById('highPercent').textContent = '100,0%';
+            } else if (riskLevel === 'critical') {
+                document.getElementById('criticalPercent').textContent = '100,0%';
+                document.getElementById('criticalCount').textContent = '1';
+            }
+            
+            document.getElementById('totalCount').textContent = '1';
+        }
+        
+        // Aggiungi event listeners per tutti i campi di input
+        document.addEventListener('DOMContentLoaded', function() {
+            // Aggiungi listener per i campi che triggerano il calcolo
+            ['perditaEconomica', 'perditaNonEconomica', 'controllo', 'company'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('change', calculateRiskAssessment);
+                }
+            });
+        });
+        
         // Inizializza all'avvio
         window.onload = function() {
             loadCategories();
             console.log('✨ Sistema pronto! Seleziona una categoria per iniziare.');
+            
+            // Aggiungi listener per aggiornamenti real-time
+            ['perditaEconomica', 'perditaNonEconomica', 'controllo', 'company'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('change', calculateRiskAssessment);
+                    element.addEventListener('input', calculateRiskAssessment);
+                }
+            });
         };
     </script>
 </body>

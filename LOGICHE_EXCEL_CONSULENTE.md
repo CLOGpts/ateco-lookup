@@ -38,6 +38,14 @@ Dopo ore di analisi, la chiave per capire TUTTO il sistema era nascosta nelle ri
 | **E** | Categoria del rischio | DROPDOWN | 7 categorie di rischio |
 | **F** | Evento | DROPDOWN DINAMICO | Eventi filtrati per categoria |
 | **G** | Descrizione | FORMULA VLOOKUP | Auto-compilata |
+| **H** | Impatto Finanziario | DROPDOWN | 9 livelli da N/A a 3-5M€ |
+| **I** | Perdita Economica Attesa | SELECT COLOR | 4 livelli G/Y/O/R |
+| **J** | Impatto Immagine | SI/NO | Impatto reputazionale |
+| **L** | Impatto Regolamentare | SI/NO | Conseguenze legali civili |
+| **M** | Impatto Criminale | SI/NO | Conseguenze penali |
+| **V** | Perdita non economica | SELECT COLOR | 4 livelli G/Y/O/R (identici a col I) |
+| **W** | Controllo | DROPDOWN | 4 livelli ++/+/-/-- |
+| **X** | Descrizione controllo | FORMULA VLOOKUP | Auto-compilata da W |
 
 ### La Formula Magica (Colonna G)
 ```excel
@@ -220,14 +228,48 @@ Il sistema del consulente è un **capolavoro di ingegneria Excel**:
 ### File Essenziali
 - `Operational Risk Mapping Globale - Copia.xlsx` - Il file originale
 - `MAPPATURE_EXCEL_PERFETTE.json` - Dati estratti corretti
-- `excel_server_corretto.py` - Server che replica la logica
-- `test_finale.html` - Interfaccia di test
+- `ateco_lookup.py` - Server principale su Render con tutti gli endpoint
+- `test_finale.html` - Interfaccia di test locale
 - `analisi_precisa_1000.py` - Script per estrarre i dati
+- `comunicazioni_backend.txt` - Documentazione per il frontend
 
-### Come Funziona Ora
-1. Lo script `analisi_precisa_1000.py` estrae i dati dalle righe 1000+
-2. Genera `MAPPATURE_EXCEL_PERFETTE.json` con le mappature corrette
-3. Il server `excel_server_corretto.py` usa questi dati
-4. L'interfaccia `test_finale.html` replica il comportamento Excel
+### Come Funziona Ora in Produzione
+1. Lo script `analisi_precisa_1000.py` ha estratto i dati dalle righe 1000+
+2. Ha generato `MAPPATURE_EXCEL_PERFETTE.json` con le mappature corrette
+3. Il server `ateco_lookup.py` su Render usa questi dati
+4. Il frontend chiama gli endpoint su `https://ateco-lookup.onrender.com`
+5. **NUOVO:** I 5 campi di Perdita Finanziaria (H, I, J, L, M) sono disponibili via:
+   - `GET /risk-assessment-fields` - Ottiene la struttura dei campi
+   - `POST /save-risk-assessment` - Salva e calcola il risk score
 
-**Sistema testato e funzionante al 100%!**
+### Aggiornamento Dicembre 2024
+- Aggiunte le colonne H, I, J, L, M per la valutazione "Perdita Finanziaria Attesa"
+- Aggiunta colonna V "Perdita non economica non attesa ma accadibile"
+- Aggiunte colonne W e X per il sistema di controllo con VLOOKUP automatica
+- Implementato sistema di risk scoring (0-100 punti)
+- Backend completamente funzionante su Render
+- Frontend integrato con i nuovi endpoint
+
+### DETTAGLIO COLONNE W e X
+
+#### COLONNA W: Controllo
+- **Tipo**: Menu a tendina
+- **Valori**:
+  - `++` = Adeguato
+  - `+` = Sostanzialmente adeguato
+  - `-` = Parzialmente Adeguato
+  - `--` = Non adeguato / assente
+
+#### COLONNA X: Descrizione del controllo
+- **Tipo**: Campo automatico (VLOOKUP)
+- **Formula Excel**: `=IFERROR(VLOOKUP(W5,$W$1001:$X$1146,2,0),"")`
+- **Tabella VLOOKUP** (righe 1001-1004):
+  ```
+  W1001: ++  →  X1001: Adeguato
+  W1002: +   →  X1002: Sostanzialmente adeguato
+  W1003: -   →  X1003: Parzialmente Adeguato
+  W1004: --  →  X1004: Non adeguato / assente
+  ```
+- **Funzionamento**: Quando l'utente seleziona un valore in W, la formula VLOOKUP cerca automaticamente nella tabella nascosta e popola X con la descrizione corrispondente
+
+**Sistema testato e funzionante al 100% con le nuove funzionalità!**

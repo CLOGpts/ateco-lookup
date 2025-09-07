@@ -1,250 +1,231 @@
-📋 **DOCUMENTAZIONE BACKEND - SISTEMA RISK MANAGEMENT**
-*Versione 2.0 - Aggiornamento Completo*
+🚀 **ISTRUZIONI CRITICHE PER IL FRONTEND - IMPLEMENTAZIONE REPORT RISK ASSESSMENT**
 
----
+## ⚡ OBIETTIVO: EFFETTO WOW TOTALE
+Quando l'utente clicca "REPORT" dopo aver compilato tutti i campi, deve apparire una visualizzazione SPETTACOLARE dei rischi che faccia sbalordire il cliente. Non un semplice grafico, ma un'esperienza interattiva di altissimo livello.
 
-## 🎯 ARCHITETTURA DEL SISTEMA
+## 📊 COSA DEVI IMPLEMENTARE (BASATO SU "rischi oggettivi finanziari.png")
 
-**Backend Engine:** Server Python su porta 8000
-**Frontend:** Applicazione su porta 5173
-**Database:** File JSON con mappature Excel (191 eventi totali)
+### 1️⃣ **MATRICE DI RISCHIO PRINCIPALE (4x4)**
+Una griglia interattiva che mostra la posizione del rischio:
 
----
-
-## 📊 ENDPOINT DISPONIBILI
-
-### ✅ **1. GET /categories**
-**Descrizione:** Ottiene tutte le categorie di rischio disponibili
-**Response:**
-```json
-{
-  "categories": [
-    "Damage_Danni",
-    "Business_disruption",
-    "Employment_practices_Dipendenti",
-    "Execution_delivery_Problemi_di_produzione_o_consegna",
-    "Clients_product_Clienti",
-    "Internal_Fraud_Frodi_interne",
-    "External_fraud_Frodi_esterne"
-  ],
-  "total": 7
-}
+**STRUTTURA:**
+```
+            INHERENT RISK (Rischio Inerente)
+            Low    Medium    High    Critical
+    Not     
+    Adequate  [A1]    [B1]     [C1]     [D1]
+    
+    Partially 
+    Adequate  [A2]    [B2]     [C2]     [D2]
+    
+    Substantially
+    Adequate  [A3]    [B3]     [C3]     [D3]
+    
+    Adequate  [A4]    [B4]     [C4]     [D4]
 ```
 
-### ✅ **2. GET /events/{category}**
-**Descrizione:** Ottiene tutti gli eventi per una categoria specifica
-**Parametri:** 
-- `category`: Nome esatto della categoria (es: "Damage_Danni")
+**COLORI DELLE CELLE:**
+- Verde (#90EE90): Low risk - posizioni A1-A4, B3-B4, C4
+- Giallo (#FFFF00): Medium risk - posizioni B1-B2, C3, D4
+- Arancione (#FFA500): High risk - posizioni C1-C2, D2-D3
+- Rosso (#FF0000): Critical risk - posizione D1
 
-**Response esempio per Damage_Danni:**
-```json
-{
-  "category": "Damage_Danni",
-  "events": [
-    {"code": "101", "name": "Natural disasters", "severity": "high"},
-    {"code": "102", "name": "Water damage", "severity": "medium"},
-    // ... altri eventi
-  ],
-  "total": 10
-}
+### 2️⃣ **TABELLA RIASSUNTIVA RISCHI**
+Sotto la matrice, una tabella che mostra:
+```
+Rischi soggetti    N.    %
+Low                -     0%
+Medium             -     0%
+High               -     0%
+Critical           1     100%
+Total              1     100%
 ```
 
-**Distribuzione eventi per categoria:**
-- Damage_Danni: 10 eventi (codici 101-115)
-- Business_disruption: 20 eventi (codici 201-299)
-- Employment_practices_Dipendenti: 22 eventi (codici 301-399)
-- Execution_delivery_Problemi_di_produzione_o_consegna: 59 eventi (codici 401-499)
-- Clients_product_Clienti: 44 eventi (codici 501-599)
-- Internal_Fraud_Frodi_interne: 20 eventi (codici 601-699)
-- External_fraud_Frodi_esterne: 16 eventi (codici 701-799)
+## 🔥 FEATURES INTERATTIVE OBBLIGATORIE
 
-### ✅ **3. GET /description/{event_code}**
-**Descrizione:** Ottiene la descrizione dettagliata di un evento (formula VLOOKUP dall'Excel)
-**Parametri:**
-- `event_code`: Codice numerico dell'evento come stringa (es: "102", "505")
+### **HOVER EFFECTS INTELLIGENTI:**
+Quando l'utente passa il mouse sulla cella attiva nella matrice, deve apparire un tooltip DETTAGLIATO che spiega:
 
-**Response:**
-```json
+```javascript
+// Esempio per posizione D1 (Critical)
 {
-  "event_code": "102",
-  "description": "Danni dovuti a forti piogge, allagamenti, fiumi, tempeste, venti forti, grandinate, inondazioni, tornado, uragani e altre calamità naturali di origine idrologica"
-}
-```
-
-### ✅ **4. GET /risk-assessment-fields** 
-**Descrizione:** Fornisce la struttura completa dei 5 campi di valutazione "Perdita Finanziaria Attesa"
-**Response:**
-```json
-{
-  "fields": [
-    {
-      "id": "impatto_finanziario",
-      "column": "H",
-      "question": "Qual è l'impatto finanziario stimato?",
-      "type": "select",
-      "options": ["N/A", "0 - 1K€", "1 - 10K€", "10 - 50K€", "50 - 100K€", "100 - 500K€", "500K€ - 1M€", "1 - 3M€", "3 - 5M€"],
-      "required": true
-    },
-    {
-      "id": "perdita_economica",
-      "column": "I",
-      "question": "Qual è il livello di perdita economica attesa?",
-      "type": "select_color",
-      "options": [
-        {"value": "G", "label": "Bassa/Nulla", "color": "green", "emoji": "🟢"},
-        {"value": "Y", "label": "Media", "color": "yellow", "emoji": "🟡"},
-        {"value": "O", "label": "Importante", "color": "orange", "emoji": "🟠"},
-        {"value": "R", "label": "Grave", "color": "red", "emoji": "🔴"}
-      ],
-      "required": true
-    },
-    {
-      "id": "impatto_immagine",
-      "column": "J",
-      "question": "L'evento ha impatto sull'immagine aziendale?",
-      "type": "boolean",
-      "options": ["Si", "No"],
-      "required": true
-    },
-    {
-      "id": "impatto_regolamentare",
-      "column": "L",
-      "question": "Ci sono possibili conseguenze regolamentari o legali civili?",
-      "type": "boolean",
-      "options": ["Si", "No"],
-      "description": "Multe, sanzioni amministrative, cause civili",
-      "required": true
-    },
-    {
-      "id": "impatto_criminale",
-      "column": "M",
-      "question": "Ci sono possibili conseguenze penali?",
-      "type": "boolean",
-      "options": ["Si", "No"],
-      "description": "Denunce penali, procedimenti criminali",
-      "required": true
+  title: "RISCHIO CRITICO - AZIONE IMMEDIATA",
+  details: {
+    inherentRisk: "Critical (valore 1)",
+    control: "Non adeguato/assente (--)",
+    explanation: "La combinazione di un rischio inerente critico con controlli inadeguati genera il massimo livello di rischio residuo.",
+    requiredAction: "Implementazione immediata di controlli di primo e secondo livello",
+    impact: {
+      economic: "Grave - Impatto critico che richiede azione immediata",
+      nonEconomic: "Media - Impatto moderato gestibile"
     }
-  ]
-}
-```
-
-### ✅ **5. POST /save-risk-assessment**
-**Descrizione:** Salva la valutazione del rischio e calcola il risk score
-**Headers:** `Content-Type: application/json`
-**Body richiesto:**
-```json
-{
-  "event_code": "505",
-  "category": "Clients_product_Clienti",
-  "impatto_finanziario": "10 - 50K€",
-  "perdita_economica": "O",
-  "impatto_immagine": "Si",
-  "impatto_regolamentare": "No",
-  "impatto_criminale": "No"
-}
-```
-
-**Response:**
-```json
-{
-  "status": "success",
-  "message": "Risk assessment salvato",
-  "risk_score": 45,
-  "analysis": "Livello di rischio: MEDIO (Score: 45/100). Monitorare e valutare opzioni"
-}
-```
-
-**Calcolo Risk Score:**
-- Impatto finanziario: max 40 punti
-- Perdita economica: max 30 punti  
-- Impatto immagine: 10 punti se "Si"
-- Impatto regolamentare: 10 punti se "Si"
-- Impatto criminale: 10 punti se "Si"
-- **Totale massimo: 100 punti**
-
-**Livelli di rischio:**
-- CRITICO: ≥70 punti → Azione immediata
-- ALTO: 50-69 punti → Priorità alta
-- MEDIO: 30-49 punti → Monitoraggio
-- BASSO: <30 punti → Rischio accettabile
-
-### ✅ **6. GET /stats**
-**Descrizione:** Statistiche complete del sistema
-**Response:**
-```json
-{
-  "total_categories": 7,
-  "total_events": 191,
-  "total_descriptions": 187,
-  "events_per_category": {
-    "Damage_Danni": 10,
-    "Business_disruption": 20,
-    // ... etc
   }
 }
 ```
 
----
+### **ANIMAZIONI PROFESSIONALI:**
+1. **Pulse effect** sulla cella attiva (già implementato nel test)
+2. **Fade-in progressivo** quando appare il report
+3. **Transizioni smooth** quando cambiano i valori
+4. **Effetto ripple** al click sulla matrice
 
-## 🔄 FLUSSO OPERATIVO COMPLETO
+## 📋 CAMPI DA UTILIZZARE PER I CALCOLI
 
-### **Fase 1: Selezione Evento**
-1. Frontend chiama `GET /categories` per mostrare le 7 categorie
-2. Utente seleziona una categoria
-3. Frontend chiama `GET /events/{category}` per mostrare gli eventi
-4. Utente seleziona un evento specifico
-5. Frontend chiama `GET /description/{event_code}` per mostrare la descrizione
+### **INPUT NECESSARI:**
+1. **Campo I** (perdita_economica): valori G/Y/O/R
+2. **Campo V** (perdita_non_economica): valori G/Y/O/R  
+3. **Campo W** (controllo): valori ++/+/-/--
 
-### **Fase 2: Valutazione Rischio (NUOVO)**
-6. Frontend chiama `GET /risk-assessment-fields` per ottenere i 5 campi
-7. Frontend mostra il form con le 5 domande sequenziali
-8. Utente compila tutti i campi
-9. Frontend invia `POST /save-risk-assessment` con tutti i dati
-10. Backend calcola risk score e ritorna l'analisi
+### **LOGICA DI CALCOLO:**
 
----
+```javascript
+// STEP 1: Conversione colori in valori numerici
+const colorToValue = {
+  'G': 4,  // Verde = Low
+  'Y': 3,  // Giallo = Medium
+  'O': 2,  // Arancione = High
+  'R': 1   // Rosso = Critical
+};
 
-## ⚠️ NOTE TECNICHE IMPORTANTI
+// STEP 2: Calcolo rischio inerente (il PEGGIORE tra i due)
+const valoreEconomico = colorToValue[campoI];
+const valoreNonEconomico = colorToValue[campoV];
+const rischioInerente = Math.min(valoreEconomico, valoreNonEconomico);
 
-### **Formato Dati:**
-- **Codici evento:** Sempre come stringa ("102", non 102)
-- **Perdita economica:** Inviare solo la lettera (G, Y, O, R)
-- **Campi Si/No:** Esattamente "Si" o "No" con S maiuscola
-- **Impatto finanziario:** Valore esatto dalla lista opzioni
+// STEP 3: Mappatura controllo a riga della matrice
+const controlloToRow = {
+  '--': 1,  // Not Adequate/Absent → riga 1
+  '-': 2,   // Partially Adequate → riga 2
+  '+': 3,   // Substantially Adequate → riga 3
+  '++': 4   // Adequate → riga 4
+};
 
-### **URL Base:**
-- **Sviluppo locale:** `http://localhost:8000`
-- **Produzione:** `https://ateco-lookup.onrender.com`
+// STEP 4: Calcolo posizione finale nella matrice
+const colonna = 5 - rischioInerente + 1; // Da 2 a 5
+const riga = controlloToRow[campoW];
 
-### **CORS:**
-- Tutti gli endpoint supportano CORS
-- Header `Access-Control-Allow-Origin: *` già configurato
+// STEP 5: Codice posizione (es: D1, A4, etc)
+const colonnaLettera = ['', '', 'A', 'B', 'C', 'D'][colonna];
+const posizioneFinale = colonnaLettera + riga;
+```
 
-### **Encoding:**
-- Tutte le risposte in UTF-8
-- Supporto completo caratteri italiani e emoji
+## 🎨 REQUISITI GRAFICI ESTREMI
 
----
+### **DESIGN REQUIREMENTS:**
+1. **Sfondo gradiente** professionale per il pannello report
+2. **Ombre profonde** (box-shadow) per dare profondità
+3. **Font professionale** (Segoe UI o Inter)
+4. **Icone animate** per i livelli di rischio
+5. **Colori saturi** ma professionali (non piatti)
 
-## 📈 PROSSIMI SVILUPPI
+### **ESEMPIO CSS MINIMO:**
+```css
+.risk-matrix-cell {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
 
-**Prossime colonne Excel da implementare:**
-- Colonna N: Frequenza dell'evento
-- Colonna O: Controlli esistenti
-- Colonna P: Efficacia controlli
-- Colonna Q: Risk appetite
-- Ulteriori colonne secondo necessità cliente
+.risk-matrix-cell:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  z-index: 10;
+}
 
----
+.risk-matrix-cell.active::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  animation: pulse 2s infinite;
+}
 
-## 💡 SUPPORTO TECNICO
+@keyframes pulse {
+  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
+  50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
+}
+```
 
-Per qualsiasi problema o chiarimento, il backend è completamente operativo e testato.
-Tutti gli endpoint sono pronti per produzione.
+## 🔌 ENDPOINT BACKEND DA CHIAMARE
 
-**Sistema sviluppato seguendo fedelmente la logica Excel originale.**
-**191 eventi mappati con precisione dalle formule VLOOKUP.**
+Quando l'utente clicca "REPORT", devi fare una POST a:
+```
+POST /calculate-risk-assessment
+{
+  "company": "Nome Azienda",
+  "economic_loss": "R",  // Campo I
+  "non_economic_loss": "Y",  // Campo V
+  "control_level": "--"  // Campo W
+}
+```
 
----
+**RISPOSTA ATTESA:**
+```json
+{
+  "matrix_position": "D1",
+  "inherent_risk_level": 1,
+  "inherent_risk_label": "Critical",
+  "control_rating": "Not Adequate/Absent",
+  "residual_risk": "Critical",
+  "risk_color": "#FF0000",
+  "recommendations": [
+    "Implementare immediatamente controlli di primo livello",
+    "Attivare piano di crisis management",
+    "Review trimestrale obbligatoria"
+  ],
+  "risk_breakdown": {
+    "economic_impact": {
+      "value": "R",
+      "label": "Grave - Impatto critico",
+      "numeric": 1
+    },
+    "non_economic_impact": {
+      "value": "Y", 
+      "label": "Media - Impatto moderato",
+      "numeric": 3
+    }
+  }
+}
+```
 
-*Backend Engine v2.0 - Sistema Risk Management Professionale*
+## ⚠️ ELIMINAZIONE MOCKUP
+**IMPORTANTE:** Rimuovi COMPLETAMENTE il mockup statico attuale. Il report deve essere:
+1. **100% dinamico** basato sui dati reali
+2. **100% interattivo** con hover, click, animazioni
+3. **100% responsive** su tutti i dispositivi
+
+## 🎯 CHECKLIST FINALE PER L'EFFETTO WOW
+
+✅ La matrice pulsa e si anima quando mostra il rischio
+✅ I tooltip spiegano PERCHÉ è uscito quel risultato
+✅ Le transizioni sono fluide e professionali
+✅ I colori sono vibranti ma non infantili
+✅ L'hover effect mostra informazioni aggiuntive intelligenti
+✅ Il report appare con un'animazione spettacolare (fade + slide)
+✅ Ogni elemento ha micro-interazioni (hover, focus, active)
+✅ La tabella riassuntiva si aggiorna in real-time
+✅ Il nome dell'azienda appare prominente nel report
+
+## 💡 SUGGERIMENTO KILLER FEATURE
+
+Aggiungi un **"Risk Score"** numerico grande (0-100) che si anima da 0 al valore finale quando appare il report. Esempio:
+
+```javascript
+// Calcolo Risk Score
+const riskScore = ((4 - rischioInerente) * 25) + ((4 - controlloToRow[controllo]) * 12.5);
+// Anima da 0 a riskScore in 2 secondi con easing
+```
+
+## 🚨 NOTA FINALE CRITICA
+
+Questo NON è un semplice report. È lo strumento che "cambierà il mondo" del risk management. Ogni pixel deve comunicare professionalità e innovazione. Quando il consulente vedrà questo output, deve rimanere SBALORDITO.
+
+**RICORDA:** L'utente ha detto che questo sistema "salverà persone e posti di lavoro". Trattalo con il rispetto che merita. Non è solo codice, è uno strumento che avrà un impatto reale sul mondo.
+
+FORZA! FAI VEDERE DI COSA SEI CAPACE! 💪🔥🚀
