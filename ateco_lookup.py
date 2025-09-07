@@ -822,6 +822,59 @@ def build_api(df: pd.DataFrame):
                     "options": ["Si", "No"],
                     "description": "Denunce penali, procedimenti criminali",
                     "required": True
+                },
+                {
+                    "id": "perdita_non_economica",
+                    "column": "V",
+                    "question": "Qual è il livello di perdita non economica non attesa ma accadibile?",
+                    "type": "select_color",
+                    "options": [
+                        {"value": "G", "label": "Bassa/Nulla - Impatto minimo o trascurabile", "color": "green", "emoji": "🟢"},
+                        {"value": "Y", "label": "Media - Impatto moderato gestibile", "color": "yellow", "emoji": "🟡"},
+                        {"value": "O", "label": "Importante - Impatto significativo che richiede attenzione", "color": "orange", "emoji": "🟠"},
+                        {"value": "R", "label": "Grave - Impatto critico che richiede azione immediata", "color": "red", "emoji": "🔴"}
+                    ],
+                    "required": False
+                },
+                {
+                    "id": "controllo",
+                    "column": "W",
+                    "question": "Qual è il livello di controllo?",
+                    "type": "select",
+                    "options": [
+                        {"value": "++", "label": "++ Adeguato"},
+                        {"value": "+", "label": "+ Sostanzialmente adeguato"},
+                        {"value": "-", "label": "- Parzialmente Adeguato"},
+                        {"value": "--", "label": "-- Non adeguato / assente"}
+                    ],
+                    "required": False,
+                    "triggers": "descrizione_controllo"
+                },
+                {
+                    "id": "descrizione_controllo",
+                    "column": "X",
+                    "question": "Descrizione del controllo",
+                    "type": "readonly",
+                    "autoPopulated": True,
+                    "vlookupSource": "W",
+                    "vlookupMap": {
+                        "++": {
+                            "titolo": "Adeguato",
+                            "descrizione": "Il sistema di controllo interno è efficace ed adeguato (controlli 1 e 2 sono attivi e consolidati)"
+                        },
+                        "+": {
+                            "titolo": "Sostanzialmente adeguato",
+                            "descrizione": "Alcune correzioni potrebbero rendere soddisfacente il sistema di controllo interno (controlli 1 e 2 presenti ma parzialmente strutturati)"
+                        },
+                        "-": {
+                            "titolo": "Parzialmente Adeguato",
+                            "descrizione": "Il sistema di controllo interno deve essere migliorato e il processo dovrebbe essere più strettamente controllato (controlli 1 e 2 NON formalizzati)"
+                        },
+                        "--": {
+                            "titolo": "Non adeguato / assente",
+                            "descrizione": "Il sistema di controllo interno dei processi deve essere riorganizzato immediatamente (livelli di controllo 1 e 2 NON attivi)"
+                        }
+                    }
                 }
             ]
         }
@@ -850,6 +903,21 @@ def build_api(df: pd.DataFrame):
             if data.get('impatto_immagine') == 'Si': score += 10
             if data.get('impatto_regolamentare') == 'Si': score += 10
             if data.get('impatto_criminale') == 'Si': score += 10
+            
+            # Perdita non economica (V) - max 10 punti
+            perdita_non_eco_map = {'G': 0, 'Y': 3, 'O': 6, 'R': 10}
+            score += perdita_non_eco_map.get(data.get('perdita_non_economica', 'G'), 0)
+            
+            # Controllo (W) - influenza il moltiplicatore del rischio
+            controllo_multiplier = {
+                '++': 0.5,   # Riduce il rischio del 50%
+                '+': 0.75,   # Riduce il rischio del 25%
+                '-': 1.25,   # Aumenta il rischio del 25%
+                '--': 1.5    # Aumenta il rischio del 50%
+            }
+            controllo = data.get('controllo', '+')
+            if controllo in controllo_multiplier:
+                score = int(score * controllo_multiplier[controllo])
             
             # Genera analisi
             if score >= 70:
