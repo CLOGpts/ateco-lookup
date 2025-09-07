@@ -952,6 +952,135 @@ def build_api(df: pd.DataFrame):
                 "message": str(e)
             }, status_code=400)
     
+    # NUOVO ENDPOINT: Calcola la matrice di rischio
+    @app.post("/calculate-risk-assessment")
+    def calculate_risk_assessment(data: dict):
+        """Endpoint per calcolare la posizione nella matrice di rischio e il livello di rischio"""
+        try:
+            # Converti colori in valori numerici (dal sistema Excel)
+            color_to_value = {'G': 4, 'Y': 3, 'O': 2, 'R': 1}
+            
+            # Estrai i valori dai dati ricevuti
+            economic_value = color_to_value.get(data.get('economic_loss', 'G'), 4)
+            non_economic_value = color_to_value.get(data.get('non_economic_loss', 'G'), 4)
+            
+            # Calcola rischio inerente (MIN dei due valori come da Excel)
+            inherent_risk = min(economic_value, non_economic_value)
+            
+            # Mappa controllo a riga della matrice
+            control_to_row = {
+                '--': 1,  # Non adeguato -> riga 1
+                '-': 2,   # Parzialmente adeguato -> riga 2
+                '+': 3,   # Sostanzialmente adeguato -> riga 3
+                '++': 4   # Adeguato -> riga 4
+            }
+            
+            control_level = data.get('control_level', '+')
+            row = control_to_row.get(control_level, 3)
+            
+            # Calcola colonna in base al rischio inerente
+            # Rischio 4 (basso) -> colonna A, Rischio 1 (alto) -> colonna D
+            column_map = {4: 'A', 3: 'B', 2: 'C', 1: 'D'}
+            column = column_map.get(inherent_risk, 'B')
+            
+            # Posizione nella matrice (es. "A1", "B2", "C3", "D4")
+            matrix_position = f"{column}{row}"
+            
+            # Determina livello di rischio basato sulla posizione
+            risk_levels = {
+                'A4': {'level': 'Low', 'color': 'green', 'value': 0},
+                'A3': {'level': 'Low', 'color': 'green', 'value': 0},
+                'B4': {'level': 'Low', 'color': 'green', 'value': 0},
+                'A2': {'level': 'Medium', 'color': 'yellow', 'value': 0},
+                'B3': {'level': 'Medium', 'color': 'yellow', 'value': 0},
+                'C4': {'level': 'Medium', 'color': 'yellow', 'value': 0},
+                'A1': {'level': 'High', 'color': 'orange', 'value': 0},
+                'B2': {'level': 'High', 'color': 'orange', 'value': 0},
+                'C3': {'level': 'High', 'color': 'orange', 'value': 0},
+                'D4': {'level': 'High', 'color': 'orange', 'value': 0},
+                'B1': {'level': 'Critical', 'color': 'red', 'value': 1},
+                'C2': {'level': 'Critical', 'color': 'red', 'value': 1},
+                'D3': {'level': 'Critical', 'color': 'red', 'value': 1},
+                'C1': {'level': 'Critical', 'color': 'red', 'value': 1},
+                'D2': {'level': 'Critical', 'color': 'red', 'value': 1},
+                'D1': {'level': 'Critical', 'color': 'red', 'value': 1}
+            }
+            
+            risk_info = risk_levels.get(matrix_position, {'level': 'Medium', 'color': 'yellow', 'value': 0})
+            
+            # Prepara risposta completa
+            response = {
+                'status': 'success',
+                'matrix_position': matrix_position,
+                'risk_level': risk_info['level'],
+                'risk_color': risk_info['color'],
+                'risk_value': risk_info['value'],
+                'inherent_risk': {
+                    'value': inherent_risk,
+                    'label': {4: 'Low', 3: 'Medium', 2: 'High', 1: 'Critical'}[inherent_risk]
+                },
+                'control_effectiveness': {
+                    'value': row,
+                    'label': control_level,
+                    'description': {
+                        '++': 'Adeguato',
+                        '+': 'Sostanzialmente adeguato',
+                        '-': 'Parzialmente Adeguato',
+                        '--': 'Non adeguato / assente'
+                    }.get(control_level, 'Unknown')
+                },
+                'calculation_details': {
+                    'economic_loss': data.get('economic_loss'),
+                    'economic_value': economic_value,
+                    'non_economic_loss': data.get('non_economic_loss'),
+                    'non_economic_value': non_economic_value,
+                    'min_value': inherent_risk,
+                    'control_level': control_level,
+                    'control_row': row,
+                    'matrix_column': column
+                },
+                'recommendations': []
+            }
+            
+            # Aggiungi raccomandazioni basate sul livello di rischio
+            if risk_info['level'] == 'Critical':
+                response['recommendations'] = [
+                    'Azione immediata richiesta',
+                    'Implementare controlli aggiuntivi urgentemente',
+                    'Escalation al management richiesta'
+                ]
+            elif risk_info['level'] == 'High':
+                response['recommendations'] = [
+                    'Priorità alta per mitigazione',
+                    'Rafforzare i controlli esistenti',
+                    'Monitoraggio frequente richiesto'
+                ]
+            elif risk_info['level'] == 'Medium':
+                response['recommendations'] = [
+                    'Monitorare regolarmente',
+                    'Valutare opportunità di miglioramento controlli',
+                    'Documentare piani di contingenza'
+                ]
+            else:  # Low
+                response['recommendations'] = [
+                    'Rischio accettabile',
+                    'Mantenere controlli attuali',
+                    'Revisione periodica standard'
+                ]
+            
+            # Log per debug
+            logger.info(f"Risk calculation: {matrix_position} = {risk_info['level']} (Inherent: {inherent_risk}, Control: {row})")
+            
+            return JSONResponse(response)
+            
+        except Exception as e:
+            logger.error(f"Errore in calculate_risk_assessment: {str(e)}", exc_info=True)
+            return JSONResponse({
+                'status': 'error',
+                'message': f'Errore nel calcolo del rischio: {str(e)}',
+                'error_details': str(e)
+            }, status_code=500)
+    
     # ENDPOINT ALTERNATIVO PER FRONTEND CHE INVIA OGGETTI
     @app.post("/description")
     def get_event_description_post(event: dict):

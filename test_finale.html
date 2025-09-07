@@ -137,6 +137,92 @@
             50% { transform: scale(1.2); opacity: 0.8; }
         }
         
+        /* Tooltip per spiegare il risultato */
+        .risk-explanation {
+            position: fixed;
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 10000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .risk-explanation.visible {
+            opacity: 1;
+        }
+        
+        .risk-explanation h3 {
+            margin: 0 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            font-size: 16px;
+        }
+        
+        .risk-explanation .calculation-step {
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+        }
+        
+        .risk-explanation .step-label {
+            color: #aaa;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        
+        .risk-explanation .step-value {
+            font-weight: bold;
+            font-size: 15px;
+        }
+        
+        .risk-explanation .arrow {
+            text-align: center;
+            font-size: 20px;
+            margin: 10px 0;
+            color: #4169E1;
+        }
+        
+        .risk-explanation .final-result {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .risk-explanation .final-result .position {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .risk-explanation .actions {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .risk-explanation .actions h4 {
+            margin: 0 0 8px 0;
+            font-size: 13px;
+            color: #ffd700;
+        }
+        
+        .risk-explanation .actions ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 12px;
+        }
+        
         .risk-summary {
             margin-top: 20px;
             background: #f8f9fa;
@@ -910,6 +996,9 @@
             }
         }
         
+        // Variabili globali per memorizzare i dati del calcolo
+        let currentRiskData = {};
+        
         // Funzione per calcolare il Risk Assessment
         function calculateRiskAssessment() {
             // Get all input values
@@ -938,6 +1027,27 @@
                 'R': 1   // Rosso = Critico
             };
             
+            const colorToLabel = {
+                'G': '🟢 Bassa/Nulla',
+                'Y': '🟡 Media',
+                'O': '🟠 Importante',
+                'R': '🔴 Grave'
+            };
+            
+            const riskLevelNames = {
+                1: 'Critical',
+                2: 'High',
+                3: 'Medium',
+                4: 'Low'
+            };
+            
+            const controlloLabels = {
+                '--': 'Non adeguato / assente',
+                '-': 'Parzialmente Adeguato',
+                '+': 'Sostanzialmente adeguato',
+                '++': 'Adeguato'
+            };
+            
             // Calcola i valori numerici
             const valoreEconomico = colorToValue[perditaEconomica] || 0;
             const valoreNonEconomico = colorToValue[perditaNonEconomica] || 0;
@@ -964,6 +1074,22 @@
             const colonnaLettera = ['', '', 'A', 'B', 'C', 'D'][colonna] || 'D';
             const posizioneCodice = colonnaLettera + rigaControllo;
             
+            // Salva i dati per il tooltip
+            currentRiskData = {
+                position: posizioneCodice,
+                economicLoss: perditaEconomica,
+                economicLabel: colorToLabel[perditaEconomica],
+                economicValue: valoreEconomico,
+                nonEconomicLoss: perditaNonEconomica,
+                nonEconomicLabel: colorToLabel[perditaNonEconomica],
+                nonEconomicValue: valoreNonEconomico,
+                inherentRisk: rischioInerente,
+                inherentRiskLabel: riskLevelNames[rischioInerente],
+                controlLevel: controllo,
+                controlLabel: controlloLabels[controllo],
+                controlRow: rigaControllo
+            };
+            
             // Reset tutti i cells
             document.querySelectorAll('.matrix-cell').forEach(cell => {
                 cell.classList.remove('active');
@@ -983,6 +1109,9 @@
                 
                 // Aggiorna il conteggio dei rischi
                 updateRiskCounts(activeCell);
+                
+                // Aggiungi event listeners per il tooltip
+                setupTooltip(activeCell);
             }
             
             console.log('📊 Risk Assessment Calcolato:');
@@ -991,6 +1120,131 @@
             console.log(`   Rischio Inerente (MIN): ${rischioInerente}`);
             console.log(`   Controllo (W): ${controllo} → Riga ${rigaControllo}`);
             console.log(`   Posizione Matrice: ${posizioneCodice}`);
+        }
+        
+        // Funzione per configurare il tooltip
+        function setupTooltip(cell) {
+            cell.addEventListener('mouseenter', showRiskExplanation);
+            cell.addEventListener('mouseleave', hideRiskExplanation);
+        }
+        
+        // Mostra la spiegazione del rischio
+        function showRiskExplanation(event) {
+            // Rimuovi tooltip esistente se presente
+            hideRiskExplanation();
+            
+            const tooltip = document.createElement('div');
+            tooltip.className = 'risk-explanation';
+            tooltip.id = 'riskTooltip';
+            
+            // Determina il livello di rischio dalla cella
+            let riskLevel = 'Low';
+            let riskColor = '#90EE90';
+            if (event.target.classList.contains('critical')) {
+                riskLevel = 'CRITICO';
+                riskColor = '#FF0000';
+            } else if (event.target.classList.contains('high')) {
+                riskLevel = 'ALTO';
+                riskColor = '#FFA500';
+            } else if (event.target.classList.contains('medium')) {
+                riskLevel = 'MEDIO';
+                riskColor = '#FFFF00';
+            } else if (event.target.classList.contains('low')) {
+                riskLevel = 'BASSO';
+                riskColor = '#90EE90';
+            }
+            
+            // Azioni consigliate in base al rischio
+            let actions = [];
+            if (currentRiskData.position && currentRiskData.position[0] === 'D') {
+                actions = [
+                    'Implementazione immediata controlli di primo livello',
+                    'Attivazione piano di crisis management',
+                    'Review trimestrale obbligatoria',
+                    'Escalation immediata al management'
+                ];
+            } else if (currentRiskData.position && currentRiskData.position[0] === 'C') {
+                actions = [
+                    'Rafforzamento controlli esistenti',
+                    'Monitoraggio mensile KPI',
+                    'Definizione piano di mitigazione'
+                ];
+            } else if (currentRiskData.position && currentRiskData.position[0] === 'B') {
+                actions = [
+                    'Review semestrale dei controlli',
+                    'Monitoraggio trimestrale'
+                ];
+            } else {
+                actions = [
+                    'Mantenimento controlli attuali',
+                    'Review annuale standard'
+                ];
+            }
+            
+            tooltip.innerHTML = `
+                <h3 style="color: ${riskColor}">📍 POSIZIONE ${currentRiskData.position} - RISCHIO ${riskLevel}</h3>
+                
+                <div class="calculation-step">
+                    <div class="step-label">PERDITA ECONOMICA (Col. I)</div>
+                    <div class="step-value">${currentRiskData.economicLabel}</div>
+                    <small>Valore numerico: ${currentRiskData.economicValue} (${currentRiskData.economicValue === 1 ? 'Peggiore' : currentRiskData.economicValue === 4 ? 'Migliore' : 'Intermedio'})</small>
+                </div>
+                
+                <div class="calculation-step">
+                    <div class="step-label">PERDITA NON ECONOMICA (Col. V)</div>
+                    <div class="step-value">${currentRiskData.nonEconomicLabel}</div>
+                    <small>Valore numerico: ${currentRiskData.nonEconomicValue} (${currentRiskData.nonEconomicValue === 1 ? 'Peggiore' : currentRiskData.nonEconomicValue === 4 ? 'Migliore' : 'Intermedio'})</small>
+                </div>
+                
+                <div class="arrow">⬇️</div>
+                
+                <div class="calculation-step" style="background: rgba(65,105,225,0.1);">
+                    <div class="step-label">RISCHIO INERENTE (MIN dei due)</div>
+                    <div class="step-value">${currentRiskData.inherentRiskLabel} (${currentRiskData.inherentRisk})</div>
+                    <small>Si prende il peggiore: MIN(${currentRiskData.economicValue}, ${currentRiskData.nonEconomicValue}) = ${currentRiskData.inherentRisk}</small>
+                </div>
+                
+                <div class="calculation-step">
+                    <div class="step-label">LIVELLO DI CONTROLLO (Col. W)</div>
+                    <div class="step-value">${currentRiskData.controlLevel} - ${currentRiskData.controlLabel}</div>
+                    <small>Riga matrice: ${currentRiskData.controlRow}</small>
+                </div>
+                
+                <div class="final-result">
+                    <div class="position">${currentRiskData.position}</div>
+                    <div>Colonna ${currentRiskData.position[0]} (${currentRiskData.inherentRiskLabel}) + Riga ${currentRiskData.controlRow}</div>
+                </div>
+                
+                <div class="actions">
+                    <h4>⚠️ AZIONI RICHIESTE:</h4>
+                    <ul>
+                        ${actions.map(action => `<li>${action}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+            
+            document.body.appendChild(tooltip);
+            
+            // Posiziona il tooltip
+            const rect = event.target.getBoundingClientRect();
+            tooltip.style.left = (rect.left + window.scrollX - 410) + 'px';
+            tooltip.style.top = (rect.top + window.scrollY + rect.height/2 - 200) + 'px';
+            
+            // Mostra con animazione
+            setTimeout(() => tooltip.classList.add('visible'), 10);
+        }
+        
+        // Nascondi la spiegazione del rischio
+        function hideRiskExplanation() {
+            const tooltip = document.getElementById('riskTooltip');
+            if (tooltip) {
+                tooltip.classList.remove('visible');
+                setTimeout(() => {
+                    if (tooltip.parentNode) {
+                        tooltip.parentNode.removeChild(tooltip);
+                    }
+                }, 300);
+            }
         }
         
         // Aggiorna i conteggi dei rischi
