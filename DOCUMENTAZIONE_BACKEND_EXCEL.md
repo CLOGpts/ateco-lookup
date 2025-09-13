@@ -1,18 +1,18 @@
-# Documentazione Backend Sistema Excel Risk Assessment
-## Replica PERFETTA del Sistema "Operational Risk Mapping Globale"
+# Documentazione Backend Sistema Risk Assessment
+## Sistema Completo "Operational Risk Mapping" + Risk Score Calculation
 
 ---
 
 ## 🎯 Panoramica del Sistema
 
 ### Cosa fa questo backend
-Il backend **Excel Risk System** replica ESATTAMENTE la logica del file Excel del consulente:
+Il backend **Risk Assessment System** implementa completamente la logica del sistema Excel del consulente con funzionalità avanzate:
 1. **Gestisce 7 categorie di rischio** operative bancarie/finanziarie
 2. **Filtra 191 eventi totali** in base alla categoria selezionata
 3. **Applica VLOOKUP automatico** per le descrizioni degli eventi (189 mappature)
-4. **Mantiene la compatibilità 100%** con il file Excel originale
-5. **Fornisce API REST** per l'integrazione frontend
-6. **Server Python puro** senza dipendenze esterne
+4. **Calcola Risk Score 0-100** basato su multipli fattori di rischio
+5. **Valuta impatti finanziari e non economici** con sistema G/Y/O/R
+6. **Sistema di controllo** con 4 livelli di adeguatezza (++/+/-/--)
 
 ### Architettura del Sistema
 ```
@@ -25,15 +25,18 @@ Il backend **Excel Risk System** replica ESATTAMENTE la logica del file Excel de
 ┌──────────────────────────┐
 │ analisi_precisa_1000.py  │  ← Script estrazione dati
 ├──────────────────────────┤
-│ MAPPATURE_EXCEL_PERFETTE │  ← JSON con dati corretti
+│ MAPPATURE_EXCEL_PERFETTE │  ← JSON con dati eventi
 │        .json (69KB)      │
 └────────────┬─────────────┘
-             │ Implementazione
+             │ Integrazione
              ▼
 ┌──────────────────────────┐
-│ excel_server_corretto.py │  ← Server Python puro
+│    ateco_lookup.py       │  ← Server principale
 ├──────────────────────────┤
-│    test_finale.html      │  ← Interfaccia test
+│  Endpoints Risk:         │
+│  /categories             │
+│  /events/{category}      │
+│  /calculate-risk-assessment │
 └──────────────────────────┘
 ```
 
@@ -43,10 +46,10 @@ Il backend **Excel Risk System** replica ESATTAMENTE la logica del file Excel de
 | File | Descrizione | Dimensione | Ruolo |
 |------|-------------|------------|-------|
 | `Operational Risk Mapping Globale - Copia.xlsx` | Excel originale del consulente | 165KB | SOURCE |
-| `excel_server_corretto.py` | Server API Python puro | 5KB | BACKEND |
-| `test_finale.html` | Interfaccia di test | 16KB | FRONTEND |
-| `MAPPATURE_EXCEL_PERFETTE.json` | Dati estratti corretti | 69KB | DATI |
-| `analisi_precisa_1000.py` | Script per estrarre dati | 9KB | UTILITY |
+| `ateco_lookup.py` | Server API principale con tutti gli endpoint | ~100KB | BACKEND |
+| `MAPPATURE_EXCEL_PERFETTE.json` | Database eventi di rischio | 69KB | DATI |
+| `analisi_precisa_1000.py` | Script per estrarre dati da Excel | 9KB | UTILITY |
+| `mapping.yaml` | Configurazione settori/normative | ~5KB | CONFIG |
 
 ---
 
@@ -93,11 +96,12 @@ Il backend **Excel Risk System** replica ESATTAMENTE la logica del file Excel de
 
 ## 🚀 API REST Disponibili
 
-### Server: excel_server_corretto.py
+### Server: ateco_lookup.py
 
 #### Base URL
 ```
-http://localhost:8000
+Sviluppo: http://localhost:8000
+Produzione: https://ateco-lookup.onrender.com
 ```
 
 #### Endpoints

@@ -1,46 +1,46 @@
-# Documentazione Backend ATECO Lookup
-## Per Sviluppatore Frontend
+# Documentazione Modulo ATECO Lookup
+## Sistema Completo di Ricerca e Classificazione Attività Economiche
 
 ---
 
 ## 🎯 Panoramica del Sistema
 
-### Cosa fa questo backend
-Il backend **ATECO Lookup** è un servizio Python che permette di:
-1. **Cercare codici ATECO** (classificazione delle attività economiche italiane)
-2. **Ottenere informazioni dettagliate** su ogni codice (descrizioni, gerarchie, ricodifiche 2022/2025)
-3. **Arricchire i dati** con normative e certificazioni pertinenti al settore
-4. **Fornire API REST** per integrazione con applicazioni frontend
-5. **Estrarre automaticamente dati** da PDF di visure camerali
-6. **Suggerire codici simili** quando non si trovano corrispondenze esatte
-7. **Supportare ricerche batch** per elaborazione multipla efficiente
+### Cosa fa questo modulo
+Il modulo **ATECO Lookup** è il cuore del sistema di identificazione aziendale che:
+1. **Cerca codici ATECO** (classificazione attività economiche italiane 2022/2025)
+2. **Gestisce transizione ATECO** 2022 → 2025 con mappature ufficiali
+3. **Arricchisce dati aziendali** con normative e certificazioni di settore
+4. **Estrae dati da visure** camerali PDF (integrato con modulo visure)
+5. **Suggerisce codici simili** quando non trova corrispondenze esatte
+6. **Supporta ricerche batch** per elaborazione multipla (fino a 50 codici)
+7. **Integra con Risk Assessment** per valutazione rischi di settore
 
-### Architettura
+### Architettura del Modulo
 ```
-┌─────────────────────┐
-│   Frontend (UI)     │
-└──────────┬──────────┘
-           │ HTTP/REST
-           ▼
-┌─────────────────────┐
-│   FastAPI Server    │  ← Porta 8000 (configurabile)
-├─────────────────────┤
-│  ateco_lookup.py    │  ← Logica principale
-├─────────────────────┤
-│   File Excel        │  ← Database ATECO (tabella_ATECO.xlsx)
-│   mapping.yaml      │  ← Mappatura settori/normative
-└─────────────────────┘
+┌───────────────────────────────┐
+│      ATECO Lookup Module      │
+│       (ateco_lookup.py)       │
+├───────────────────────────────┤
+│ • Ricerca ATECO 2022/2025     │
+│ • Autocomplete intelligente   │
+│ • Batch processing           │
+│ • Cache LRU per performance  │
+├─────────────┬─────────────────┤
+│ Data Sources │ Enrichment      │
+├─────────────┼─────────────────┤
+│ tabella_ATECO│ mapping.yaml    │
+│ .xlsx        │ (normative)     │
+└─────────────┴─────────────────┘
 ```
 
-### Tecnologie utilizzate
-- **Python 3.7+**: Versione minima richiesta
-- **FastAPI**: Framework web moderno per API REST
-- **Pandas**: Manipolazione dati Excel
-- **CORS abilitato**: Permette chiamate da domini diversi (configurabile)
-- **Cache LRU**: Ottimizzazione performance per ricerche frequenti
-- **pdfplumber/PyPDF2**: Estrazione dati da PDF (opzionale)
-- **python-multipart**: Supporto upload file
-- **PyYAML**: Lettura configurazione mapping settori
+### Stack Tecnologico
+- **Python 3.7+**: Linguaggio principale
+- **FastAPI**: Framework REST API ad alte prestazioni
+- **Pandas**: Gestione database ATECO Excel
+- **Cache LRU**: Ottimizzazione ricerche frequenti (500+ entries)
+- **PyYAML**: Configurazione mappature settori
+- **CORS**: Configurabile per multi-domain
+- **Uvicorn**: ASGI server per produzione
 
 ---
 
@@ -48,7 +48,8 @@ Il backend **ATECO Lookup** è un servizio Python che permette di:
 
 ### Base URL
 ```
-http://127.0.0.1:8000
+Sviluppo: http://localhost:8000
+Produzione: https://ateco-lookup.onrender.com
 ```
 
 ### 1. Health Check
@@ -65,16 +66,16 @@ http://127.0.0.1:8000
 }
 ```
 
-### 2. Ricerca ATECO (Principale)
+### 2. Ricerca ATECO (Core)
 **Endpoint:** `GET /lookup`
 
 **Parametri Query:**
-| Parametro | Tipo | Obbligatorio | Descrizione | Esempio |
-|-----------|------|--------------|-------------|---------|
-| `code` | string | ✅ | Codice ATECO da cercare | `01.11.0`, `20.14`, `62` |
-| `prefer` | string | ❌ | Priorità versione: `2022`, `2025`, `2025-camerale` | `2025` |
-| `prefix` | boolean | ❌ | Se `true`, cerca tutti i codici che iniziano con il valore fornito | `true` |
-| `limit` | integer | ❌ | Numero massimo di risultati (default: 50) | `10` |
+| Parametro | Tipo | Obbligatorio | Descrizione | Default | Esempio |
+|-----------|------|--------------|-------------|---------|------|
+| `code` | string | ✅ | Codice ATECO da cercare | - | `62.01`, `20.14` |
+| `prefer` | string | ❌ | Versione preferita | `2022` | `2025` |
+| `prefix` | boolean | ❌ | Ricerca per prefisso | `false` | `true` |
+| `limit` | integer | ❌ | Max risultati | `50` | `10` |
 
 **Esempi di chiamate:**
 
@@ -93,57 +94,53 @@ GET /lookup?code=20&prefix=true&limit=10
 GET /lookup?code=62.01&prefer=2025
 ```
 
-**Risposta tipo (ricerca esatta):**
+**Risposta (ricerca esatta):**
 ```json
 {
   "found": 1,
   "items": [
     {
-      "ORDINE_CODICE_ATECO_2022": "123",
-      "CODICE_ATECO_2022": "20.14.0",
-      "TITOLO_ATECO_2022": "Fabbricazione di altri prodotti chimici di base organici",
-      "GERARCHIA_ATECO_2022": "C.20.14.0",
-      "NUMERO_CORR_ATECO_2022": "456",
-      "SOTTOTIPOLOGIA": "invariato",
+      "CODICE_ATECO_2022": "62.01.0",
+      "TITOLO_ATECO_2022": "Produzione di software non connesso all'edizione",
+      "CODICE_ATECO_2025_RAPPRESENTATIVO": "62.01.00",
+      "TITOLO_ATECO_2025_RAPPRESENTATIVO": "Produzione di software non connesso all'edizione",
       "TIPO_RICODIFICA": "1 a 1",
-      "CODICE_ATECO_2025_RAPPRESENTATIVO": "20.14.00",
-      "TITOLO_ATECO_2025_RAPPRESENTATIVO": "Fabbricazione di altri prodotti chimici di base organici",
-      "CODICE_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "20.14.00",
-      "TITOLO_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "Fabbricazione di altri prodotti chimici di base organici",
-      "settore": "chimico",
+      "settore": "ict",
       "normative": [
-        "REACH (Reg. CE 1907/2006)",
-        "CLP (Reg. CE 1272/2008)",
-        "Direttiva 98/24/CE (Agenti chimici)",
-        "Direttiva Seveso III (2012/18/UE)"
+        "GDPR (Reg. UE 2016/679)",
+        "NIS2 (Direttiva UE 2022/2555)",
+        "Cyber Resilience Act",
+        "AI Act (quando applicabile)"
       ],
       "certificazioni": [
+        "ISO 27001",
         "ISO 9001",
-        "ISO 14001",
-        "ISO 45001",
-        "ISO 50001"
+        "SOC 2",
+        "ISO 27701"
       ]
     }
   ]
 }
 ```
 
-**Risposta tipo (nessun risultato):**
+**Risposta (nessun risultato con suggerimenti):**
 ```json
 {
   "found": 0,
   "items": [],
   "suggestions": [
     {
-      "code": "20.13.0",
-      "title": "Fabbricazione di altri prodotti chimici di base inorganici"
+      "code": "62.02.0",
+      "title": "Consulenza nel settore delle tecnologie dell'informatica",
+      "similarity": 0.85
     },
     {
-      "code": "20.15.0",
-      "title": "Fabbricazione di fertilizzanti e composti azotati"
+      "code": "62.03.0",
+      "title": "Gestione di strutture e apparecchiature informatiche",
+      "similarity": 0.72
     }
   ],
-  "message": "Nessun risultato per 'XX.XX'. Prova con uno dei suggerimenti."
+  "message": "Nessun risultato esatto. Ecco alcuni suggerimenti basati sulla ricerca."
 }
 ```
 
@@ -228,10 +225,10 @@ GET /autocomplete?partial=20.1&limit=10
 }
 ```
 
-### 5. Test Visura API
-**Endpoint:** `GET /api/test-visura`
+### 5. Health Check
+**Endpoint:** `GET /health`
 
-**Descrizione:** Endpoint di test per verificare che l'API di estrazione visure funzioni
+**Descrizione:** Verifica stato del servizio e versione
 
 **Risposta:**
 ```json
@@ -254,17 +251,19 @@ GET /autocomplete?partial=20.1&limit=10
 }
 ```
 
-### 6. Estrazione Visura Camerale
+### 6. Estrazione Visura Camerale [Integrato]
 **Endpoint:** `POST /api/extract-visura`
 
-**Descrizione:** Estrae dati strutturati da un PDF di visura camerale
+**Descrizione:** Estrae P.IVA, codice ATECO e oggetto sociale da PDF visura
 
 **Content-Type:** `multipart/form-data`
 
 **Parametri:**
 | Parametro | Tipo | Obbligatorio | Descrizione |
 |-----------|------|--------------|-------------|
-| `file` | file | ✅ | File PDF della visura (max 20MB) |
+| `file` | file | ✅ | PDF visura camerale (max 20MB) |
+
+**Note:** Vedi DOCUMENTAZIONE_BACKEND_VISURE.md per dettagli completi
 
 **Esempio chiamata (JavaScript):**
 ```javascript
@@ -351,14 +350,17 @@ pip install pdfplumber PyPDF2 Pillow pdfminer.six python-multipart
 | `normative` | array | Lista normative applicabili al settore |
 | `certificazioni` | array | Lista certificazioni consigliate per il settore |
 
-### Settori mappati e relativi prefissi ATECO:
-- **Chimico**: codici che iniziano con `20`
-- **Alimentare**: codici che iniziano con `10` o `11`
-- **Sanitario**: codici che iniziano con `21` o `86`
-- **Automotive**: codici che iniziano con `29` o `45`
-- **Industriale**: codici che iniziano con `25` o `28`
-- **ICT**: codici che iniziano con `62`
-- **Finance**: codici che iniziano con `64` o `66`
+### Settori Mappati e Normative
+
+| Settore | Prefissi ATECO | Normative Principali | Certificazioni |
+|---------|----------------|---------------------|----------------|
+| **ICT** | 62, 63 | GDPR, NIS2, CRA, AI Act | ISO 27001, SOC 2 |
+| **Chimico** | 20 | REACH, CLP, Seveso III | ISO 14001, 45001 |
+| **Alimentare** | 10, 11 | HACCP, Reg. 178/2002 | ISO 22000, BRC |
+| **Sanitario** | 21, 86 | MDR, IVDR, GMP | ISO 13485, 9001 |
+| **Automotive** | 29, 45 | UNECE, TISAX | IATF 16949, ISO 26262 |
+| **Finance** | 64, 66 | DORA, PSD2, MiFID II | ISO 27001, PCI DSS |
+| **Industriale** | 25, 28 | Macchine 2006/42/CE | ISO 9001, 45001 |
 
 ---
 
