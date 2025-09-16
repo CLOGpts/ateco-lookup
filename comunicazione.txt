@@ -1,24 +1,36 @@
-Ho bisogno di preparare il backend Python per il deploy su Railway. Il backend è in /Celerya_Cyber_Ateco/ e include:
-
-  1. ateco_lookup.py - Server FastAPI con API per codici ATECO
-  2. test_server.py - Server HTTP semplice per mappature Excel
-  3. visura_extractor_FINAL_embedded.py - Estrattore visure
-
-  Mi serve che tu:
-
-  1. Crea un file main.py unificato che:
-    - Avvii FastAPI con tutte le API di ateco_lookup.py
-    - Includa gli endpoint di test_server.py (/categories, /events, /description)
-    - Aggiunga CORS per permettere accesso dal frontend
-  2. Crea requirements.txt con tutte le dipendenze:
-  fastapi
-  uvicorn
-  pandas
-  openpyxl
-  pyyaml
-  python-multipart
-  3. Crea Procfile per Railway:
-  web: uvicorn main:app --host 0.0.0.0 --port $PORT
-  4. Verifica che tutti i file Excel e JSON siano nella stessa cartella
-
-  Il frontend è già pronto e farà chiamate al backend deployato."
+Starting Container
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+Starting Container
+/bin/bash: line 1: uvicorn: command not found
+Stopping Container
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
+/bin/bash: line 1: uvicorn: command not found
