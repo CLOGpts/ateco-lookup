@@ -4,9 +4,14 @@ API Backend per Railway - VERSIONE MINIMAL TESTATA
 """
 import os
 import json
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Crea app
 app = FastAPI(title="Celerya API", version="1.0")
@@ -24,12 +29,16 @@ app.add_middleware(
 EXCEL_CATEGORIES = {}
 EXCEL_DESCRIPTIONS = {}
 try:
+    logger.info("Tentativo caricamento MAPPATURE_EXCEL_PERFETTE.json...")
     with open("MAPPATURE_EXCEL_PERFETTE.json", 'r', encoding='utf-8') as f:
         data = json.load(f)
         EXCEL_CATEGORIES = data.get('mappature_categoria_eventi', {})
         EXCEL_DESCRIPTIONS = data.get('vlookup_map', {})
-except:
-    pass
+    logger.info(f"Caricati {len(EXCEL_CATEGORIES)} categorie e {len(EXCEL_DESCRIPTIONS)} descrizioni")
+except Exception as e:
+    logger.warning(f"Impossibile caricare mappature: {e}")
+    EXCEL_CATEGORIES = {}
+    EXCEL_DESCRIPTIONS = {}
 
 @app.get("/")
 def root():
@@ -69,7 +78,5 @@ def description(event_code: str):
         return {"code": event_code, "description": desc}
     return {"code": event_code, "description": "Not found"}
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=port)
+# NON serve if __name__ == "__main__" per Railway
+# Railway usa il Procfile per avviare uvicorn
