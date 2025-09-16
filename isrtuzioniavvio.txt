@@ -1,0 +1,70 @@
+   python ateco_lookup.py --file tabella_ATECO.xlsx --serve --port 8080
+
+   python -m http.server 8888
+
+   python test_server.py
+
+
+## BACKEND OPERATIVO - COMANDI DI AVVIO
+
+Il backend è attivo e funzionante. Per avviare il sistema completo, eseguire questi 3 comandi in 3 terminali separati:
+
+### Terminal 1 - API Principale ATECO (porta 8080)
+python ateco_lookup.py --file tabella_ATECO.xlsx --serve --port 8080
+
+### Terminal 2 - File Server Statico (porta 8888)
+python -m http.server 8888
+
+### Terminal 3 - Test Server per Eventi Risk (porta 8000)
+python test_server.py
+
+---
+
+## RICHIESTA TEST AL FRONTEND
+
+Caro Frontend Developer,
+
+Il backend è completamente operativo con tutti e 3 i servizi attivi. Ti chiedo di eseguire i seguenti test per verificare l'integrazione:
+
+### 1. Test Ricerca ATECO
+- Endpoint: http://localhost:8080/lookup?code=62.01
+- Verifica che ritorni i dati del codice ATECO per sviluppo software
+
+### 2. Test Autocomplete
+- Endpoint: http://localhost:8080/autocomplete?q=software
+- Verifica suggerimenti durante digitazione
+
+### 3. Test Risk Assessment Categories
+- Endpoint: http://localhost:8000/categories
+- Verifica che ritorni le 7 categorie di rischio
+
+### 4. Test Eventi per Categoria
+- Endpoint: http://localhost:8000/events/Clients_product_Clienti
+- Verifica che ritorni gli eventi di rischio per la categoria
+
+### 5. Test Calcolo Risk Assessment
+- Endpoint: POST http://localhost:8080/calculate-risk-assessment
+- Body esempio in DOCUMENTAZIONE_ARCHITETTURA_GENERALE.md (riga 140-153)
+
+### 6. Test Estrazione Visura (se hai un PDF)
+- Endpoint: POST http://localhost:8080/api/extract-visura
+- Upload un PDF di visura camerale
+
+### 7. Test File Statici
+- Verifica accesso a: http://localhost:8888/test_finale.html
+
+---
+
+## NOTE IMPORTANTI
+
+1. CORS è abilitato su tutti gli endpoint - non dovrebbero esserci problemi di cross-origin
+2. Tutti i servizi sono attivi sulle porte indicate sopra
+3. La documentazione completa è in DOCUMENTAZIONE_ARCHITETTURA_GENERALE.md
+4. Esempi di integrazione JavaScript sono alle righe 221-249 del file documentazione
+
+Per qualsiasi problema, verifica che:
+- I 3 processi siano attivi nei terminali
+- Le porte 8000, 8080, 8888 siano libere
+- I file richiesti (tabella_ATECO.xlsx, MAPPATURE_EXCEL_PERFETTE.json) siano presenti
+
+Fammi sapere l'esito dei test!

@@ -1,5 +1,0 @@
-   python ateco_lookup.py --file tabella_ATECO.xlsx --serve --port 8080
-
-   python -m http.server 8888
-    python test_server.py
-

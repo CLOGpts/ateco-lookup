@@ -6,6 +6,7 @@ IMPORTANTE: Servono 3 PowerShell aperte contemporaneamente!
 1. PRIMA POWERSHELL - Frontend principale (porta 8080):
    cd C:\Users\speci\Desktop\Varie\Celerya_Cyber_Ateco
    python -m http.server 8080
+    python ateco_lookup.py --file tabella_ATECO.xlsx --serve --port 8080
    
    Poi apri nel browser: http://localhost:8080
 
