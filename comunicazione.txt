@@ -1,12 +1,12 @@
-s
-/bin/bash: line 1: pip: command not found
+/root/.nix-profile/bin/python: No module named pip
 Dockerfile:20
 -------------------
-18 |     ENV NIXPACKS_PATH=/app/node_modules/.bin:$NIXPACKS_PATH
+18 |     ENV NIXPACKS_PATH=/opt/venv/bin:$NIXPACKS_PATH
 19 |     COPY . /app/.
-20 | >>> RUN --mount=type=cache,id=s/cc58b0e4-35f3-429f-818a-703f9bb57a99-/root/npm,target=/root/.npm pip install -r requirements.txt
+20 | >>> RUN --mount=type=cache,id=s/cc58b0e4-35f3-429f-818a-703f9bb57a99-/root/cache/pip,target=/root/.cache/pip python -m pip install -r requirements.txt
 21 |
 22 |     # build phase
 -------------------
-ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c pip install -r requirements.txt" did not complete successfully: exit code: 127
+ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c python -m pip install -r requirements.txt" did not complete successfully: exit code: 1
 Error: Docker build failed
+ 
