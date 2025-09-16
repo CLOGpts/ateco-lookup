@@ -1,36 +1,12 @@
-Starting Container
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-Starting Container
-/bin/bash: line 1: uvicorn: command not found
-Stopping Container
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
-/bin/bash: line 1: uvicorn: command not found
+s
+/bin/bash: line 1: pip: command not found
+Dockerfile:20
+-------------------
+18 |     ENV NIXPACKS_PATH=/app/node_modules/.bin:$NIXPACKS_PATH
+19 |     COPY . /app/.
+20 | >>> RUN --mount=type=cache,id=s/cc58b0e4-35f3-429f-818a-703f9bb57a99-/root/npm,target=/root/.npm pip install -r requirements.txt
+21 |
+22 |     # build phase
+-------------------
+ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c pip install -r requirements.txt" did not complete successfully: exit code: 127
+Error: Docker build failed
