@@ -5,6 +5,8 @@ API Backend per Railway - VERSIONE MINIMAL TESTATA
 import os
 import json
 import logging
+import pandas as pd
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -24,6 +26,35 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
+
+# ============= CARICA DATI ATECO =============
+ATECO_DATA = []
+try:
+    logger.info("Caricamento tabella_ATECO.xlsx...")
+    df = pd.read_excel("tabella_ATECO.xlsx", dtype=str)
+    df = df.fillna("")
+
+    # Prepara lista per ricerca veloce
+    for _, row in df.iterrows():
+        code = str(row.get('Codice Ateco 2007', '')).strip()
+        desc = str(row.get('Descrizione', '')).strip()
+        if code and desc:
+            ATECO_DATA.append({
+                "code": code,
+                "description": desc,
+                "search_text": f"{code} {desc}".lower()
+            })
+
+    logger.info(f"Caricati {len(ATECO_DATA)} codici ATECO")
+except Exception as e:
+    logger.warning(f"Impossibile caricare ATECO: {e}")
+    # Fallback con alcuni dati di esempio
+    ATECO_DATA = [
+        {"code": "62.01", "description": "Produzione di software", "search_text": "62.01 produzione di software"},
+        {"code": "62.02", "description": "Consulenza informatica", "search_text": "62.02 consulenza informatica"},
+        {"code": "56.10", "description": "Ristoranti e attività di ristorazione", "search_text": "56.10 ristoranti e attività di ristorazione"},
+        {"code": "47.11", "description": "Commercio al dettaglio", "search_text": "47.11 commercio al dettaglio"}
+    ]
 
 # Carica dati Risk se esistono
 EXCEL_CATEGORIES = {}
@@ -268,44 +299,78 @@ def calculate_risk_assessment(data: dict):
 # ============= ATECO LOOKUP ENDPOINTS (MOCK) =============
 
 @app.get("/lookup")
-def ateco_lookup(description: str = ""):
-    """Endpoint ATECO lookup - versione mock"""
+def ateco_lookup(description: str = "", limit: int = 10):
+    """Ricerca ATECO per descrizione"""
+    if not description:
+        return {"results": [], "query": description, "total": 0}
+
+    query_lower = description.lower()
+    results = []
+
+    # Ricerca nei dati ATECO
+    for item in ATECO_DATA:
+        if query_lower in item["search_text"]:
+            score = 0.9 if query_lower in item["description"].lower() else 0.7
+            results.append({
+                "code": item["code"],
+                "description": item["description"],
+                "score": score
+            })
+            if len(results) >= limit:
+                break
+
+    # Ordina per score
+    results.sort(key=lambda x: x["score"], reverse=True)
+
     return {
-        "results": [
-            {
-                "code": "62.01",
-                "description": "Produzione di software",
-                "score": 0.95
-            },
-            {
-                "code": "62.02",
-                "description": "Consulenza informatica",
-                "score": 0.85
-            }
-        ],
+        "results": results,
         "query": description,
-        "total": 2
+        "total": len(results)
     }
 
 @app.get("/autocomplete")
-def ateco_autocomplete(q: str = ""):
-    """Endpoint ATECO autocomplete - versione mock"""
+def ateco_autocomplete(q: str = "", limit: int = 10):
+    """Suggerimenti ATECO per autocompletamento"""
+    if not q or len(q) < 2:
+        # Mostra alcuni esempi comuni
+        suggestions = [
+            f"{item['code']} - {item['description']}"
+            for item in ATECO_DATA[:5]
+        ]
+    else:
+        query_lower = q.lower()
+        suggestions = []
+
+        for item in ATECO_DATA:
+            if query_lower in item["search_text"]:
+                suggestions.append(f"{item['code']} - {item['description']}")
+                if len(suggestions) >= limit:
+                    break
+
     return {
-        "suggestions": [
-            "Software development",
-            "Software consulting",
-            "Software engineering"
-        ],
+        "suggestions": suggestions,
         "query": q
     }
 
 @app.post("/batch")
 def ateco_batch(data: dict):
-    """Endpoint ATECO batch - versione mock"""
+    """Ricerca batch di codici ATECO"""
+    codes = data.get("codes", [])
+    results = []
+
+    for code in codes:
+        for item in ATECO_DATA:
+            if item["code"] == code:
+                results.append({
+                    "code": item["code"],
+                    "description": item["description"]
+                })
+                break
+
     return {
         "status": "success",
-        "processed": len(data.get("codes", [])),
-        "results": []
+        "processed": len(codes),
+        "results": results
     }
 
 # ============= VISURA EXTRACTION ENDPOINT =============

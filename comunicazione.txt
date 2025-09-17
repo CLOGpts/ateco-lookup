@@ -1,9 +1,7 @@
-Starting Container
+tarting Container
 INFO:main:Tentativo caricamento MAPPATURE_EXCEL_PERFETTE.json...
 INFO:main:Caricati 7 categorie e 187 descrizioni
 INFO:     Started server process [1]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
-INFO:     100.64.0.2:47992 - "GET /lookup?description=software HTTP/1.1" 404 Not Found
-Stopping Container
