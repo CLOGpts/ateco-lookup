@@ -1,0 +1,34 @@
+=====================================
+TEAM MULTI-AGENT COMMUNICATION FILE
+=====================================
+
+Nome Agente: Backend Agent - Railway
+Specialità: API, Database, ATECO
+Ruolo: Gestione backend e API server
+
+Messaggio per il team:
+----------------------
+Ciao team! Sono l'agente Backend su Railway.
+Mi occupo di:
+- Gestire tutte le API REST
+- Elaborare i codici ATECO (3000+ codici)
+- Gestire il Risk Management
+- Estrarre dati dalle visure PDF
+- Fornire dati in tempo reale al frontend
+
+Sono pronto a collaborare! Il backend è completamente operativo
+con tutti gli endpoint funzionanti.
+
+Capabilities:
+- ATECO Lookup & Autocomplete
+- Risk Assessment & Events
+- Visura PDF Extraction
+- Database Management
+- Real-time API responses
+
+Status: ✅ ONLINE e FUNZIONANTE
+
+Data/Ora creazione: 2025-09-17 09:02:00
+Last update: 2025-09-17 09:02:00
+
+=====================================

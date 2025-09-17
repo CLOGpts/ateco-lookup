@@ -1,0 +1,546 @@
+[
+  {
+    "code": "01.11",
+    "description": "Coltivazione di cereali (escluso il riso), legumi da granella e semi oleosi"
+  },
+  {
+    "code": "01.13",
+    "description": "Coltivazione di ortaggi e meloni, radici e tuberi"
+  },
+  {
+    "code": "01.21",
+    "description": "Coltivazione di uva"
+  },
+  {
+    "code": "01.50",
+    "description": "Coltivazioni agricole e allevamento di animali"
+  },
+  {
+    "code": "10.11",
+    "description": "Lavorazione e conservazione di carne"
+  },
+  {
+    "code": "10.71",
+    "description": "Produzione di pane, prodotti di pasticceria freschi"
+  },
+  {
+    "code": "11.01",
+    "description": "Distillazione, rettifica e miscelatura degli alcolici"
+  },
+  {
+    "code": "13.10",
+    "description": "Preparazione e filatura di fibre tessili"
+  },
+  {
+    "code": "14.13",
+    "description": "Confezione di altro abbigliamento esterno"
+  },
+  {
+    "code": "15.12",
+    "description": "Fabbricazione di articoli da viaggio, borse, pelletteria"
+  },
+  {
+    "code": "25.62",
+    "description": "Lavori di meccanica generale"
+  },
+  {
+    "code": "28.11",
+    "description": "Fabbricazione di motori e turbine"
+  },
+  {
+    "code": "41.10",
+    "description": "Sviluppo di progetti immobiliari"
+  },
+  {
+    "code": "41.20",
+    "description": "Costruzione di edifici residenziali e non residenziali"
+  },
+  {
+    "code": "43.21",
+    "description": "Installazione di impianti elettrici"
+  },
+  {
+    "code": "43.22",
+    "description": "Installazione di impianti idraulici, di riscaldamento"
+  },
+  {
+    "code": "45.11",
+    "description": "Commercio di autovetture e di autoveicoli leggeri"
+  },
+  {
+    "code": "45.20",
+    "description": "Manutenzione e riparazione di autoveicoli"
+  },
+  {
+    "code": "46.71",
+    "description": "Commercio all'ingrosso di combustibili solidi, liquidi"
+  },
+  {
+    "code": "47.11",
+    "description": "Commercio al dettaglio in esercizi non specializzati con prevalenza alimentari"
+  },
+  {
+    "code": "47.19",
+    "description": "Commercio al dettaglio in altri esercizi non specializzati"
+  },
+  {
+    "code": "47.21",
+    "description": "Commercio al dettaglio di frutta e verdura"
+  },
+  {
+    "code": "47.22",
+    "description": "Commercio al dettaglio di carni e prodotti a base di carne"
+  },
+  {
+    "code": "47.24",
+    "description": "Commercio al dettaglio di pane, torte, dolciumi"
+  },
+  {
+    "code": "47.30",
+    "description": "Commercio al dettaglio di carburante per autotrazione"
+  },
+  {
+    "code": "47.52",
+    "description": "Commercio al dettaglio di ferramenta, vernici"
+  },
+  {
+    "code": "47.71",
+    "description": "Commercio al dettaglio di articoli di abbigliamento"
+  },
+  {
+    "code": "47.72",
+    "description": "Commercio al dettaglio di calzature e articoli in pelle"
+  },
+  {
+    "code": "49.31",
+    "description": "Trasporto terrestre di passeggeri in aree urbane"
+  },
+  {
+    "code": "49.32",
+    "description": "Trasporto con taxi, noleggio auto con conducente"
+  },
+  {
+    "code": "49.41",
+    "description": "Trasporto di merci su strada"
+  },
+  {
+    "code": "52.10",
+    "description": "Magazzinaggio e deposito"
+  },
+  {
+    "code": "52.21",
+    "description": "Attività dei servizi connessi ai trasporti terrestri"
+  },
+  {
+    "code": "55.10",
+    "description": "Alberghi e strutture simili"
+  },
+  {
+    "code": "55.20",
+    "description": "Alloggi per vacanze e altre strutture"
+  },
+  {
+    "code": "56.10",
+    "description": "Ristoranti e attività di ristorazione mobile"
+  },
+  {
+    "code": "56.21",
+    "description": "Fornitura di pasti preparati (catering)"
+  },
+  {
+    "code": "56.30",
+    "description": "Bar e altri esercizi simili senza cucina"
+  },
+  {
+    "code": "58.11",
+    "description": "Edizione di libri"
+  },
+  {
+    "code": "59.11",
+    "description": "Attività di produzione cinematografica, video"
+  },
+  {
+    "code": "62.01",
+    "description": "Produzione di software non connesso all'edizione"
+  },
+  {
+    "code": "62.02",
+    "description": "Consulenza nel settore delle tecnologie dell'informatica"
+  },
+  {
+    "code": "62.03",
+    "description": "Gestione di strutture e apparecchiature informatiche"
+  },
+  {
+    "code": "62.09",
+    "description": "Altre attività dei servizi connessi alle tecnologie dell'informatica"
+  },
+  {
+    "code": "63.11",
+    "description": "Elaborazione dei dati, hosting e attività connesse"
+  },
+  {
+    "code": "63.12",
+    "description": "Portali web"
+  },
+  {
+    "code": "64.19",
+    "description": "Altre intermediazioni monetarie"
+  },
+  {
+    "code": "64.92",
+    "description": "Altre attività creditizie"
+  },
+  {
+    "code": "66.12",
+    "description": "Negoziazione di contratti relativi a titoli e merci"
+  },
+  {
+    "code": "66.19",
+    "description": "Altre attività ausiliarie dei servizi finanziari"
+  },
+  {
+    "code": "68.10",
+    "description": "Compravendita di beni immobili effettuata su beni propri"
+  },
+  {
+    "code": "68.20",
+    "description": "Affitto e gestione di immobili di proprietà o in leasing"
+  },
+  {
+    "code": "68.31",
+    "description": "Attività di mediazione immobiliare"
+  },
+  {
+    "code": "68.32",
+    "description": "Amministrazione di condomini e gestione beni immobili"
+  },
+  {
+    "code": "69.10",
+    "description": "Attività degli studi legali"
+  },
+  {
+    "code": "69.20",
+    "description": "Contabilità, controllo e revisione contabile, consulenza fiscale"
+  },
+  {
+    "code": "70.10",
+    "description": "Attività delle holding impegnate nelle attività gestionali"
+  },
+  {
+    "code": "70.21",
+    "description": "Pubbliche relazioni e comunicazione"
+  },
+  {
+    "code": "70.22",
+    "description": "Consulenza imprenditoriale e altra consulenza amministrativo-gestionale"
+  },
+  {
+    "code": "71.11",
+    "description": "Attività degli studi di architettura"
+  },
+  {
+    "code": "71.12",
+    "description": "Attività degli studi d'ingegneria"
+  },
+  {
+    "code": "71.20",
+    "description": "Collaudi ed analisi tecniche"
+  },
+  {
+    "code": "72.19",
+    "description": "Altre attività di ricerca e sviluppo sperimentale"
+  },
+  {
+    "code": "73.11",
+    "description": "Agenzie pubblicitarie"
+  },
+  {
+    "code": "73.12",
+    "description": "Attività delle concessionarie pubblicitarie"
+  },
+  {
+    "code": "73.20",
+    "description": "Ricerche di mercato e sondaggi di opinione"
+  },
+  {
+    "code": "74.10",
+    "description": "Attività di design specializzate"
+  },
+  {
+    "code": "74.20",
+    "description": "Attività fotografiche"
+  },
+  {
+    "code": "74.30",
+    "description": "Traduzione e interpretariato"
+  },
+  {
+    "code": "74.90",
+    "description": "Altre attività professionali, scientifiche e tecniche"
+  },
+  {
+    "code": "77.11",
+    "description": "Noleggio di autovetture ed autoveicoli leggeri"
+  },
+  {
+    "code": "77.21",
+    "description": "Noleggio di attrezzature sportive e ricreative"
+  },
+  {
+    "code": "78.10",
+    "description": "Attività di ricerca, selezione, fornitura di personale"
+  },
+  {
+    "code": "79.11",
+    "description": "Attività delle agenzie di viaggio"
+  },
+  {
+    "code": "79.12",
+    "description": "Attività dei tour operator"
+  },
+  {
+    "code": "80.10",
+    "description": "Servizi di vigilanza privata"
+  },
+  {
+    "code": "81.10",
+    "description": "Servizi integrati di gestione agli edifici"
+  },
+  {
+    "code": "81.21",
+    "description": "Pulizia generale (non specializzata) di edifici"
+  },
+  {
+    "code": "81.29",
+    "description": "Altre attività di pulizia"
+  },
+  {
+    "code": "82.11",
+    "description": "Servizi integrati di supporto per le funzioni d'ufficio"
+  },
+  {
+    "code": "82.19",
+    "description": "Servizi di fotocopiatura, preparazione documenti"
+  },
+  {
+    "code": "82.30",
+    "description": "Organizzazione di convegni e fiere"
+  },
+  {
+    "code": "82.91",
+    "description": "Attività di recupero crediti"
+  },
+  {
+    "code": "82.99",
+    "description": "Altri servizi di sostegno alle imprese"
+  },
+  {
+    "code": "85.10",
+    "description": "Istruzione prescolastica"
+  },
+  {
+    "code": "85.20",
+    "description": "Istruzione primaria"
+  },
+  {
+    "code": "85.31",
+    "description": "Istruzione secondaria di formazione generale"
+  },
+  {
+    "code": "85.32",
+    "description": "Istruzione secondaria tecnica e professionale"
+  },
+  {
+    "code": "85.41",
+    "description": "Istruzione e formazione tecnica superiore"
+  },
+  {
+    "code": "85.42",
+    "description": "Istruzione universitaria e post-universitaria"
+  },
+  {
+    "code": "85.51",
+    "description": "Corsi sportivi e ricreativi"
+  },
+  {
+    "code": "85.52",
+    "description": "Formazione culturale"
+  },
+  {
+    "code": "85.59",
+    "description": "Altri servizi di istruzione"
+  },
+  {
+    "code": "85.60",
+    "description": "Attività di supporto all'istruzione"
+  },
+  {
+    "code": "86.10",
+    "description": "Servizi ospedalieri"
+  },
+  {
+    "code": "86.21",
+    "description": "Servizi degli studi medici di medicina generale"
+  },
+  {
+    "code": "86.22",
+    "description": "Studi medici specialistici e poliambulatori"
+  },
+  {
+    "code": "86.23",
+    "description": "Attività degli studi odontoiatrici"
+  },
+  {
+    "code": "86.90",
+    "description": "Altri servizi di assistenza sanitaria"
+  },
+  {
+    "code": "87.10",
+    "description": "Strutture di assistenza residenziale per anziani"
+  },
+  {
+    "code": "88.10",
+    "description": "Assistenza sociale non residenziale per anziani"
+  },
+  {
+    "code": "88.91",
+    "description": "Servizi di asili nido e assistenza diurna minori"
+  },
+  {
+    "code": "88.99",
+    "description": "Altre attività di assistenza sociale"
+  },
+  {
+    "code": "90.01",
+    "description": "Rappresentazioni artistiche"
+  },
+  {
+    "code": "90.02",
+    "description": "Attività di supporto alle rappresentazioni artistiche"
+  },
+  {
+    "code": "90.03",
+    "description": "Creazioni artistiche e letterarie"
+  },
+  {
+    "code": "90.04",
+    "description": "Gestione di teatri, sale da concerto"
+  },
+  {
+    "code": "91.01",
+    "description": "Attività di biblioteche ed archivi"
+  },
+  {
+    "code": "91.02",
+    "description": "Attività di musei"
+  },
+  {
+    "code": "91.03",
+    "description": "Gestione di luoghi e monumenti storici"
+  },
+  {
+    "code": "92.00",
+    "description": "Attività riguardanti le lotterie, scommesse"
+  },
+  {
+    "code": "93.11",
+    "description": "Gestione di impianti sportivi"
+  },
+  {
+    "code": "93.12",
+    "description": "Attività di club sportivi"
+  },
+  {
+    "code": "93.13",
+    "description": "Palestre"
+  },
+  {
+    "code": "93.19",
+    "description": "Altre attività sportive"
+  },
+  {
+    "code": "93.21",
+    "description": "Parchi di divertimento e parchi tematici"
+  },
+  {
+    "code": "93.29",
+    "description": "Altre attività ricreative e di divertimento"
+  },
+  {
+    "code": "94.11",
+    "description": "Attività di organizzazioni economiche e datoriali"
+  },
+  {
+    "code": "94.12",
+    "description": "Attività di organizzazioni professionali"
+  },
+  {
+    "code": "94.20",
+    "description": "Attività dei sindacati"
+  },
+  {
+    "code": "94.91",
+    "description": "Attività delle organizzazioni religiose"
+  },
+  {
+    "code": "94.92",
+    "description": "Attività dei partiti politici"
+  },
+  {
+    "code": "94.99",
+    "description": "Attività di altre organizzazioni associative"
+  },
+  {
+    "code": "95.11",
+    "description": "Riparazione di computer e periferiche"
+  },
+  {
+    "code": "95.12",
+    "description": "Riparazione di apparecchiature per comunicazione"
+  },
+  {
+    "code": "95.21",
+    "description": "Riparazione di prodotti elettronici di consumo"
+  },
+  {
+    "code": "95.22",
+    "description": "Riparazione di elettrodomestici e articoli casa"
+  },
+  {
+    "code": "95.23",
+    "description": "Riparazione di calzature e articoli in pelle"
+  },
+  {
+    "code": "95.24",
+    "description": "Riparazione di mobili e oggetti di arredamento"
+  },
+  {
+    "code": "95.25",
+    "description": "Riparazione di orologi e gioielli"
+  },
+  {
+    "code": "95.29",
+    "description": "Riparazione di altri beni per uso personale"
+  },
+  {
+    "code": "96.01",
+    "description": "Lavanderia e pulitura di articoli tessili"
+  },
+  {
+    "code": "96.02",
+    "description": "Servizi dei parrucchieri e altri trattamenti estetici"
+  },
+  {
+    "code": "96.03",
+    "description": "Servizi di pompe funebri e attività connesse"
+  },
+  {
+    "code": "96.04",
+    "description": "Servizi dei centri per il benessere fisico"
+  },
+  {
+    "code": "96.09",
+    "description": "Altre attività di servizi per la persona"
+  }
+]

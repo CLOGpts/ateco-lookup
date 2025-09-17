@@ -439,6 +439,23 @@ def build_api(df: pd.DataFrame):
         logger.info("Health check requested")
         return {"status": "ok", "version": "2.0", "cache_enabled": True}
 
+    @app.get("/team/hello")
+    async def team_hello():
+        """Endpoint per sistema multi-agente"""
+        from datetime import datetime
+        return {
+            "agent": "Backend Railway",
+            "message": "Ciao team! Sono il backend",
+            "capabilities": ["ATECO", "Risk API", "Database"],
+            "timestamp": datetime.now().isoformat(),
+            "status": "operational",
+            "endpoints_available": [
+                "/lookup", "/autocomplete", "/batch",
+                "/events/{category}", "/risk-assessment-fields",
+                "/api/extract-visura"
+            ]
+        }
+
     @app.get("/lookup")
     def lookup(code: str = Query(..., description="Codice ATECO"),
                prefer: Optional[str] = Query(None, description="priorità: 2022 | 2025 | 2025-camerale"),

@@ -1,7 +1,26 @@
-tarting Container
-INFO:main:Tentativo caricamento MAPPATURE_EXCEL_PERFETTE.json...
-INFO:main:Caricati 7 categorie e 187 descrizioni
-INFO:     Started server process [1]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+ PER IL CLAUDE DEL BACKEND (Railway):
+
+  Copia e incolla questo:
+
+  Ciao! Sei parte di un sistema multi-agente.
+
+  ISTRUZIONI:
+  1. Crea un file chiamato "team-hello.txt" nel progetto
+  2. Scrivi dentro:
+     - Il tuo nome: "Backend Agent - Railway"
+     - La tua specialità: "API, Database, ATECO"
+     - Un messaggio per gli altri agenti
+     - La data e ora
+
+  3. Poi aggiungi questo endpoint semplice in ateco_lookup.py:     
+
+  @app.get("/team/hello")
+  async def team_hello():
+      return {
+          "agent": "Backend Railway",
+          "message": "Ciao team! Sono il backend",
+          "capabilities": ["ATECO", "Risk API", "Database"],       
+          "timestamp": datetime.now().isoformat()
+      }
+
+  Conferma quando hai fatto!
