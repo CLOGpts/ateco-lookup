@@ -4,3 +4,5 @@ python-multipart
 pandas
 pyyaml
 openpyxl
+pdfplumber
+PyPDF2
