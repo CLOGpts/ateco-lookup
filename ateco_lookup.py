@@ -35,6 +35,7 @@ from typing import Dict, List, Optional, Union
 from difflib import get_close_matches
 import os
 import tempfile
+from datetime import datetime
 
 import pandas as pd
 import yaml
@@ -438,6 +439,15 @@ def build_api(df: pd.DataFrame):
     def health():
         logger.info("Health check requested")
         return {"status": "ok", "version": "2.0", "cache_enabled": True}
+
+    @app.get("/team/hello")
+    async def team_hello():
+        return {
+            "agent": "Backend Railway",
+            "message": "Ciao team! Sono il backend",
+            "capabilities": ["ATECO", "Risk API", "Database"],
+            "timestamp": datetime.now().isoformat()
+        }
 
     @app.get("/lookup")
     def lookup(code: str = Query(..., description="Codice ATECO"),
@@ -1372,6 +1382,104 @@ def build_api(df: pd.DataFrame):
                     pass
         
         return JSONResponse(result)
+
+    # ========== ENDPOINT ZONA SISMICA ==========
+    @app.get("/seismic-zone/{comune}")
+    async def get_seismic_zone(comune: str, provincia: Optional[str] = None):
+        """
+        Restituisce la zona sismica di un comune italiano (OPCM 3519/2006)
+        """
+        try:
+            # Carica database zone sismiche
+            db_path = Path(__file__).parent / 'zone_sismiche_comuni.json'
+            if not db_path.exists():
+                return JSONResponse({
+                    "error": "database_not_found",
+                    "message": "Database zone sismiche non trovato"
+                }, status_code=500)
+
+            with open(db_path, 'r', encoding='utf-8') as f:
+                db = json.load(f)
+
+            # Normalizza input
+            comune_upper = comune.upper().strip()
+            comune_normalized = comune_upper.replace("'", "").replace("À", "A").replace("È", "E").replace("Ì", "I").replace("Ò", "O").replace("Ù", "U")
+
+            # Ricerca esatta
+            if comune_upper in db['comuni']:
+                zona_data = db['comuni'][comune_upper]
+
+                # Verifica provincia se specificata
+                if provincia and zona_data['provincia'] != provincia.upper():
+                    return JSONResponse({
+                        "error": "comune_provincia_mismatch",
+                        "message": f"Comune {comune} non trovato in provincia {provincia}"
+                    })
+
+                # Descrizioni zone
+                descriptions = {
+                    1: "Zona 1 - Sismicità alta: forte probabilità di terremoti intensi. Richiede massima attenzione nella progettazione antisismica.",
+                    2: "Zona 2 - Sismicità media: possibili terremoti forti. Necessarie adeguate misure di sicurezza strutturale.",
+                    3: "Zona 3 - Sismicità bassa: terremoti forti meno probabili rispetto a zona 1 e 2. Comunque richieste norme antisismiche.",
+                    4: "Zona 4 - Sismicità molto bassa: probabilità molto bassa di terremoti. Norme antisismiche facoltative per alcune Regioni."
+                }
+
+                return JSONResponse({
+                    "comune": comune_upper,
+                    "provincia": zona_data['provincia'],
+                    "regione": zona_data.get('regione', 'N/D'),
+                    "zona_sismica": zona_data['zona_sismica'],
+                    "accelerazione_ag": zona_data['accelerazione_ag'],
+                    "risk_level": zona_data['risk_level'],
+                    "description": descriptions.get(zona_data['zona_sismica'], "N/D"),
+                    "normativa": "OPCM 3519/2006",
+                    "source": "database_match",
+                    "confidence": 1.0
+                })
+
+            # Fuzzy matching per typo
+            comuni_list = list(db['comuni'].keys())
+            matches = get_close_matches(comune_normalized, comuni_list, n=1, cutoff=0.8)
+
+            if matches:
+                matched_comune = matches[0]
+                zona_data = db['comuni'][matched_comune]
+
+                descriptions = {
+                    1: "Zona 1 - Sismicità alta: forte probabilità di terremoti intensi.",
+                    2: "Zona 2 - Sismicità media: possibili terremoti forti.",
+                    3: "Zona 3 - Sismicità bassa: terremoti forti meno probabili.",
+                    4: "Zona 4 - Sismicità molto bassa: probabilità molto bassa di terremoti."
+                }
+
+                return JSONResponse({
+                    "comune": matched_comune,
+                    "provincia": zona_data['provincia'],
+                    "regione": zona_data.get('regione', 'N/D'),
+                    "zona_sismica": zona_data['zona_sismica'],
+                    "accelerazione_ag": zona_data['accelerazione_ag'],
+                    "risk_level": zona_data['risk_level'],
+                    "description": descriptions.get(zona_data['zona_sismica'], "N/D"),
+                    "normativa": "OPCM 3519/2006",
+                    "source": "fuzzy_match",
+                    "original_query": comune,
+                    "matched_to": matched_comune,
+                    "confidence": 0.9
+                })
+
+            # Comune non trovato
+            return JSONResponse({
+                "error": "comune_not_found",
+                "message": f"Comune '{comune}' non trovato nel database",
+                "suggestion": "Verifica il nome del comune o usa un comune più grande della zona"
+            })
+
+        except Exception as e:
+            logger.error(f"Errore seismic-zone: {str(e)}")
+            return JSONResponse({
+                "error": "internal_error",
+                "message": str(e)
+            }, status_code=500)
 
     return app
 
