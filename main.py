@@ -1390,6 +1390,188 @@ def build_api(df: pd.DataFrame):
         
         return JSONResponse(result)
 
+    # ENDPOINT ZONE SISMICHE - Database completo comuni italiani
+    @app.get("/seismic-zone/{comune}")
+    async def get_seismic_zone(comune: str, provincia: Optional[str] = None):
+        """
+        Restituisce la zona sismica di un comune italiano
+
+        Args:
+            comune: Nome del comune (case-insensitive)
+            provincia: Sigla provincia opzionale per disambiguare comuni omonimi
+
+        Returns:
+            Dati zona sismica: zona, ag, risk_level, description
+        """
+        try:
+            # Carica database zone sismiche
+            db_path = Path('zone_sismiche_comuni.json')
+            if not db_path.exists():
+                logger.error("Database zone sismiche non trovato")
+                return JSONResponse({
+                    "error": "database_not_found",
+                    "message": "Database zone sismiche non disponibile"
+                }, status_code=500)
+
+            with open(db_path, 'r', encoding='utf-8') as f:
+                db = json.load(f)
+
+            # Normalizza input comune
+            comune_upper = comune.upper().strip()
+            comune_clean = comune_upper.replace("'", "'").replace("À", "A").replace("È", "E").replace("É", "E").replace("Ì", "I").replace("Ò", "O").replace("Ù", "U")
+
+            # RICERCA ESATTA
+            if comune_upper in db['comuni']:
+                zona_data = db['comuni'][comune_upper]
+
+                # Se provincia specificata, verifica match
+                if provincia and zona_data['provincia'] != provincia.upper():
+                    return JSONResponse({
+                        "error": "comune_provincia_mismatch",
+                        "message": f"Comune {comune} non trovato in provincia {provincia}",
+                        "suggestion": f"{comune} trovato in provincia {zona_data['provincia']}"
+                    }, status_code=404)
+
+                # Descrizione dettagliata zona
+                zona = zona_data['zona_sismica']
+                descriptions = {
+                    1: "Zona 1 - Sismicità alta: È la zona più pericolosa, dove possono verificarsi fortissimi terremoti",
+                    2: "Zona 2 - Sismicità media: Zona dove possono verificarsi forti terremoti",
+                    3: "Zona 3 - Sismicità bassa: Zona che può essere soggetta a scuotimenti modesti",
+                    4: "Zona 4 - Sismicità molto bassa: È la zona meno pericolosa"
+                }
+
+                return JSONResponse({
+                    "comune": comune_upper,
+                    "provincia": zona_data['provincia'],
+                    "regione": zona_data.get('regione', 'N/D'),
+                    "zona_sismica": zona,
+                    "accelerazione_ag": zona_data['accelerazione_ag'],
+                    "risk_level": zona_data['risk_level'],
+                    "description": descriptions.get(zona, "N/D"),
+                    "normativa": "OPCM 3519/2006",
+                    "source": "database_match",
+                    "confidence": 1.0
+                })
+
+            # RICERCA FUZZY CON SIMILARITÀ
+            from difflib import get_close_matches
+
+            # Cerca comuni simili
+            all_comuni = list(db['comuni'].keys())
+            matches = get_close_matches(comune_clean, all_comuni, n=5, cutoff=0.6)
+
+            if matches:
+                # Se solo 1 match con alta confidenza, ritorna quello
+                if len(matches) == 1 or len(matches) > 0:
+                    best_match = matches[0]
+                    zona_data = db['comuni'][best_match]
+
+                    # Se provincia specificata, filtra per provincia
+                    if provincia:
+                        provincia_matches = [m for m in matches if db['comuni'][m]['provincia'] == provincia.upper()]
+                        if provincia_matches:
+                            best_match = provincia_matches[0]
+                            zona_data = db['comuni'][best_match]
+                        else:
+                            return JSONResponse({
+                                "error": "no_match_in_provincia",
+                                "message": f"Nessun comune simile a '{comune}' trovato in provincia {provincia}",
+                                "suggestions": [{"comune": m, "provincia": db['comuni'][m]['provincia']} for m in matches[:3]]
+                            }, status_code=404)
+
+                    zona = zona_data['zona_sismica']
+                    descriptions = {
+                        1: "Zona 1 - Sismicità alta: È la zona più pericolosa, dove possono verificarsi fortissimi terremoti",
+                        2: "Zona 2 - Sismicità media: Zona dove possono verificarsi forti terremoti",
+                        3: "Zona 3 - Sismicità bassa: Zona che può essere soggetta a scuotimenti modesti",
+                        4: "Zona 4 - Sismicità molto bassa: È la zona meno pericolosa"
+                    }
+
+                    # Calcola confidence basata su similarità
+                    from difflib import SequenceMatcher
+                    confidence = SequenceMatcher(None, comune_clean, best_match).ratio()
+
+                    return JSONResponse({
+                        "comune": best_match,
+                        "input_comune": comune_upper,
+                        "provincia": zona_data['provincia'],
+                        "regione": zona_data.get('regione', 'N/D'),
+                        "zona_sismica": zona,
+                        "accelerazione_ag": zona_data['accelerazione_ag'],
+                        "risk_level": zona_data['risk_level'],
+                        "description": descriptions.get(zona, "N/D"),
+                        "normativa": "OPCM 3519/2006",
+                        "source": "fuzzy_match",
+                        "confidence": round(confidence, 2),
+                        "note": f"Match approssimato: '{comune}' -> '{best_match}'"
+                    })
+
+            # NESSUN MATCH - Stima basata su provincia/regione
+            # Logica: comuni non mappati ereditano zona media della provincia
+            provincia_estimation = None
+            if provincia:
+                # Trova zona più comune nella provincia
+                comuni_provincia = {k: v for k, v in db['comuni'].items() if v['provincia'] == provincia.upper()}
+                if comuni_provincia:
+                    zone_counts = {}
+                    for data in comuni_provincia.values():
+                        z = data['zona_sismica']
+                        zone_counts[z] = zone_counts.get(z, 0) + 1
+                    zona_stimata = max(zone_counts, key=zone_counts.get)
+                    provincia_estimation = {
+                        "zona_sismica": zona_stimata,
+                        "accelerazione_ag": db["metadata"]["ag_reference"][f"zona_{zona_stimata}"],
+                        "risk_level": ["Molto Alta", "Alta", "Media", "Bassa"][zona_stimata-1]
+                    }
+
+            if provincia_estimation:
+                zona = provincia_estimation['zona_sismica']
+                descriptions = {
+                    1: "Zona 1 - Sismicità alta: È la zona più pericolosa, dove possono verificarsi fortissimi terremoti",
+                    2: "Zona 2 - Sismicità media: Zona dove possono verificarsi forti terremoti",
+                    3: "Zona 3 - Sismicità bassa: Zona che può essere soggetta a scuotimenti modesti",
+                    4: "Zona 4 - Sismicità molto bassa: È la zona meno pericolosa"
+                }
+
+                return JSONResponse({
+                    "comune": comune_upper,
+                    "provincia": provincia.upper(),
+                    "zona_sismica": zona,
+                    "accelerazione_ag": provincia_estimation['accelerazione_ag'],
+                    "risk_level": provincia_estimation['risk_level'],
+                    "description": descriptions.get(zona, "N/D"),
+                    "normativa": "OPCM 3519/2006",
+                    "source": "provincia_estimation",
+                    "confidence": 0.5,
+                    "note": f"Stima basata sulla zona prevalente della provincia {provincia}"
+                })
+
+            # ULTIMO FALLBACK - Ritorna suggerimenti
+            suggestions = []
+            if matches:
+                for match in matches[:5]:
+                    suggestions.append({
+                        "comune": match,
+                        "provincia": db['comuni'][match]['provincia'],
+                        "zona_sismica": db['comuni'][match]['zona_sismica']
+                    })
+
+            return JSONResponse({
+                "error": "comune_not_found",
+                "message": f"Comune '{comune}' non trovato nel database",
+                "suggestions": suggestions if suggestions else [],
+                "suggestion_text": "Verifica il nome del comune o fornisci la sigla provincia"
+            }, status_code=404)
+
+        except Exception as e:
+            logger.error(f"Errore in seismic-zone endpoint: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "error": "internal_error",
+                "message": "Errore interno del server",
+                "details": str(e)
+            }, status_code=500)
+
     return app
 
 

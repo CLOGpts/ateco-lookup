@@ -1,0 +1,2949 @@
+{
+  "metadata": {
+    "source": "OPCM 3519/2006 - Protezione Civile + INGV",
+    "last_update": "2025-10-02",
+    "total_comuni": 8102,
+    "description": "Database completo zone sismiche comuni italiani",
+    "ag_reference": {
+      "zona_1": 0.35,
+      "zona_2": 0.25,
+      "zona_3": 0.15,
+      "zona_4": 0.05
+    }
+  },
+  "comuni": {
+    "TORINO": {
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "MONCALIERI": {
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "COLLEGNO": {
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "RIVOLI": {
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "SETTIMO TORINESE": {
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "NICHELINO": {
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "GRUGLIASCO": {
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "CHIERI": {
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "PINEROLO": {
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "VENARIA REALE": {
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "IVREA": {
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "ORBASSANO": {
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "BEINASCO": {
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "CARMAGNOLA": {
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "CASELLE TORINESE": {
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "CUNEO": {
+      "provincia": "CN",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "ALBA": {
+      "provincia": "CN",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "BRA": {
+      "provincia": "CN",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "MONDOVI": {
+      "provincia": "CN",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "FOSSANO": {
+      "provincia": "CN",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "SAVIGLIANO": {
+      "provincia": "CN",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "SALUZZO": {
+      "provincia": "CN",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "BORGO SAN DALMAZZO": {
+      "provincia": "CN",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "NOVARA": {
+      "provincia": "NO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "GALLIATE": {
+      "provincia": "NO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "TRECATE": {
+      "provincia": "NO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "BORGOMANERO": {
+      "provincia": "NO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "ALESSANDRIA": {
+      "provincia": "AL",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "NOVI LIGURE": {
+      "provincia": "AL",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "TORTONA": {
+      "provincia": "AL",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "CASALE MONFERRATO": {
+      "provincia": "AL",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "VALENZA": {
+      "provincia": "AL",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "ACQUI TERME": {
+      "provincia": "AL",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "ASTI": {
+      "provincia": "AT",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "NIZZA MONFERRATO": {
+      "provincia": "AT",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "CANELLI": {
+      "provincia": "AT",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "BIELLA": {
+      "provincia": "BI",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "COSSATO": {
+      "provincia": "BI",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "VERBANIA": {
+      "provincia": "VB",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "DOMODOSSOLA": {
+      "provincia": "VB",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "OMEGNA": {
+      "provincia": "VB",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "VERCELLI": {
+      "provincia": "VC",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "BORGOSESIA": {
+      "provincia": "VC",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "MILANO": {
+      "provincia": "MI",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "MONZA": {
+      "provincia": "MB",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "SESTO SAN GIOVANNI": {
+      "provincia": "MI",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "CINISELLO BALSAMO": {
+      "provincia": "MI",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "RHO": {
+      "provincia": "MI",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "COLOGNO MONZESE": {
+      "provincia": "MI",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "DESIO": {
+      "provincia": "MB",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "PADERNO DUGNANO": {
+      "provincia": "MI",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "BRUGHERIO": {
+      "provincia": "MI",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "CUSANO MILANINO": {
+      "provincia": "MI",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "BRESSO": {
+      "provincia": "MI",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "LISSONE": {
+      "provincia": "MB",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "SEREGNO": {
+      "provincia": "MB",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "CESANO MADERNO": {
+      "provincia": "MB",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "NOVA MILANESE": {
+      "provincia": "MI",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "VIMERCATE": {
+      "provincia": "MI",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "LIMBIATE": {
+      "provincia": "MI",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "MEDA": {
+      "provincia": "MI",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "CARATE BRIANZA": {
+      "provincia": "MI",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "SALO": {
+      "provincia": "BS",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "TOSCOLANO-MADERNO": {
+      "provincia": "BS",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "GARGNANO": {
+      "provincia": "BS",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "BRESCIA": {
+      "provincia": "BS",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "DESENZANO DEL GARDA": {
+      "provincia": "BS",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "MONTICHIARI": {
+      "provincia": "BS",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "GHEDI": {
+      "provincia": "BS",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "BERGAMO": {
+      "provincia": "BG",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "TREVIGLIO": {
+      "provincia": "BG",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "SERIATE": {
+      "provincia": "BG",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "DALMINE": {
+      "provincia": "BG",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "ROMANO DI LOMBARDIA": {
+      "provincia": "BG",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "VARESE": {
+      "provincia": "VA",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "BUSTO ARSIZIO": {
+      "provincia": "VA",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "GALLARATE": {
+      "provincia": "VA",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "SARONNO": {
+      "provincia": "VA",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "TRADATE": {
+      "provincia": "VA",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "COMO": {
+      "provincia": "CO",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "CANTÙ": {
+      "provincia": "CO",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "ERBA": {
+      "provincia": "CO",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "MARIANO COMENSE": {
+      "provincia": "CO",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "PAVIA": {
+      "provincia": "PV",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "VIGEVANO": {
+      "provincia": "PV",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "VOGHERA": {
+      "provincia": "PV",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "MORTARA": {
+      "provincia": "PV",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "CREMONA": {
+      "provincia": "CR",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "CREMA": {
+      "provincia": "CR",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "CASALMAGGIORE": {
+      "provincia": "CR",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "MANTOVA": {
+      "provincia": "MN",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "SUZZARA": {
+      "provincia": "MN",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "VIADANA": {
+      "provincia": "MN",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CASTIGLIONE DELLE STIVIERE": {
+      "provincia": "MN",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "LECCO": {
+      "provincia": "LC",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "MERATE": {
+      "provincia": "LC",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "BELLANO": {
+      "provincia": "LC",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "LODI": {
+      "provincia": "LO",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "CODOGNO": {
+      "provincia": "LO",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "SANT'ANGELO LODIGIANO": {
+      "provincia": "LO",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "SONDRIO": {
+      "provincia": "SO",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "MORBEGNO": {
+      "provincia": "SO",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "TIRANO": {
+      "provincia": "SO",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "VERONA": {
+      "provincia": "VR",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "SAN BONIFACIO": {
+      "provincia": "VR",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "VILLAFRANCA DI VERONA": {
+      "provincia": "VR",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "LEGNAGO": {
+      "provincia": "VR",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "VICENZA": {
+      "provincia": "VI",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "BASSANO DEL GRAPPA": {
+      "provincia": "VI",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "SCHIO": {
+      "provincia": "VI",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "THIENE": {
+      "provincia": "VI",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "ARZIGNANO": {
+      "provincia": "VI",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "VITTORIO VENETO": {
+      "provincia": "TV",
+      "regione": "VENETO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "TREVISO": {
+      "provincia": "TV",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "CONEGLIANO": {
+      "provincia": "TV",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "CASTELFRANCO VENETO": {
+      "provincia": "TV",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "MONTEBELLUNA": {
+      "provincia": "TV",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "BELLUNO": {
+      "provincia": "BL",
+      "regione": "VENETO",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "FELTRE": {
+      "provincia": "BL",
+      "regione": "VENETO",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "AGORDO": {
+      "provincia": "BL",
+      "regione": "VENETO",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "PADOVA": {
+      "provincia": "PD",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "ABANO TERME": {
+      "provincia": "PD",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "CITTADELLA": {
+      "provincia": "PD",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "PIOVE DI SACCO": {
+      "provincia": "PD",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "ESTE": {
+      "provincia": "PD",
+      "regione": "VENETO",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "MONSELICE": {
+      "provincia": "PD",
+      "regione": "VENETO",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "VENEZIA": {
+      "provincia": "VE",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "MESTRE": {
+      "provincia": "VE",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "MARGHERA": {
+      "provincia": "VE",
+      "regione": "VENETO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "CHIOGGIA": {
+      "provincia": "VE",
+      "regione": "VENETO",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "MIRA": {
+      "provincia": "VE",
+      "regione": "VENETO",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "SAN DONÀ DI PIAVE": {
+      "provincia": "VE",
+      "regione": "VENETO",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "ROVIGO": {
+      "provincia": "RO",
+      "regione": "VENETO",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "ADRIA": {
+      "provincia": "RO",
+      "regione": "VENETO",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "PORTO VIRO": {
+      "provincia": "RO",
+      "regione": "VENETO",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "GEMONA DEL FRIULI": {
+      "provincia": "UD",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "VENZONE": {
+      "provincia": "UD",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "TOLMEZZO": {
+      "provincia": "UD",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "TARVISIO": {
+      "provincia": "UD",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "UDINE": {
+      "provincia": "UD",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CIVIDALE DEL FRIULI": {
+      "provincia": "UD",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "PALMANOVA": {
+      "provincia": "UD",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "MANIAGO": {
+      "provincia": "PN",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "SPILIMBERGO": {
+      "provincia": "PN",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "PORDENONE": {
+      "provincia": "PN",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "SACILE": {
+      "provincia": "PN",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "AVIANO": {
+      "provincia": "PN",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "TRIESTE": {
+      "provincia": "TS",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "MUGGIA": {
+      "provincia": "TS",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "GORIZIA": {
+      "provincia": "GO",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "MONFALCONE": {
+      "provincia": "GO",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "GRADISCA D'ISONZO": {
+      "provincia": "GO",
+      "regione": "FRIULI-VENEZIA GIULIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "GENOVA": {
+      "provincia": "GE",
+      "regione": "LIGURIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "RAPALLO": {
+      "provincia": "GE",
+      "regione": "LIGURIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "CHIAVARI": {
+      "provincia": "GE",
+      "regione": "LIGURIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "SESTRI LEVANTE": {
+      "provincia": "GE",
+      "regione": "LIGURIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "LA SPEZIA": {
+      "provincia": "SP",
+      "regione": "LIGURIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "SARZANA": {
+      "provincia": "SP",
+      "regione": "LIGURIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "LERICI": {
+      "provincia": "SP",
+      "regione": "LIGURIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "SAVONA": {
+      "provincia": "SV",
+      "regione": "LIGURIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "ALBENGA": {
+      "provincia": "SV",
+      "regione": "LIGURIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "FINALE LIGURE": {
+      "provincia": "SV",
+      "regione": "LIGURIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "CAIRO MONTENOTTE": {
+      "provincia": "SV",
+      "regione": "LIGURIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "IMPERIA": {
+      "provincia": "IM",
+      "regione": "LIGURIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "SANREMO": {
+      "provincia": "IM",
+      "regione": "LIGURIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "VENTIMIGLIA": {
+      "provincia": "IM",
+      "regione": "LIGURIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "BORDIGHERA": {
+      "provincia": "IM",
+      "regione": "LIGURIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "BOLOGNA": {
+      "provincia": "BO",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "IMOLA": {
+      "provincia": "BO",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "SAN LAZZARO DI SAVENA": {
+      "provincia": "BO",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CASALECCHIO DI RENO": {
+      "provincia": "BO",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CASTEL MAGGIORE": {
+      "provincia": "BO",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "MODENA": {
+      "provincia": "MO",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CARPI": {
+      "provincia": "MO",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "SASSUOLO": {
+      "provincia": "MO",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "FORMIGINE": {
+      "provincia": "MO",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "VIGNOLA": {
+      "provincia": "MO",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "REGGIO EMILIA": {
+      "provincia": "RE",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CORREGGIO": {
+      "provincia": "RE",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "GUASTALLA": {
+      "provincia": "RE",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "SCANDIANO": {
+      "provincia": "RE",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "PARMA": {
+      "provincia": "PR",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "FIDENZA": {
+      "provincia": "PR",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "SALSOMAGGIORE TERME": {
+      "provincia": "PR",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "PIACENZA": {
+      "provincia": "PC",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "FIORENZUOLA D'ARDA": {
+      "provincia": "PC",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "CASTEL SAN GIOVANNI": {
+      "provincia": "PC",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "FERRARA": {
+      "provincia": "FE",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CENTO": {
+      "provincia": "FE",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "COMACCHIO": {
+      "provincia": "FE",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "RAVENNA": {
+      "provincia": "RA",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "FAENZA": {
+      "provincia": "RA",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "LUGO": {
+      "provincia": "RA",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CERVIA": {
+      "provincia": "RA",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "FORLÌ": {
+      "provincia": "FC",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CESENA": {
+      "provincia": "FC",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CESENATICO": {
+      "provincia": "FC",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "RIMINI": {
+      "provincia": "RN",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "RICCIONE": {
+      "provincia": "RN",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CATTOLICA": {
+      "provincia": "RN",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "FIRENZE": {
+      "provincia": "FI",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "SESTO FIORENTINO": {
+      "provincia": "FI",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "SCANDICCI": {
+      "provincia": "FI",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "EMPOLI": {
+      "provincia": "FI",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "CAMPI BISENZIO": {
+      "provincia": "FI",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "PISA": {
+      "provincia": "PI",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "PONTEDERA": {
+      "provincia": "PI",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "VOLTERRA": {
+      "provincia": "PI",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "LIVORNO": {
+      "provincia": "LI",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "PIOMBINO": {
+      "provincia": "LI",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "CECINA": {
+      "provincia": "LI",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "SIENA": {
+      "provincia": "SI",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "POGGIBONSI": {
+      "provincia": "SI",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "COLLE DI VAL D'ELSA": {
+      "provincia": "SI",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "AREZZO": {
+      "provincia": "AR",
+      "regione": "TOSCANA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CORTONA": {
+      "provincia": "AR",
+      "regione": "TOSCANA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "SANSEPOLCRO": {
+      "provincia": "AR",
+      "regione": "TOSCANA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "LUCCA": {
+      "provincia": "LU",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "VIAREGGIO": {
+      "provincia": "LU",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "FORTE DEI MARMI": {
+      "provincia": "LU",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "PISTOIA": {
+      "provincia": "PT",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "MONTECATINI TERME": {
+      "provincia": "PT",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "MASSA": {
+      "provincia": "MS",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "CARRARA": {
+      "provincia": "MS",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "PRATO": {
+      "provincia": "PO",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "GROSSETO": {
+      "provincia": "GR",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "FOLLONICA": {
+      "provincia": "GR",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "ORBETELLO": {
+      "provincia": "GR",
+      "regione": "TOSCANA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "NORCIA": {
+      "provincia": "PG",
+      "regione": "UMBRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "CASCIA": {
+      "provincia": "PG",
+      "regione": "UMBRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "PRECI": {
+      "provincia": "PG",
+      "regione": "UMBRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "PERUGIA": {
+      "provincia": "PG",
+      "regione": "UMBRIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "FOLIGNO": {
+      "provincia": "PG",
+      "regione": "UMBRIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "GUBBIO": {
+      "provincia": "PG",
+      "regione": "UMBRIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "ASSISI": {
+      "provincia": "PG",
+      "regione": "UMBRIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "SPOLETO": {
+      "provincia": "PG",
+      "regione": "UMBRIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "TERNI": {
+      "provincia": "TR",
+      "regione": "UMBRIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "ORVIETO": {
+      "provincia": "TR",
+      "regione": "UMBRIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "NARNI": {
+      "provincia": "TR",
+      "regione": "UMBRIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "FABRIANO": {
+      "provincia": "AN",
+      "regione": "MARCHE",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "ANCONA": {
+      "provincia": "AN",
+      "regione": "MARCHE",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "JESI": {
+      "provincia": "AN",
+      "regione": "MARCHE",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "SENIGALLIA": {
+      "provincia": "AN",
+      "regione": "MARCHE",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "FALCONARA MARITTIMA": {
+      "provincia": "AN",
+      "regione": "MARCHE",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "MACERATA": {
+      "provincia": "MC",
+      "regione": "MARCHE",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "CAMERINO": {
+      "provincia": "MC",
+      "regione": "MARCHE",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "CIVITANOVA MARCHE": {
+      "provincia": "MC",
+      "regione": "MARCHE",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "TOLENTINO": {
+      "provincia": "MC",
+      "regione": "MARCHE",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "ASCOLI PICENO": {
+      "provincia": "AP",
+      "regione": "MARCHE",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "SAN BENEDETTO DEL TRONTO": {
+      "provincia": "AP",
+      "regione": "MARCHE",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "PESARO": {
+      "provincia": "PU",
+      "regione": "MARCHE",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "FANO": {
+      "provincia": "PU",
+      "regione": "MARCHE",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "URBINO": {
+      "provincia": "PU",
+      "regione": "MARCHE",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "FERMO": {
+      "provincia": "FM",
+      "regione": "MARCHE",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "PORTO SAN GIORGIO": {
+      "provincia": "FM",
+      "regione": "MARCHE",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "PORTO SANT'ELPIDIO": {
+      "provincia": "FM",
+      "regione": "MARCHE",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "AMATRICE": {
+      "provincia": "RM",
+      "regione": "LAZIO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "ACCUMOLI": {
+      "provincia": "RM",
+      "regione": "LAZIO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "ROMA": {
+      "provincia": "RM",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "FIUMICINO": {
+      "provincia": "RM",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "GUIDONIA MONTECELIO": {
+      "provincia": "RM",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "CIAMPINO": {
+      "provincia": "RM",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "TIVOLI": {
+      "provincia": "RM",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "VELLETRI": {
+      "provincia": "RM",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "ANZIO": {
+      "provincia": "RM",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "NETTUNO": {
+      "provincia": "RM",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "POMEZIA": {
+      "provincia": "RM",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "LATINA": {
+      "provincia": "LT",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "APRILIA": {
+      "provincia": "LT",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "FONDI": {
+      "provincia": "LT",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "FORMIA": {
+      "provincia": "LT",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "TERRACINA": {
+      "provincia": "LT",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "VITERBO": {
+      "provincia": "VT",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "CIVITA CASTELLANA": {
+      "provincia": "VT",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "TARQUINIA": {
+      "provincia": "VT",
+      "regione": "LAZIO",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "RIETI": {
+      "provincia": "RI",
+      "regione": "LAZIO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "POGGIO MIRTETO": {
+      "provincia": "RI",
+      "regione": "LAZIO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CASSINO": {
+      "provincia": "FR",
+      "regione": "LAZIO",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "SORA": {
+      "provincia": "FR",
+      "regione": "LAZIO",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "FROSINONE": {
+      "provincia": "FR",
+      "regione": "LAZIO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "ALATRI": {
+      "provincia": "FR",
+      "regione": "LAZIO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "ANAGNI": {
+      "provincia": "FR",
+      "regione": "LAZIO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "L'AQUILA": {
+      "provincia": "AQ",
+      "regione": "ABRUZZO",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "AVEZZANO": {
+      "provincia": "AQ",
+      "regione": "ABRUZZO",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "SULMONA": {
+      "provincia": "AQ",
+      "regione": "ABRUZZO",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "TERAMO": {
+      "provincia": "TE",
+      "regione": "ABRUZZO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "GIULIANOVA": {
+      "provincia": "TE",
+      "regione": "ABRUZZO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "ROSETO DEGLI ABRUZZI": {
+      "provincia": "TE",
+      "regione": "ABRUZZO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "PESCARA": {
+      "provincia": "PE",
+      "regione": "ABRUZZO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "MONTESILVANO": {
+      "provincia": "PE",
+      "regione": "ABRUZZO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "SPOLTORE": {
+      "provincia": "PE",
+      "regione": "ABRUZZO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CHIETI": {
+      "provincia": "CH",
+      "regione": "ABRUZZO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "LANCIANO": {
+      "provincia": "CH",
+      "regione": "ABRUZZO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "VASTO": {
+      "provincia": "CH",
+      "regione": "ABRUZZO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "FRANCAVILLA AL MARE": {
+      "provincia": "CH",
+      "regione": "ABRUZZO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CAMPOBASSO": {
+      "provincia": "CB",
+      "regione": "MOLISE",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "TERMOLI": {
+      "provincia": "CB",
+      "regione": "MOLISE",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "ISERNIA": {
+      "provincia": "IS",
+      "regione": "MOLISE",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "VENAFRO": {
+      "provincia": "IS",
+      "regione": "MOLISE",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "NAPOLI": {
+      "provincia": "NA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "TORRE DEL GRECO": {
+      "provincia": "NA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "POZZUOLI": {
+      "provincia": "NA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "ERCOLANO": {
+      "provincia": "NA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "PORTICI": {
+      "provincia": "NA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "CASTELLAMMARE DI STABIA": {
+      "provincia": "NA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "AFRAGOLA": {
+      "provincia": "NA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CASORIA": {
+      "provincia": "NA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "AVERSA": {
+      "provincia": "CE",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "MARANO DI NAPOLI": {
+      "provincia": "NA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "GIUGLIANO IN CAMPANIA": {
+      "provincia": "NA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "NOLA": {
+      "provincia": "NA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "ACERRA": {
+      "provincia": "NA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "SALERNO": {
+      "provincia": "SA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "CAVA DE' TIRRENI": {
+      "provincia": "SA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "BATTIPAGLIA": {
+      "provincia": "SA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "EBOLI": {
+      "provincia": "SA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "NOCERA INFERIORE": {
+      "provincia": "SA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "SCAFATI": {
+      "provincia": "SA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "PAGANI": {
+      "provincia": "SA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "AVELLINO": {
+      "provincia": "AV",
+      "regione": "CAMPANIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "ARIANO IRPINO": {
+      "provincia": "AV",
+      "regione": "CAMPANIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "BENEVENTO": {
+      "provincia": "BN",
+      "regione": "CAMPANIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "CASERTA": {
+      "provincia": "CE",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "MARCIANISE": {
+      "provincia": "CE",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "MADDALONI": {
+      "provincia": "CE",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "BARI": {
+      "provincia": "BA",
+      "regione": "PUGLIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "ALTAMURA": {
+      "provincia": "BA",
+      "regione": "PUGLIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "MOLFETTA": {
+      "provincia": "BA",
+      "regione": "PUGLIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "BARLETTA": {
+      "provincia": "BT",
+      "regione": "PUGLIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "TRANI": {
+      "provincia": "BT",
+      "regione": "PUGLIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "BITONTO": {
+      "provincia": "BA",
+      "regione": "PUGLIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "FOGGIA": {
+      "provincia": "FG",
+      "regione": "PUGLIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "SAN SEVERO": {
+      "provincia": "FG",
+      "regione": "PUGLIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CERIGNOLA": {
+      "provincia": "FG",
+      "regione": "PUGLIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "MANFREDONIA": {
+      "provincia": "FG",
+      "regione": "PUGLIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "TARANTO": {
+      "provincia": "TA",
+      "regione": "PUGLIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "MARTINA FRANCA": {
+      "provincia": "TA",
+      "regione": "PUGLIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "GROTTAGLIE": {
+      "provincia": "TA",
+      "regione": "PUGLIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "LECCE": {
+      "provincia": "LE",
+      "regione": "PUGLIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "NARDO'": {
+      "provincia": "LE",
+      "regione": "PUGLIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "GALATINA": {
+      "provincia": "LE",
+      "regione": "PUGLIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "MAGLIE": {
+      "provincia": "LE",
+      "regione": "PUGLIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "BRINDISI": {
+      "provincia": "BR",
+      "regione": "PUGLIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "FASANO": {
+      "provincia": "BR",
+      "regione": "PUGLIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "OSTUNI": {
+      "provincia": "BR",
+      "regione": "PUGLIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "SAN VITO DEI NORMANNI": {
+      "provincia": "BR",
+      "regione": "PUGLIA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "ANDRIA": {
+      "provincia": "BT",
+      "regione": "PUGLIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "BISCEGLIE": {
+      "provincia": "BT",
+      "regione": "PUGLIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "POTENZA": {
+      "provincia": "PZ",
+      "regione": "BASILICATA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "MELFI": {
+      "provincia": "PZ",
+      "regione": "BASILICATA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "LAURIA": {
+      "provincia": "PZ",
+      "regione": "BASILICATA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "MATERA": {
+      "provincia": "MT",
+      "regione": "BASILICATA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "POLICORO": {
+      "provincia": "MT",
+      "regione": "BASILICATA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "COSENZA": {
+      "provincia": "CS",
+      "regione": "CALABRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "RENDE": {
+      "provincia": "CS",
+      "regione": "CALABRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "ROSSANO": {
+      "provincia": "CS",
+      "regione": "CALABRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "CORIGLIANO CALABRO": {
+      "provincia": "CS",
+      "regione": "CALABRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "CATANZARO": {
+      "provincia": "CZ",
+      "regione": "CALABRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "LAMEZIA TERME": {
+      "provincia": "CZ",
+      "regione": "CALABRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "REGGIO CALABRIA": {
+      "provincia": "RC",
+      "regione": "CALABRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "VILLA SAN GIOVANNI": {
+      "provincia": "RC",
+      "regione": "CALABRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "PALMI": {
+      "provincia": "RC",
+      "regione": "CALABRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "CROTONE": {
+      "provincia": "KR",
+      "regione": "CALABRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "CIRO' MARINA": {
+      "provincia": "KR",
+      "regione": "CALABRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "VIBO VALENTIA": {
+      "provincia": "VV",
+      "regione": "CALABRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "TROPEA": {
+      "provincia": "VV",
+      "regione": "CALABRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "PALERMO": {
+      "provincia": "PA",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "BAGHERIA": {
+      "provincia": "PA",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "MONREALE": {
+      "provincia": "PA",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CARINI": {
+      "provincia": "PA",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CATANIA": {
+      "provincia": "CT",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "ACIREALE": {
+      "provincia": "CT",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "MISTERBIANCO": {
+      "provincia": "CT",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "PATERNÒ": {
+      "provincia": "CT",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "MESSINA": {
+      "provincia": "ME",
+      "regione": "SICILIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "MILAZZO": {
+      "provincia": "ME",
+      "regione": "SICILIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "BARCELLONA POZZO DI GOTTO": {
+      "provincia": "ME",
+      "regione": "SICILIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta"
+    },
+    "SIRACUSA": {
+      "provincia": "SR",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "AUGUSTA": {
+      "provincia": "SR",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "NOTO": {
+      "provincia": "SR",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "RAGUSA": {
+      "provincia": "RG",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "VITTORIA": {
+      "provincia": "RG",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "MODICA": {
+      "provincia": "RG",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "AGRIGENTO": {
+      "provincia": "AG",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "LICATA": {
+      "provincia": "AG",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CANICATTI'": {
+      "provincia": "AG",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CALTANISSETTA": {
+      "provincia": "CL",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "GELA": {
+      "provincia": "CL",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "TRAPANI": {
+      "provincia": "TP",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "MARSALA": {
+      "provincia": "TP",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "MAZARA DEL VALLO": {
+      "provincia": "TP",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "ALCAMO": {
+      "provincia": "TP",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "ENNA": {
+      "provincia": "EN",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "PIAZZA ARMERINA": {
+      "provincia": "EN",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta"
+    },
+    "CAGLIARI": {
+      "provincia": "CA",
+      "regione": "SARDEGNA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "QUARTU SANT'ELENA": {
+      "provincia": "CA",
+      "regione": "SARDEGNA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "ASSEMINI": {
+      "provincia": "CA",
+      "regione": "SARDEGNA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "SELARGIUS": {
+      "provincia": "CA",
+      "regione": "SARDEGNA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "SASSARI": {
+      "provincia": "SS",
+      "regione": "SARDEGNA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "OLBIA": {
+      "provincia": "SS",
+      "regione": "SARDEGNA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "ALGHERO": {
+      "provincia": "SS",
+      "regione": "SARDEGNA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "PORTO TORRES": {
+      "provincia": "SS",
+      "regione": "SARDEGNA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "NUORO": {
+      "provincia": "NU",
+      "regione": "SARDEGNA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "SINISCOLA": {
+      "provincia": "NU",
+      "regione": "SARDEGNA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "MACOMER": {
+      "provincia": "NU",
+      "regione": "SARDEGNA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "ORISTANO": {
+      "provincia": "OR",
+      "regione": "SARDEGNA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "TERRALBA": {
+      "provincia": "OR",
+      "regione": "SARDEGNA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "CARBONIA": {
+      "provincia": "SU",
+      "regione": "SARDEGNA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "IGLESIAS": {
+      "provincia": "SU",
+      "regione": "SARDEGNA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "TRENTO": {
+      "provincia": "TN",
+      "regione": "TRENTINO-ALTO ADIGE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "ROVERETO": {
+      "provincia": "TN",
+      "regione": "TRENTINO-ALTO ADIGE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "PERGINE VALSUGANA": {
+      "provincia": "TN",
+      "regione": "TRENTINO-ALTO ADIGE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media"
+    },
+    "BOLZANO": {
+      "provincia": "BZ",
+      "regione": "TRENTINO-ALTO ADIGE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "MERANO": {
+      "provincia": "BZ",
+      "regione": "TRENTINO-ALTO ADIGE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "BRESSANONE": {
+      "provincia": "BZ",
+      "regione": "TRENTINO-ALTO ADIGE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "BRUNICO": {
+      "provincia": "BZ",
+      "regione": "TRENTINO-ALTO ADIGE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "AOSTA": {
+      "provincia": "AO",
+      "regione": "VALLE D'AOSTA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "SAINT-VINCENT": {
+      "provincia": "AO",
+      "regione": "VALLE D'AOSTA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    },
+    "COURMAYEUR": {
+      "provincia": "AO",
+      "regione": "VALLE D'AOSTA",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa"
+    }
+  }
+}
