@@ -1311,11 +1311,20 @@ def build_api(df: pd.DataFrame):
                         logger.info(f"✅ P.IVA trovata: {partita_iva}")
                         break
             
-            # CODICE ATECO (XX.XX o XX.XX.XX)
+            # CODICE ATECO - SOLO 2025 (formato XX.XX.XX - 6 cifre)
+            def is_ateco_2025(code: str) -> bool:
+                """Verifica se il codice è in formato ATECO 2025 (XX.XX.XX)"""
+                # ATECO 2025 = esattamente 2 cifre + punto + 2 cifre + punto + 2 cifre
+                if not re.match(r'^\d{2}\.\d{2}\.\d{2}$', code):
+                    return False
+                # Escludi anni (19.xx.xx, 20.xx.xx, 21.xx.xx)
+                first_part = int(code.split('.')[0])
+                return first_part not in [19, 20, 21]
+
             ateco_patterns = [
-                r'(?:Codice ATECO|ATECO|Attività prevalente)[\s:]+(\d{2}[.\s]\d{2}(?:[.\s]\d{1,2})?)',
-                r'(?:Codice attività)[\s:]+(\d{2}[.\s]\d{2}(?:[.\s]\d{1,2})?)',
-                r'\b(\d{2}\.\d{2}(?:\.\d{1,2})?)\b'
+                r'(?:Codice ATECO|ATECO|Attività prevalente)[\s:]+(\d{2}[.\s]\d{2}[.\s]\d{2})',
+                r'(?:Codice attività)[\s:]+(\d{2}[.\s]\d{2}[.\s]\d{2})',
+                r'\b(\d{2}\.\d{2}\.\d{2})\b'
             ]
             codice_ateco = None
             for pattern in ateco_patterns:
@@ -1323,13 +1332,12 @@ def build_api(df: pd.DataFrame):
                 if match:
                     ateco = match.group(1)
                     ateco_clean = re.sub(r'\s+', '.', ateco)
-                    if re.match(r'^\d{2}\.\d{2}(?:\.\d{1,2})?$', ateco_clean):
-                        # Escludi anni (20.xx, 19.xx, 21.xx)
-                        first_part = int(ateco_clean.split('.')[0])
-                        if first_part not in [19, 20, 21]:
-                            codice_ateco = ateco_clean
-                            logger.info(f"✅ ATECO trovato: {codice_ateco}")
-                            break
+                    if is_ateco_2025(ateco_clean):
+                        codice_ateco = ateco_clean
+                        logger.info(f"✅ ATECO 2025 trovato: {codice_ateco}")
+                        break
+                    else:
+                        logger.warning(f"⚠️ ATECO ignorato (non 2025): {ateco_clean}")
             
             # OGGETTO SOCIALE (min 30 caratteri con parole business)
             oggetto_patterns = [
