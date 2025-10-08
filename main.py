@@ -1260,36 +1260,61 @@ def build_api(df: pd.DataFrame):
                 tmp_path = tmp.name
                 logger.info(f"File salvato: {tmp_path} ({len(content)} bytes)")
             
-            # 2. ESTRAI TESTO DAL PDF (con fallback multipli)
+            # 2. ESTRAI TESTO DAL PDF (con retry e fallback multipli)
             text = ""
-            
-            # Prova con pdfplumber
-            try:
+            max_retries = 2
+
+            # Funzione helper per estrarre con retry
+            def extract_with_retry(extractor_fn, name, retries=max_retries):
+                for attempt in range(1, retries + 1):
+                    try:
+                        logger.info(f"🔄 Tentativo {attempt}/{retries} con {name}")
+                        result = extractor_fn()
+                        if result:
+                            logger.info(f"✅ {name} riuscito al tentativo {attempt}")
+                            return result
+                    except Exception as e:
+                        if attempt < retries:
+                            logger.warning(f"⚠️ {name} fallito (tentativo {attempt}): {e}, riprovo...")
+                            import time
+                            time.sleep(0.5)  # Breve pausa prima del retry
+                        else:
+                            logger.error(f"❌ {name} fallito dopo {retries} tentativi: {e}")
+                return None
+
+            # Prova con pdfplumber (con retry)
+            def try_pdfplumber():
                 import pdfplumber
+                text_result = ""
                 with pdfplumber.open(tmp_path) as pdf:
                     for page in pdf.pages:
                         page_text = page.extract_text()
                         if page_text:
-                            text += page_text + "\n"
-                logger.info("✅ Estrazione con pdfplumber riuscita")
-            except Exception as e:
-                logger.warning(f"pdfplumber fallito: {e}")
-                
-                # Fallback su PyPDF2
-                try:
+                            text_result += page_text + "\n"
+                return text_result if text_result else None
+
+            text = extract_with_retry(try_pdfplumber, "pdfplumber")
+
+            # Fallback su PyPDF2 se pdfplumber ha fallito
+            if not text:
+                logger.warning("pdfplumber fallito, provo PyPDF2...")
+
+                def try_pypdf2():
                     import PyPDF2
+                    text_result = ""
                     with open(tmp_path, 'rb') as pdf_file:
                         pdf_reader = PyPDF2.PdfReader(pdf_file)
                         for page in pdf_reader.pages:
-                            text += page.extract_text() + "\n"
-                    logger.info("✅ Estrazione con PyPDF2 riuscita")
-                except Exception as e2:
-                    logger.error(f"Anche PyPDF2 fallito: {e2}")
-                    # Se niente funziona, ritorna vuoto (userà AI)
-                    return JSONResponse(result)
-            
+                            page_text = page.extract_text()
+                            if page_text:
+                                text_result += page_text + "\n"
+                    return text_result if text_result else None
+
+                text = extract_with_retry(try_pypdf2, "PyPDF2")
+
+            # Se ENTRAMBI i metodi falliscono dopo retry, ritorna vuoto
             if not text:
-                logger.warning("Nessun testo estratto")
+                logger.error("❌ TUTTI i metodi di estrazione PDF hanno fallito dopo retry")
                 return JSONResponse(result)
             
             # 3. ESTRAI I 3 CAMPI STRICT
@@ -1311,33 +1336,57 @@ def build_api(df: pd.DataFrame):
                         logger.info(f"✅ P.IVA trovata: {partita_iva}")
                         break
             
-            # CODICE ATECO - SOLO 2025 (formato XX.XX.XX - 6 cifre)
-            def is_ateco_2025(code: str) -> bool:
-                """Verifica se il codice è in formato ATECO 2025 (XX.XX.XX)"""
-                # ATECO 2025 = esattamente 2 cifre + punto + 2 cifre + punto + 2 cifre
-                if not re.match(r'^\d{2}\.\d{2}\.\d{2}$', code):
-                    return False
-                # Escludi anni (19.xx.xx, 20.xx.xx, 21.xx.xx)
-                first_part = int(code.split('.')[0])
-                return first_part not in [19, 20, 21]
-
+            # CODICE ATECO - Estrae 2022 o 2025, poi converte a 2025 usando il database
             ateco_patterns = [
+                # Pattern per ATECO 2025 (6 cifre: XX.XX.XX)
                 r'(?:Codice ATECO|ATECO|Attività prevalente)[\s:]+(\d{2}[.\s]\d{2}[.\s]\d{2})',
                 r'(?:Codice attività)[\s:]+(\d{2}[.\s]\d{2}[.\s]\d{2})',
-                r'\b(\d{2}\.\d{2}\.\d{2})\b'
+                r'\b(\d{2}\.\d{2}\.\d{2})\b',
+                # Pattern per ATECO 2022 (4 cifre: XX.XX)
+                r'(?:Codice ATECO|ATECO|Attività prevalente)[\s:]+(\d{2}[.\s]\d{2})\b',
+                r'(?:Codice attività)[\s:]+(\d{2}[.\s]\d{2})\b',
+                r'\b(\d{2}\.\d{2})\b'
             ]
             codice_ateco = None
+            codice_ateco_raw = None  # Codice estratto dal PDF (potrebbe essere 2022)
+
             for pattern in ateco_patterns:
                 match = re.search(pattern, text, re.IGNORECASE)
                 if match:
                     ateco = match.group(1)
-                    ateco_clean = re.sub(r'\s+', '.', ateco)
-                    if is_ateco_2025(ateco_clean):
-                        codice_ateco = ateco_clean
-                        logger.info(f"✅ ATECO 2025 trovato: {codice_ateco}")
+                    codice_ateco_raw = re.sub(r'\s+', '.', ateco)
+
+                    # Escludi anni (19.xx, 20.xx, 21.xx)
+                    first_part = int(codice_ateco_raw.split('.')[0])
+                    if first_part in [19, 20, 21]:
+                        continue
+
+                    logger.info(f"📋 ATECO estratto dal PDF: {codice_ateco_raw}")
+
+                    # Se è già formato 2025 (6 cifre), usa direttamente
+                    if re.match(r'^\d{2}\.\d{2}\.\d{2}$', codice_ateco_raw):
+                        codice_ateco = codice_ateco_raw
+                        logger.info(f"✅ ATECO 2025 trovato direttamente: {codice_ateco}")
                         break
-                    else:
-                        logger.warning(f"⚠️ ATECO ignorato (non 2025): {ateco_clean}")
+                    # Se è formato 2022 (4 cifre), converti usando il database
+                    elif re.match(r'^\d{2}\.\d{2}$', codice_ateco_raw):
+                        logger.info(f"🔄 ATECO 2022 trovato: {codice_ateco_raw}, conversione a 2025...")
+                        try:
+                            # Usa la funzione search_smart del database per ottenere il 2025
+                            result_df = search_smart(df, codice_ateco_raw, prefer='2025')
+                            if not result_df.empty:
+                                row = result_df.iloc[0]
+                                codice_2025 = row.get('CODICE_ATECO_2025_RAPPRESENTATIVO', '')
+                                if codice_2025:
+                                    codice_ateco = normalize_code(codice_2025)
+                                    logger.info(f"✅ Conversione riuscita: {codice_ateco_raw} → {codice_ateco}")
+                                else:
+                                    logger.warning(f"⚠️ Nessun corrispondente 2025 per {codice_ateco_raw}")
+                            else:
+                                logger.warning(f"⚠️ Codice {codice_ateco_raw} non trovato nel database")
+                        except Exception as e:
+                            logger.error(f"❌ Errore conversione ATECO: {e}")
+                        break
             
             # OGGETTO SOCIALE (min 30 caratteri con parole business)
             oggetto_patterns = [
@@ -1359,7 +1408,44 @@ def build_api(df: pd.DataFrame):
                             oggetto_sociale = oggetto
                             logger.info(f"✅ Oggetto trovato: {oggetto_sociale[:50]}...")
                             break
-            
+
+            # SEDE LEGALE (Comune + Provincia) - CRITICO per zona sismica!
+            sede_legale = None
+            # Pattern per estrarre sede legale dalle visure camerali
+            sede_patterns = [
+                # Pattern completo con comune e provincia
+                r'(?:SEDE LEGALE|Sede legale|Sede)[\s:]+([A-Z][A-Za-z\s]+)\s+\(([A-Z]{2})\)',
+                r'(?:SEDE|Sede)[\s:]+(?:in\s+)?([A-Z][A-Za-z\s]+)\s+\(([A-Z]{2})\)',
+                # Pattern con Via + Comune + Provincia
+                r'Via\s+[^,]+,\s+([A-Z][A-Za-z\s]+)\s+\(([A-Z]{2})\)',
+                # Pattern generico: Comune (Provincia)
+                r'\b([A-Z][A-Za-z\s]{3,30})\s+\(([A-Z]{2})\)\b'
+            ]
+
+            for pattern in sede_patterns:
+                matches = re.finditer(pattern, text)
+                for match in matches:
+                    comune = match.group(1).strip()
+                    provincia = match.group(2).strip()
+
+                    # Validazione comune (no parole comuni)
+                    common_words = ['VIA', 'VIALE', 'PIAZZA', 'CORSO', 'STRADA', 'LOCALITÀ',
+                                  'FRAZIONE', 'PRESSO', 'ITALY', 'ITALIA']
+                    if comune.upper() not in common_words and len(comune) > 3:
+                        # Rimuovi "di" all'inizio (es: "di TORINO" → "TORINO")
+                        if comune.lower().startswith('di '):
+                            comune = comune[3:]
+
+                        sede_legale = {
+                            'comune': comune.title(),  # Prima lettera maiuscola
+                            'provincia': provincia.upper()
+                        }
+                        logger.info(f"✅ Sede legale trovata: {comune} ({provincia})")
+                        break
+
+                if sede_legale:
+                    break
+
             # 4. CALCOLA CONFIDENCE REALE
             score = 0
             if partita_iva:
@@ -1377,12 +1463,18 @@ def build_api(df: pd.DataFrame):
                 }]
                 result['data']['confidence']['details']['ateco'] = 'valid'
             if oggetto_sociale:
-                score += 34
+                score += 25
                 result['data']['oggetto_sociale'] = oggetto_sociale
                 result['data']['confidence']['details']['oggetto_sociale'] = 'valid'
-            
-            result['data']['confidence']['score'] = score
-            logger.info(f"📊 Estrazione completata: {score}% confidence")
+            if sede_legale:
+                score += 25  # Molto importante per zona sismica!
+                result['data']['sede_legale'] = sede_legale
+                result['data']['confidence']['details']['sede_legale'] = 'valid'
+            else:
+                result['data']['confidence']['details']['sede_legale'] = 'not_found'
+
+            result['data']['confidence']['score'] = min(score, 100)  # Cap a 100%
+            logger.info(f"📊 Estrazione completata: {score}% confidence (P.IVA: {bool(partita_iva)}, ATECO: {bool(codice_ateco)}, Oggetto: {bool(oggetto_sociale)}, Sede: {bool(sede_legale)})")
             
         except Exception as e:
             logger.error(f"❌ Errore estrazione: {str(e)}")
