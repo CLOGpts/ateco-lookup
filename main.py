@@ -439,6 +439,45 @@ def build_api(df: pd.DataFrame):
         logger.info("Health check requested")
         return {"status": "ok", "version": "2.0", "cache_enabled": True}
 
+    @app.get("/health/database")
+    def health_database():
+        """Test connessione database PostgreSQL"""
+        logger.info("Database health check requested")
+        try:
+            from database.config import check_database_connection, get_pool_status
+
+            # Test connessione
+            connection_ok = check_database_connection()
+
+            if connection_ok:
+                # Ottieni status pool
+                pool_status = get_pool_status()
+                return {
+                    "status": "ok",
+                    "database": "postgresql",
+                    "connection": "active",
+                    "pool": pool_status
+                }
+            else:
+                return {
+                    "status": "error",
+                    "database": "postgresql",
+                    "connection": "failed",
+                    "message": "Cannot connect to database"
+                }
+        except ImportError:
+            return {
+                "status": "warning",
+                "message": "Database module not installed yet",
+                "hint": "Run: pip install sqlalchemy psycopg2-binary"
+            }
+        except Exception as e:
+            logger.error(f"Database health check failed: {e}")
+            return {
+                "status": "error",
+                "message": str(e)
+            }
+
     @app.get("/team/hello")
     async def team_hello():
         """Endpoint per sistema multi-agente"""
