@@ -1,0 +1,13 @@
+# SYD Cyber - Database Dependencies
+# PostgreSQL + SQLAlchemy stack
+
+# Database Core
+sqlalchemy==2.0.23          # ORM per database
+psycopg2-binary==2.9.9      # PostgreSQL driver (binary = no compilation needed)
+alembic==1.12.1             # Database migrations
+
+# Performance & Monitoring
+psycopg2-pool==1.1          # Advanced connection pooling (opzionale)
+
+# NOTA: Aggiungi queste righe al requirements.txt principale:
+# pip install -r database/requirements.txt
