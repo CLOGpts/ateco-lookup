@@ -1868,14 +1868,15 @@ def build_api(df: pd.DataFrame):
                         })
 
                     # Salva evento
+                    event_data_json = json.dumps(event_data)
                     conn.execute(text("""
                         INSERT INTO session_events (user_id, session_id, event_type, event_data)
-                        VALUES (:user_id, :session_id, :event_type, :event_data::jsonb)
+                        VALUES (:user_id, :session_id, :event_type, CAST(:event_data AS jsonb))
                     """), {
                         "user_id": user_id,
                         "session_id": session_id,
                         "event_type": event_type,
-                        "event_data": json.dumps(event_data)
+                        "event_data": event_data_json
                     })
 
                     trans.commit()
