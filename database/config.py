@@ -194,9 +194,10 @@ def check_database_connection() -> bool:
         bool: True se connessione ok, False altrimenti
     """
     try:
+        from sqlalchemy import text
         engine = get_engine()
         with engine.connect() as conn:
-            result = conn.execute("SELECT 1")
+            result = conn.execute(text("SELECT 1"))
             logger.info("✅ Database connection: OK")
             return True
     except Exception as e:
