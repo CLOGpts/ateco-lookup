@@ -1711,6 +1711,98 @@ def build_api(df: pd.DataFrame):
                 "details": str(e)
             }, status_code=500)
 
+    # ENDPOINT ADMIN - Database Setup
+    @app.get("/admin/setup-database")
+    async def setup_database():
+        """
+        Esegue setup tabelle Syd Agent tracking
+        IMPORTANTE: Usa questo endpoint SOLO per inizializzare database
+        """
+        try:
+            from database.setup_syd_tracking import (
+                read_sql_file,
+                execute_sql,
+                verify_tables,
+                verify_indexes,
+                verify_test_data
+            )
+            from database.config import get_engine, check_database_connection
+
+            results = {
+                "steps": [],
+                "success": False
+            }
+
+            # Step 1: Check connection
+            results["steps"].append({"step": 1, "name": "Verifica connessione", "status": "running"})
+            if not check_database_connection():
+                results["steps"][-1]["status"] = "failed"
+                results["steps"][-1]["error"] = "Impossibile connettersi al database"
+                return JSONResponse(results, status_code=500)
+            results["steps"][-1]["status"] = "completed"
+
+            # Step 2: Load SQL
+            results["steps"].append({"step": 2, "name": "Carica SQL", "status": "running"})
+            try:
+                sql_content = read_sql_file()
+                results["steps"][-1]["status"] = "completed"
+                results["steps"][-1]["sql_size"] = len(sql_content)
+            except Exception as e:
+                results["steps"][-1]["status"] = "failed"
+                results["steps"][-1]["error"] = str(e)
+                return JSONResponse(results, status_code=500)
+
+            # Step 3: Execute SQL
+            results["steps"].append({"step": 3, "name": "Esegui SQL", "status": "running"})
+            engine = get_engine()
+            try:
+                execute_sql(engine, sql_content)
+                results["steps"][-1]["status"] = "completed"
+            except Exception as e:
+                results["steps"][-1]["status"] = "failed"
+                results["steps"][-1]["error"] = str(e)
+                return JSONResponse(results, status_code=500)
+
+            # Step 4: Verify tables
+            results["steps"].append({"step": 4, "name": "Verifica tabelle", "status": "running"})
+            if not verify_tables(engine):
+                results["steps"][-1]["status"] = "failed"
+                results["steps"][-1]["error"] = "Tabelle non create"
+                return JSONResponse(results, status_code=500)
+            results["steps"][-1]["status"] = "completed"
+
+            # Step 5: Verify indexes
+            results["steps"].append({"step": 5, "name": "Verifica indici", "status": "running"})
+            if not verify_indexes(engine):
+                results["steps"][-1]["status"] = "warning"
+                results["steps"][-1]["message"] = "Nessun indice trovato (potrebbero già esistere)"
+            else:
+                results["steps"][-1]["status"] = "completed"
+
+            # Step 6: Verify test data
+            results["steps"].append({"step": 6, "name": "Verifica dati test", "status": "running"})
+            if not verify_test_data(engine):
+                results["steps"][-1]["status"] = "warning"
+                results["steps"][-1]["message"] = "Dati test non trovati"
+            else:
+                results["steps"][-1]["status"] = "completed"
+
+            results["success"] = True
+            results["message"] = "🎉 Setup completato con successo!"
+            results["tables_created"] = ["user_sessions", "session_events"]
+
+            return JSONResponse(results)
+
+        except Exception as e:
+            logger.error(f"Errore in setup-database endpoint: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "success": False,
+                "error": "internal_error",
+                "message": "Errore durante setup database",
+                "details": str(e),
+                "steps": results.get("steps", [])
+            }, status_code=500)
+
     return app
 
 
