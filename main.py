@@ -41,7 +41,7 @@ import yaml
 
 # Import FastAPI opzionali - necessari per l'API
 try:
-    from fastapi import FastAPI, Query, HTTPException, UploadFile, File
+    from fastapi import FastAPI, Query, HTTPException, UploadFile, File, Body
     from fastapi.responses import JSONResponse
     from fastapi.middleware.cors import CORSMiddleware
     from pydantic import BaseModel
@@ -1801,6 +1801,312 @@ def build_api(df: pd.DataFrame):
                 "message": "Errore durante setup database",
                 "details": str(e),
                 "steps": results.get("steps", [])
+            }, status_code=500)
+
+    # =====================================================
+    # SYD AGENT - Event Tracking Endpoints
+    # =====================================================
+
+    @app.post("/api/events")
+    async def save_event(payload: dict = Body(...)):
+        """
+        Salva evento utente per Syd Agent tracking
+
+        Event types supportati:
+        - ateco_uploaded: Caricamento codice ATECO
+        - visura_extracted: Estrazione dati da visura
+        - category_selected: Selezione categoria rischio
+        - risk_evaluated: Valutazione rischio completata
+        - assessment_question_answered: Risposta domanda assessment
+        - report_generated: Report generato
+
+        Body JSON:
+        {
+            "user_id": "test@example.com",
+            "session_id": "uuid",
+            "event_type": "ateco_uploaded",
+            "event_data": {"code": "62.01"}
+        }
+        """
+        try:
+            from database.config import get_engine
+            from sqlalchemy import text
+            from datetime import datetime
+            import uuid
+
+            # Estrai parametri dal payload
+            user_id = payload.get("user_id")
+            session_id = payload.get("session_id")
+            event_type = payload.get("event_type")
+            event_data = payload.get("event_data", {})
+
+            if not user_id or not session_id or not event_type:
+                return JSONResponse({
+                    "success": False,
+                    "error": "missing_fields",
+                    "message": "user_id, session_id e event_type sono obbligatori"
+                }, status_code=400)
+
+            engine = get_engine()
+
+            with engine.connect() as conn:
+                trans = conn.begin()
+                try:
+                    # Verifica se session_id esiste, altrimenti crea sessione
+                    result = conn.execute(text("""
+                        SELECT id FROM user_sessions WHERE session_id = :session_id
+                    """), {"session_id": session_id})
+
+                    if not result.fetchone():
+                        # Crea nuova sessione
+                        conn.execute(text("""
+                            INSERT INTO user_sessions (user_id, session_id, phase, progress)
+                            VALUES (:user_id, :session_id, 'idle', 0)
+                        """), {
+                            "user_id": user_id,
+                            "session_id": session_id
+                        })
+
+                    # Salva evento
+                    conn.execute(text("""
+                        INSERT INTO session_events (user_id, session_id, event_type, event_data)
+                        VALUES (:user_id, :session_id, :event_type, :event_data::jsonb)
+                    """), {
+                        "user_id": user_id,
+                        "session_id": session_id,
+                        "event_type": event_type,
+                        "event_data": json.dumps(event_data)
+                    })
+
+                    trans.commit()
+
+                    return JSONResponse({
+                        "success": True,
+                        "message": "Evento salvato con successo",
+                        "event": {
+                            "user_id": user_id,
+                            "session_id": session_id,
+                            "event_type": event_type,
+                            "timestamp": datetime.now().isoformat()
+                        }
+                    })
+
+                except Exception as e:
+                    trans.rollback()
+                    raise e
+
+        except Exception as e:
+            logger.error(f"Errore salvataggio evento: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "success": False,
+                "error": "save_failed",
+                "message": "Impossibile salvare evento",
+                "details": str(e)
+            }, status_code=500)
+
+    @app.get("/api/sessions/{user_id}")
+    async def get_session_history(user_id: str):
+        """
+        Recupera cronologia completa sessione utente per Syd Agent
+
+        Returns:
+        - session: Dati sessione corrente (phase, progress, metadata)
+        - events: Lista tutti eventi ordinati per timestamp
+        - summary: Riassunto statistiche
+        """
+        try:
+            from database.config import get_engine
+            from sqlalchemy import text
+
+            engine = get_engine()
+
+            with engine.connect() as conn:
+                # Recupera sessione corrente (più recente)
+                result = conn.execute(text("""
+                    SELECT session_id, phase, progress, start_time, last_activity, metadata
+                    FROM user_sessions
+                    WHERE user_id = :user_id
+                    ORDER BY last_activity DESC
+                    LIMIT 1
+                """), {"user_id": user_id})
+
+                session_row = result.fetchone()
+
+                if not session_row:
+                    return JSONResponse({
+                        "success": False,
+                        "error": "session_not_found",
+                        "message": f"Nessuna sessione trovata per user {user_id}"
+                    }, status_code=404)
+
+                session = {
+                    "session_id": str(session_row[0]),
+                    "phase": session_row[1],
+                    "progress": session_row[2],
+                    "start_time": session_row[3].isoformat() if session_row[3] else None,
+                    "last_activity": session_row[4].isoformat() if session_row[4] else None,
+                    "metadata": session_row[5] if session_row[5] else {}
+                }
+
+                # Recupera tutti eventi della sessione
+                result = conn.execute(text("""
+                    SELECT event_type, event_data, timestamp
+                    FROM session_events
+                    WHERE session_id = :session_id
+                    ORDER BY timestamp ASC
+                """), {"session_id": session["session_id"]})
+
+                events = []
+                event_counts = {}
+
+                for row in result:
+                    event = {
+                        "event_type": row[0],
+                        "event_data": row[1],
+                        "timestamp": row[2].isoformat() if row[2] else None
+                    }
+                    events.append(event)
+
+                    # Conta eventi per tipo
+                    event_counts[row[0]] = event_counts.get(row[0], 0) + 1
+
+                return JSONResponse({
+                    "success": True,
+                    "user_id": user_id,
+                    "session": session,
+                    "events": events,
+                    "summary": {
+                        "total_events": len(events),
+                        "event_counts": event_counts,
+                        "first_event": events[0]["timestamp"] if events else None,
+                        "last_event": events[-1]["timestamp"] if events else None
+                    }
+                })
+
+        except Exception as e:
+            logger.error(f"Errore recupero sessione: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "success": False,
+                "error": "fetch_failed",
+                "message": "Impossibile recuperare cronologia",
+                "details": str(e)
+            }, status_code=500)
+
+    @app.get("/api/sessions/{user_id}/summary")
+    async def get_session_summary(user_id: str, limit: int = Query(default=10, description="Numero ultimi eventi")):
+        """
+        Riassunto ottimizzato sessione per ridurre costi Gemini API
+
+        Returns:
+        - Ultimi N eventi (dettaglio completo)
+        - Statistiche aggregate eventi precedenti
+        - Conteggi per tipo
+
+        Questo endpoint è ottimizzato per context Syd Agent:
+        invece di passare 1000+ eventi (50K tokens), passa solo
+        ultimi 10 + summary (2.7K tokens) = 90% risparmio
+        """
+        try:
+            from database.config import get_engine
+            from sqlalchemy import text
+
+            engine = get_engine()
+
+            with engine.connect() as conn:
+                # Recupera sessione corrente
+                result = conn.execute(text("""
+                    SELECT session_id, phase, progress, start_time, last_activity
+                    FROM user_sessions
+                    WHERE user_id = :user_id
+                    ORDER BY last_activity DESC
+                    LIMIT 1
+                """), {"user_id": user_id})
+
+                session_row = result.fetchone()
+
+                if not session_row:
+                    return JSONResponse({
+                        "success": False,
+                        "error": "session_not_found",
+                        "message": f"Nessuna sessione trovata per user {user_id}"
+                    }, status_code=404)
+
+                session_id = str(session_row[0])
+
+                # Conta totale eventi
+                result = conn.execute(text("""
+                    SELECT COUNT(*), MIN(timestamp), MAX(timestamp)
+                    FROM session_events
+                    WHERE session_id = :session_id
+                """), {"session_id": session_id})
+
+                count_row = result.fetchone()
+                total_events = count_row[0]
+
+                # Recupera ultimi N eventi (dettaglio)
+                result = conn.execute(text("""
+                    SELECT event_type, event_data, timestamp
+                    FROM session_events
+                    WHERE session_id = :session_id
+                    ORDER BY timestamp DESC
+                    LIMIT :limit
+                """), {"session_id": session_id, "limit": limit})
+
+                recent_events = []
+                for row in result:
+                    recent_events.append({
+                        "event_type": row[0],
+                        "event_data": row[1],
+                        "timestamp": row[2].isoformat() if row[2] else None
+                    })
+
+                # Inverte ordine (più vecchio → più recente)
+                recent_events.reverse()
+
+                # Conta eventi per tipo (tutti)
+                result = conn.execute(text("""
+                    SELECT event_type, COUNT(*) as count
+                    FROM session_events
+                    WHERE session_id = :session_id
+                    GROUP BY event_type
+                    ORDER BY count DESC
+                """), {"session_id": session_id})
+
+                event_counts = {}
+                for row in result:
+                    event_counts[row[0]] = row[1]
+
+                return JSONResponse({
+                    "success": True,
+                    "user_id": user_id,
+                    "session": {
+                        "session_id": session_id,
+                        "phase": session_row[1],
+                        "progress": session_row[2]
+                    },
+                    "recent_events": recent_events,
+                    "summary": {
+                        "total_events": total_events,
+                        "recent_count": len(recent_events),
+                        "older_count": total_events - len(recent_events),
+                        "event_counts": event_counts,
+                        "first_event": count_row[1].isoformat() if count_row[1] else None,
+                        "last_event": count_row[2].isoformat() if count_row[2] else None
+                    },
+                    "optimization": {
+                        "mode": "summary",
+                        "tokens_saved": f"~{int((total_events - limit) * 50)} tokens",
+                        "note": "Solo ultimi eventi + statistiche aggregate"
+                    }
+                })
+
+        except Exception as e:
+            logger.error(f"Errore recupero summary: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "success": False,
+                "error": "fetch_failed",
+                "message": "Impossibile recuperare summary",
+                "details": str(e)
             }, status_code=500)
 
     return app
