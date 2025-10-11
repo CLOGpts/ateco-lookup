@@ -1875,6 +1875,111 @@ def build_api(df: pd.DataFrame):
                 "details": str(e)
             }, status_code=500)
 
+    # ENDPOINT ADMIN - Create Missing Tables
+    @app.post("/admin/create-tables")
+    async def create_missing_tables():
+        """
+        Crea le 6 tabelle mancanti nel database PostgreSQL
+
+        SICUREZZA:
+        - Non cancella tabelle esistenti
+        - Non modifica dati esistenti
+        - Usa SQLAlchemy create_all (idempotente)
+
+        Tabelle create:
+        1. users (consultanti)
+        2. companies (aziende)
+        3. assessments (valutazioni)
+        4. risk_events (191 eventi)
+        5. ateco_codes (25K codici)
+        6. seismic_zones (8K comuni)
+        """
+        try:
+            from database.config import get_engine
+            from database.models import Base
+            from sqlalchemy import inspect
+
+            results = {
+                "steps": [],
+                "success": False
+            }
+
+            # Step 1: Check connection
+            results["steps"].append({
+                "step": 1,
+                "name": "Verifica connessione",
+                "status": "running"
+            })
+
+            engine = get_engine()
+            inspector = inspect(engine)
+
+            results["steps"][-1]["status"] = "completed"
+
+            # Step 2: Check existing tables
+            results["steps"].append({
+                "step": 2,
+                "name": "Controlla tabelle esistenti",
+                "status": "running"
+            })
+
+            existing_tables = inspector.get_table_names()
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["existing_tables"] = existing_tables
+            results["steps"][-1]["count"] = len(existing_tables)
+
+            # Step 3: Create tables
+            results["steps"].append({
+                "step": 3,
+                "name": "Crea tabelle mancanti",
+                "status": "running"
+            })
+
+            logger.info("Creazione tabelle con Base.metadata.create_all()...")
+            Base.metadata.create_all(bind=engine)
+
+            results["steps"][-1]["status"] = "completed"
+            logger.info("✅ Base.metadata.create_all() completato!")
+
+            # Step 4: Verify new tables
+            results["steps"].append({
+                "step": 4,
+                "name": "Verifica tabelle create",
+                "status": "running"
+            })
+
+            # Refresh inspector
+            inspector = inspect(engine)
+            new_tables = inspector.get_table_names()
+
+            created_tables = [t for t in new_tables if t not in existing_tables]
+
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["new_tables"] = new_tables
+            results["steps"][-1]["created_tables"] = created_tables
+            results["steps"][-1]["total_count"] = len(new_tables)
+
+            # Success
+            results["success"] = True
+            results["message"] = f"✅ Tabelle create con successo! ({len(created_tables)} nuove)"
+            results["summary"] = {
+                "before": len(existing_tables),
+                "after": len(new_tables),
+                "created": len(created_tables)
+            }
+
+            return JSONResponse(results)
+
+        except Exception as e:
+            logger.error(f"Errore in create-tables endpoint: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "success": False,
+                "error": "internal_error",
+                "message": "Errore durante creazione tabelle",
+                "details": str(e),
+                "steps": results.get("steps", [])
+            }, status_code=500)
+
     # =====================================================
     # SYD AGENT - Event Tracking Endpoints
     # =====================================================
