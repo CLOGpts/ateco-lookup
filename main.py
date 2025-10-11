@@ -1399,9 +1399,13 @@ def build_api(df: pd.DataFrame):
                 logger.error("❌ TUTTI i metodi di estrazione PDF hanno fallito dopo retry")
                 return JSONResponse(result)
             
-            # 3. ESTRAI I 3 CAMPI STRICT
+            # 3. NORMALIZZA TESTO (rimuovi spazi/newline extra per matching robusto)
             import re
-            
+            text_normalized = re.sub(r'\s+', ' ', text)  # Sostituisci multipli spazi/newline con singolo spazio
+            logger.info(f"📝 Testo estratto: {len(text)} caratteri, normalizzato: {len(text_normalized)} caratteri")
+
+            # 4. ESTRAI I 3 CAMPI STRICT
+
             # PARTITA IVA (11 cifre)
             piva_patterns = [
                 r'(?:Partita IVA|P\.?\s?IVA|VAT)[\s:]+(\d{11})',
@@ -1410,7 +1414,7 @@ def build_api(df: pd.DataFrame):
             ]
             partita_iva = None
             for pattern in piva_patterns:
-                match = re.search(pattern, text, re.IGNORECASE)
+                match = re.search(pattern, text_normalized, re.IGNORECASE)
                 if match:
                     piva = match.group(1)
                     if re.match(r'^\d{11}$', piva):
@@ -1419,21 +1423,25 @@ def build_api(df: pd.DataFrame):
                         break
             
             # CODICE ATECO - Estrae 2022 o 2025, poi converte a 2025 usando il database
+            # IMPORTANTE: Cerca prima 6 cifre (più specifico), poi 4 cifre (meno specifico)
             ateco_patterns = [
-                # Pattern per ATECO 2025 (6 cifre: XX.XX.XX)
-                r'(?:Codice ATECO|ATECO|Attività prevalente)[\s:]+(\d{2}[.\s]\d{2}[.\s]\d{2})',
-                r'(?:Codice attività)[\s:]+(\d{2}[.\s]\d{2}[.\s]\d{2})',
-                r'\b(\d{2}\.\d{2}\.\d{2})\b',
-                # Pattern per ATECO 2022 (4 cifre: XX.XX)
-                r'(?:Codice ATECO|ATECO|Attività prevalente)[\s:]+(\d{2}[.\s]\d{2})\b',
-                r'(?:Codice attività)[\s:]+(\d{2}[.\s]\d{2})\b',
-                r'\b(\d{2}\.\d{2})\b'
+                # ========== ATECO 2025 (6 cifre: XX.XX.XX) - PRIORITÀ MASSIMA ==========
+                # Pattern con label esplicita + 6 cifre
+                r'(?:Codice ATECO|ATECO|Attività prevalente|Codice attività)[\s:]+(\d{2}[\s.]\d{2}[\s.]\d{2})',
+                # Pattern generico 6 cifre (cattura anche senza label)
+                r'\b(\d{2}\.?\d{2}\.?\d{2})\b',
+
+                # ========== ATECO 2022 (4 cifre: XX.XX) - FALLBACK ==========
+                # Pattern con label esplicita + 4 cifre
+                r'(?:Codice ATECO|ATECO|Attività prevalente|Codice attività)[\s:]+(\d{2}[\s.]\d{2})(?!\s*\.\s*\d)',
+                # Pattern generico 4 cifre (escludi se seguito da altro .XX)
+                r'\b(\d{2}\.\d{2})(?!\s*\.\s*\d)\b'
             ]
             codice_ateco = None
             codice_ateco_raw = None  # Codice estratto dal PDF (potrebbe essere 2022)
 
             for pattern in ateco_patterns:
-                match = re.search(pattern, text, re.IGNORECASE)
+                match = re.search(pattern, text_normalized, re.IGNORECASE)
                 if match:
                     ateco = match.group(1)
                     codice_ateco_raw = re.sub(r'\s+', '.', ateco)
@@ -1471,15 +1479,19 @@ def build_api(df: pd.DataFrame):
                         break
             
             # OGGETTO SOCIALE (min 30 caratteri con parole business)
+            # NOTA: Usa text originale (non normalizzato) per preservare newline come delimitatori
             oggetto_patterns = [
-                r'(?:OGGETTO SOCIALE|Oggetto sociale|Oggetto)[\s:]+([^\n]{30,})',
-                r'(?:Attività|ATTIVITA)[\s:]+([^\n]{30,})'
+                r'(?:OGGETTO SOCIALE|Oggetto sociale|Oggetto)[\s:]+([^\n]{30,500})',
+                r'(?:Attività|ATTIVITA)[\s:]+([^\n]{30,500})',
+                # Fallback: cerca in testo normalizzato con limite di parole
+                r'(?:OGGETTO SOCIALE|Oggetto sociale|Oggetto)[\s:]+(.{30,500})'
             ]
             oggetto_sociale = None
-            business_words = ['produzione', 'commercio', 'servizi', 'consulenza', 
-                            'vendita', 'gestione', 'prestazione', 'attività']
+            business_words = ['produzione', 'commercio', 'servizi', 'consulenza',
+                            'vendita', 'gestione', 'prestazione', 'attività', 'investiment']
             for pattern in oggetto_patterns:
-                match = re.search(pattern, text, re.IGNORECASE)
+                search_text = text if '[^\\n]' in pattern else text_normalized
+                match = re.search(pattern, search_text, re.IGNORECASE)
                 if match:
                     oggetto = match.group(1).strip()
                     if len(oggetto) >= 30:
@@ -1496,16 +1508,16 @@ def build_api(df: pd.DataFrame):
             # Pattern per estrarre sede legale dalle visure camerali
             sede_patterns = [
                 # Pattern completo con comune e provincia
-                r'(?:SEDE LEGALE|Sede legale|Sede)[\s:]+([A-Z][A-Za-z\s]+)\s+\(([A-Z]{2})\)',
-                r'(?:SEDE|Sede)[\s:]+(?:in\s+)?([A-Z][A-Za-z\s]+)\s+\(([A-Z]{2})\)',
+                r'(?:SEDE LEGALE|Sede legale|Sede)[\s:]+([A-Z][A-Za-z\s]+?)\s*\(([A-Z]{2})\)',
+                r'(?:SEDE|Sede)[\s:]+(?:in\s+)?([A-Z][A-Za-z\s]+?)\s*\(([A-Z]{2})\)',
                 # Pattern con Via + Comune + Provincia
-                r'Via\s+[^,]+,\s+([A-Z][A-Za-z\s]+)\s+\(([A-Z]{2})\)',
+                r'[Vv]ia\s+[^,]+,\s*([A-Z][A-Za-z\s]+?)\s*\(([A-Z]{2})\)',
                 # Pattern generico: Comune (Provincia)
-                r'\b([A-Z][A-Za-z\s]{3,30})\s+\(([A-Z]{2})\)\b'
+                r'\b([A-Z][A-Za-z\s]{3,30}?)\s*\(([A-Z]{2})\)\b'
             ]
 
             for pattern in sede_patterns:
-                matches = re.finditer(pattern, text)
+                matches = re.finditer(pattern, text_normalized)
                 for match in matches:
                     comune = match.group(1).strip()
                     provincia = match.group(2).strip()
