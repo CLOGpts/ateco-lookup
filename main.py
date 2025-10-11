@@ -1489,28 +1489,27 @@ def build_api(df: pd.DataFrame):
                         break
             
             # OGGETTO SOCIALE (min 30 caratteri con parole business)
-            # NOTA: Usa text originale (non normalizzato) per preservare newline come delimitatori
+            # NOTA: Cattura TUTTO il testo multiriga (fino a 2000 caratteri)
             oggetto_patterns = [
-                r'(?:OGGETTO SOCIALE|Oggetto sociale|Oggetto)[\s:]+([^\n]{30,500})',
-                r'(?:Attività|ATTIVITA)[\s:]+([^\n]{30,500})',
-                # Fallback: cerca in testo normalizzato con limite di parole
-                r'(?:OGGETTO SOCIALE|Oggetto sociale|Oggetto)[\s:]+(.{30,500})'
+                r'(?:OGGETTO SOCIALE|Oggetto sociale|Oggetto)[\s:]+(.{30,2000})',
+                r'(?:Attività|ATTIVITA)[\s:]+(.{30,2000})',
             ]
             oggetto_sociale = None
             business_words = ['produzione', 'commercio', 'servizi', 'consulenza',
                             'vendita', 'gestione', 'prestazione', 'attività', 'investiment']
             for pattern in oggetto_patterns:
-                search_text = text if '[^\\n]' in pattern else text_normalized
-                match = re.search(pattern, search_text, re.IGNORECASE)
+                match = re.search(pattern, text_normalized, re.IGNORECASE | re.DOTALL)
                 if match:
                     oggetto = match.group(1).strip()
+                    # Pulisci newline multipli e spazi eccessivi
+                    oggetto = re.sub(r'\s+', ' ', oggetto)
                     if len(oggetto) >= 30:
                         has_business = any(w in oggetto.lower() for w in business_words)
                         if has_business:
-                            if len(oggetto) > 500:
-                                oggetto = oggetto[:500] + '...'
+                            if len(oggetto) > 2000:
+                                oggetto = oggetto[:2000] + '...'
                             oggetto_sociale = oggetto
-                            logger.info(f"✅ Oggetto trovato: {oggetto_sociale[:50]}...")
+                            logger.info(f"✅ Oggetto trovato ({len(oggetto)} caratteri): {oggetto_sociale[:80]}...")
                             break
 
             # SEDE LEGALE (Comune + Provincia) - CRITICO per zona sismica!
