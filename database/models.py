@@ -19,7 +19,7 @@ from sqlalchemy import (
     Column, String, Integer, Boolean, DateTime, Text, DECIMAL,
     ForeignKey, CheckConstraint, Index, Enum as SQLEnum, JSON
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 import uuid
 import enum
@@ -145,7 +145,7 @@ class RiskEvent(Base):
     category: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     severity: Mapped[str] = mapped_column(String(20), default="medium")
-    suggested_controls: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    suggested_controls: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
 
     # Relationships
     assessments: Mapped[List["Assessment"]] = relationship("Assessment", back_populates="risk_event")
@@ -236,8 +236,8 @@ class ATECOCode(Base):
     title_2025: Mapped[str] = mapped_column(Text, nullable=False)
     hierarchy: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     sector: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, index=True)
-    regulations: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    certifications: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    regulations: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    certifications: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
 
     # Index GIN per ricerca JSON (PostgreSQL specific)
     __table_args__ = (
