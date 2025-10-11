@@ -1980,6 +1980,190 @@ def build_api(df: pd.DataFrame):
                 "steps": results.get("steps", [])
             }, status_code=500)
 
+    # ENDPOINT ADMIN - Migrate Risk Events
+    @app.post("/admin/migrate-risk-events")
+    async def migrate_risk_events():
+        """
+        Migra 191 eventi rischio da MAPPATURE_EXCEL_PERFETTE.json → PostgreSQL
+
+        SICUREZZA:
+        - Skip eventi già esistenti (no duplicati)
+        - Transazione atomica (rollback su errore)
+        - Report dettagliato step-by-step
+        """
+        try:
+            from database.config import get_db_session
+            from database.models import RiskEvent
+            import json
+            from pathlib import Path
+
+            results = {
+                "steps": [],
+                "success": False
+            }
+
+            # Step 1: Load JSON file
+            results["steps"].append({
+                "step": 1,
+                "name": "Carica MAPPATURE_EXCEL_PERFETTE.json",
+                "status": "running"
+            })
+
+            json_path = Path(__file__).parent / "MAPPATURE_EXCEL_PERFETTE.json"
+
+            if not json_path.exists():
+                results["steps"][-1]["status"] = "failed"
+                results["steps"][-1]["error"] = f"File non trovato: {json_path}"
+                return JSONResponse(results, status_code=404)
+
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["file_size"] = len(json.dumps(data))
+
+            # Step 2: Parse events
+            results["steps"].append({
+                "step": 2,
+                "name": "Parse eventi da JSON",
+                "status": "running"
+            })
+
+            # Category mapping
+            category_mapping = {
+                "Damage_Danni": "Damage/Danni",
+                "Business_disruption": "Business Disruption",
+                "Employment_practices_Dipendenti": "Employment Practices",
+                "Execution_delivery_Problemi_di_produzione_o_consegna": "Execution & Delivery",
+                "Clients_product_Clienti": "Clients & Products",
+                "Internal_Fraud_Frodi_interne": "Internal Fraud",
+                "External_fraud_Frodi_esterne": "External Fraud"
+            }
+
+            # Severity mapping
+            def get_severity(code: str) -> str:
+                code_num = int(code)
+                if code_num < 200:
+                    return "low"
+                elif code_num < 300:
+                    return "medium"
+                elif code_num < 500:
+                    return "high"
+                else:
+                    return "critical"
+
+            # Parse events
+            events_to_insert = []
+            parse_errors = []
+
+            for category_key, events_list in data.get('mappature_categoria_eventi', {}).items():
+                category_name = category_mapping.get(category_key, category_key)
+
+                for event_line in events_list:
+                    # Parse: "101 - Disastro naturale: fuoco"
+                    parts = event_line.split(" - ", 1)
+
+                    if len(parts) != 2:
+                        parse_errors.append(f"Formato non valido: {event_line}")
+                        continue
+
+                    code = parts[0].strip()
+                    name = parts[1].strip()
+                    severity = get_severity(code)
+
+                    events_to_insert.append({
+                        "code": code,
+                        "name": name,
+                        "category": category_name,
+                        "severity": severity
+                    })
+
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["total_events"] = len(events_to_insert)
+            results["steps"][-1]["parse_errors"] = len(parse_errors)
+
+            if parse_errors:
+                results["steps"][-1]["errors"] = parse_errors[:5]  # First 5 errors
+
+            # Step 3: Insert into database
+            results["steps"].append({
+                "step": 3,
+                "name": "Inserisci eventi nel database",
+                "status": "running"
+            })
+
+            inserted = 0
+            skipped = 0
+            errors = []
+
+            with get_db_session() as session:
+                for event_data in events_to_insert:
+                    # Check if exists
+                    existing = session.query(RiskEvent).filter_by(code=event_data["code"]).first()
+
+                    if existing:
+                        skipped += 1
+                        continue
+
+                    # Insert new event
+                    risk_event = RiskEvent(
+                        code=event_data["code"],
+                        name=event_data["name"],
+                        category=event_data["category"],
+                        description=None,
+                        severity=event_data["severity"],
+                        suggested_controls=None
+                    )
+
+                    session.add(risk_event)
+                    inserted += 1
+
+                # Commit all at once
+                session.commit()
+
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["inserted"] = inserted
+            results["steps"][-1]["skipped"] = skipped
+
+            # Step 4: Verify
+            results["steps"].append({
+                "step": 4,
+                "name": "Verifica dati inseriti",
+                "status": "running"
+            })
+
+            with get_db_session() as session:
+                total_count = session.query(RiskEvent).count()
+
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["total_in_db"] = total_count
+
+            # Success
+            results["success"] = True
+            results["message"] = f"✅ Migrazione completata! {inserted} eventi inseriti, {skipped} già esistenti"
+            results["summary"] = {
+                "total_events": len(events_to_insert),
+                "inserted": inserted,
+                "skipped": skipped,
+                "total_in_db": total_count,
+                "expected": 191
+            }
+
+            if total_count != 191:
+                results["warning"] = f"Attesi 191 eventi, trovati {total_count}"
+
+            return JSONResponse(results)
+
+        except Exception as e:
+            logger.error(f"Errore in migrate-risk-events endpoint: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "success": False,
+                "error": "internal_error",
+                "message": "Errore durante migrazione eventi",
+                "details": str(e),
+                "steps": results.get("steps", [])
+            }, status_code=500)
+
     # =====================================================
     # SYD AGENT - Event Tracking Endpoints
     # =====================================================
