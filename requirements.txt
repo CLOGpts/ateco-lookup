@@ -6,6 +6,9 @@ pyyaml
 openpyxl
 pdfplumber
 PyPDF2
+pytesseract
+pdf2image
+Pillow
 
 # Database PostgreSQL
 sqlalchemy==2.0.23

@@ -1351,7 +1351,50 @@ def build_api(df: pd.DataFrame):
 
                 text = extract_with_retry(try_pypdf2, "PyPDF2")
 
-            # Se ENTRAMBI i metodi falliscono dopo retry, ritorna vuoto
+            # Fallback su Tesseract OCR se pdfplumber e PyPDF2 hanno fallito (PDF scansionato)
+            if not text:
+                logger.warning("pdfplumber e PyPDF2 falliti, provo Tesseract OCR (PDF scansionato)...")
+
+                def try_tesseract_ocr():
+                    """
+                    Estrae testo da PDF scansionato usando Tesseract OCR
+
+                    Processo:
+                    1. Converte PDF in immagini
+                    2. Applica OCR su ogni immagine
+                    3. Concatena tutto il testo estratto
+                    """
+                    try:
+                        from pdf2image import convert_from_path
+                        import pytesseract
+
+                        # Converti PDF in immagini (DPI 300 per qualità OCR)
+                        images = convert_from_path(tmp_path, dpi=300)
+
+                        if not images:
+                            logger.warning("⚠️ Nessuna immagine estratta dal PDF")
+                            return None
+
+                        text_result = ""
+                        for i, image in enumerate(images, 1):
+                            logger.info(f"🔍 OCR su pagina {i}/{len(images)}...")
+                            # Estrai testo con Tesseract (lingua italiana + inglese)
+                            page_text = pytesseract.image_to_string(image, lang='ita+eng')
+                            if page_text:
+                                text_result += page_text + "\n"
+
+                        return text_result if text_result.strip() else None
+
+                    except ImportError as e:
+                        logger.error(f"❌ Tesseract non installato: {e}")
+                        return None
+                    except Exception as e:
+                        logger.error(f"❌ Errore OCR: {e}")
+                        return None
+
+                text = extract_with_retry(try_tesseract_ocr, "Tesseract OCR")
+
+            # Se TUTTI i metodi falliscono dopo retry, ritorna vuoto
             if not text:
                 logger.error("❌ TUTTI i metodi di estrazione PDF hanno fallito dopo retry")
                 return JSONResponse(result)
