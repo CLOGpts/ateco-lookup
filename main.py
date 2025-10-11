@@ -1404,6 +1404,12 @@ def build_api(df: pd.DataFrame):
             text_normalized = re.sub(r'\s+', ' ', text)  # Sostituisci multipli spazi/newline con singolo spazio
             logger.info(f"📝 Testo estratto: {len(text)} caratteri, normalizzato: {len(text_normalized)} caratteri")
 
+            # 🔍 DEBUG: Stampa primi 2000 caratteri del testo estratto (per analisi pattern)
+            logger.info("="*80)
+            logger.info("🔍 DEBUG TESTO ESTRATTO (primi 2000 char):")
+            logger.info(text[:2000])
+            logger.info("="*80)
+
             # 4. ESTRAI I 3 CAMPI STRICT
 
             # PARTITA IVA (11 cifre)
