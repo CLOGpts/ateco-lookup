@@ -1463,12 +1463,12 @@ def build_api(df: pd.DataFrame):
 
                     logger.info(f"📋 ATECO estratto dal PDF: {codice_ateco_raw}")
 
-                    # Se è già formato 2025 (6 cifre), usa direttamente
-                    if re.match(r'^\d{2}\.\d{2}\.\d{2}$', codice_ateco_raw):
+                    # Se è già formato 2025 (5-6 cifre: XX.XX.X o XX.XX.XX), usa direttamente
+                    if re.match(r'^\d{2}\.\d{2}\.\d{1,2}$', codice_ateco_raw):
                         codice_ateco = codice_ateco_raw
                         logger.info(f"✅ ATECO 2025 trovato direttamente: {codice_ateco}")
                         break
-                    # Se è formato 2022 (4 cifre), converti usando il database
+                    # Se è formato 2022 (4 cifre: XX.XX), converti usando il database
                     elif re.match(r'^\d{2}\.\d{2}$', codice_ateco_raw):
                         logger.info(f"🔄 ATECO 2022 trovato: {codice_ateco_raw}, conversione a 2025...")
                         try:
