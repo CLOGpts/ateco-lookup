@@ -1549,14 +1549,57 @@ def build_api(df: pd.DataFrame):
                 if sede_legale:
                     break
 
+            # DENOMINAZIONE (Ragione Sociale)
+            denominazione_patterns = [
+                r'(?:Denominazione|DENOMINAZIONE|Ragione sociale|RAGIONE SOCIALE)[\s:]+([A-Z][A-Za-z0-9\s\.\&\'\-]{5,150})',
+                r'(?:denominazione|ragione sociale)[\s:]+([A-Z][A-Za-z0-9\s\.\&\'\-]{5,150})',
+            ]
+            denominazione = None
+            for pattern in denominazione_patterns:
+                match = re.search(pattern, text_normalized)
+                if match:
+                    denom = match.group(1).strip()
+                    # Pulisci e valida
+                    if len(denom) >= 5 and len(denom) <= 150:
+                        denominazione = denom
+                        logger.info(f"✅ Denominazione trovata: {denominazione}")
+                        break
+
+            # FORMA GIURIDICA
+            forma_patterns = [
+                r'(?:SOCIETA\' PER AZIONI|S\.P\.A\.|SPA)\b',
+                r'(?:SOCIETA\' A RESPONSABILITA\' LIMITATA|S\.R\.L\.|SRL)\b',
+                r'(?:SOCIETA\' IN ACCOMANDITA SEMPLICE|S\.A\.S\.|SAS)\b',
+                r'(?:SOCIETA\' IN NOME COLLETTIVO|S\.N\.C\.|SNC)\b',
+                r'(?:DITTA INDIVIDUALE|IMPRESA INDIVIDUALE)\b',
+            ]
+            forma_giuridica = None
+            forma_map = {
+                'S.P.A.': 'SOCIETA\' PER AZIONI',
+                'SPA': 'SOCIETA\' PER AZIONI',
+                'S.R.L.': 'SOCIETA\' A RESPONSABILITA\' LIMITATA',
+                'SRL': 'SOCIETA\' A RESPONSABILITA\' LIMITATA',
+                'S.A.S.': 'SOCIETA\' IN ACCOMANDITA SEMPLICE',
+                'SAS': 'SOCIETA\' IN ACCOMANDITA SEMPLICE',
+                'S.N.C.': 'SOCIETA\' IN NOME COLLETTIVO',
+                'SNC': 'SOCIETA\' IN NOME COLLETTIVO',
+            }
+            for pattern in forma_patterns:
+                match = re.search(pattern, text_normalized, re.IGNORECASE)
+                if match:
+                    forma_raw = match.group(0).upper()
+                    forma_giuridica = forma_map.get(forma_raw, forma_raw)
+                    logger.info(f"✅ Forma giuridica trovata: {forma_giuridica}")
+                    break
+
             # 4. CALCOLA CONFIDENCE REALE
             score = 0
             if partita_iva:
-                score += 33
+                score += 25
                 result['data']['partita_iva'] = partita_iva
                 result['data']['confidence']['details']['partita_iva'] = 'valid'
             if codice_ateco:
-                score += 33
+                score += 25
                 result['data']['codice_ateco'] = codice_ateco
                 # Aggiungi anche in formato array per compatibilità
                 result['data']['codici_ateco'] = [{
@@ -1566,18 +1609,26 @@ def build_api(df: pd.DataFrame):
                 }]
                 result['data']['confidence']['details']['ateco'] = 'valid'
             if oggetto_sociale:
-                score += 25
+                score += 15
                 result['data']['oggetto_sociale'] = oggetto_sociale
                 result['data']['confidence']['details']['oggetto_sociale'] = 'valid'
             if sede_legale:
-                score += 25  # Molto importante per zona sismica!
+                score += 15  # Molto importante per zona sismica!
                 result['data']['sede_legale'] = sede_legale
                 result['data']['confidence']['details']['sede_legale'] = 'valid'
             else:
                 result['data']['confidence']['details']['sede_legale'] = 'not_found'
+            if denominazione:
+                score += 10
+                result['data']['denominazione'] = denominazione
+                result['data']['confidence']['details']['denominazione'] = 'valid'
+            if forma_giuridica:
+                score += 10
+                result['data']['forma_giuridica'] = forma_giuridica
+                result['data']['confidence']['details']['forma_giuridica'] = 'valid'
 
             result['data']['confidence']['score'] = min(score, 100)  # Cap a 100%
-            logger.info(f"📊 Estrazione completata: {score}% confidence (P.IVA: {bool(partita_iva)}, ATECO: {bool(codice_ateco)}, Oggetto: {bool(oggetto_sociale)}, Sede: {bool(sede_legale)})")
+            logger.info(f"📊 Estrazione completata: {score}% confidence (P.IVA: {bool(partita_iva)}, ATECO: {bool(codice_ateco)}, Oggetto: {bool(oggetto_sociale)}, Sede: {bool(sede_legale)}, Denom: {bool(denominazione)}, Forma: {bool(forma_giuridica)})")
             
         except Exception as e:
             logger.error(f"❌ Errore estrazione: {str(e)}")
