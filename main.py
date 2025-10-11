@@ -1430,12 +1430,16 @@ def build_api(df: pd.DataFrame):
             
             # CODICE ATECO - Estrae 2022 o 2025, poi converte a 2025 usando il database
             # IMPORTANTE: Cerca prima 6 cifre (più specifico), poi 4 cifre (meno specifico)
+            # NOTA: L'ultima parte può essere 1-2 cifre (es: 64.99.1 o 64.99.10)
             ateco_patterns = [
-                # ========== ATECO 2025 (6 cifre: XX.XX.XX) - PRIORITÀ MASSIMA ==========
-                # Pattern con label esplicita + 6 cifre
-                r'(?:Codice ATECO|ATECO|Attività prevalente|Codice attività)[\s:]+(\d{2}[\s.]\d{2}[\s.]\d{2})',
-                # Pattern generico 6 cifre (cattura anche senza label)
-                r'\b(\d{2}\.?\d{2}\.?\d{2})\b',
+                # ========== ATECO 2025 (5-6 cifre: XX.XX.X o XX.XX.XX) - PRIORITÀ MASSIMA ==========
+                # Pattern con label esplicita + 5-6 cifre (es: "Codice ATECO 64.99.1")
+                r'(?:Codice ATECO|ATECO|Attività prevalente|Codice attività)[\s:]+(\d{2}[\s.]\d{2}[\s.]\d{1,2})',
+                # Pattern generico 5-6 cifre con label "Codice:" (es: "Codice: 64.99.1")
+                r'Codice[\s:]+(\d{2}\.?\d{2}\.?\d{1,2})\s*-',
+                # Pattern generico 5-6 cifre (cattura anche senza label, MA solo se non è una data)
+                # Negative lookahead per escludere date tipo 27.06.2022
+                r'\b(\d{2}\.\d{2}\.\d{1,2})(?!\d)\b',
 
                 # ========== ATECO 2022 (4 cifre: XX.XX) - FALLBACK ==========
                 # Pattern con label esplicita + 4 cifre
