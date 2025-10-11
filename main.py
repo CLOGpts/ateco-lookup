@@ -1259,7 +1259,83 @@ def build_api(df: pd.DataFrame):
                 "confidence": 0.99
             }
         })
-    
+
+    @app.get("/api/ateco/search")
+    def search_ateco_by_text(query: str, limit: int = 10):
+        """
+        Cerca codici ATECO per descrizione (alternativa a Gemini AI)
+
+        Args:
+            query: Testo da cercare nelle descrizioni (es: "consulenza informatica")
+            limit: Numero massimo risultati (default: 10)
+
+        Returns:
+            JSON con lista codici ATECO trovati (2025 format)
+
+        Example:
+            GET /api/ateco/search?query=consulenza&limit=5
+        """
+        try:
+            if not query or len(query.strip()) < 2:
+                return JSONResponse({
+                    "success": False,
+                    "error": "Query troppo corta (minimo 2 caratteri)",
+                    "results": []
+                })
+
+            query_lower = query.lower().strip()
+
+            # Cerca in entrambe le colonne descrizione (2022 e 2025)
+            mask_2022 = df['TITOLO_ATECO_2022'].str.lower().str.contains(query_lower, na=False)
+            mask_2025 = df['TITOLO_ATECO_2025_RAPPRESENTATIVO'].str.lower().str.contains(query_lower, na=False)
+
+            # Unisci risultati (preferisci 2025)
+            results_df = df[mask_2022 | mask_2025].copy()
+
+            if results_df.empty:
+                return JSONResponse({
+                    "success": True,
+                    "query": query,
+                    "count": 0,
+                    "results": []
+                })
+
+            # Rimuovi duplicati (stesso codice 2025)
+            results_df = results_df.drop_duplicates(subset=['CODICE_ATECO_2025_RAPPRESENTATIVO'])
+
+            # Limita risultati
+            results_df = results_df.head(limit)
+
+            # Formatta output
+            results = []
+            for _, row in results_df.iterrows():
+                code_2025 = row.get('CODICE_ATECO_2025_RAPPRESENTATIVO', '')
+                title_2025 = row.get('TITOLO_ATECO_2025_RAPPRESENTATIVO', '')
+                code_2022 = row.get('CODICE_ATECO_2022', '')
+
+                if code_2025:  # Solo se ha codice 2025
+                    results.append({
+                        "codice": code_2025,
+                        "descrizione": title_2025 or "",
+                        "codice_2022": code_2022 or None,
+                        "principale": False  # Frontend può settarlo
+                    })
+
+            return JSONResponse({
+                "success": True,
+                "query": query,
+                "count": len(results),
+                "results": results
+            })
+
+        except Exception as e:
+            logger.error(f"Errore ricerca ATECO: {e}", exc_info=True)
+            return JSONResponse({
+                "success": False,
+                "error": str(e),
+                "results": []
+            }, status_code=500)
+
     @app.post("/api/extract-visura")
     async def extract_visura(file: UploadFile = File(...)):
         """
