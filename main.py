@@ -1803,6 +1803,78 @@ def build_api(df: pd.DataFrame):
                 "steps": results.get("steps", [])
             }, status_code=500)
 
+    # ENDPOINT ADMIN - Check Tables Status
+    @app.get("/admin/check-tables")
+    async def check_tables_status():
+        """
+        Verifica quali tabelle esistono nel database
+        SOLO LETTURA - non modifica nulla
+        """
+        try:
+            from database.config import get_engine
+            from sqlalchemy import text, inspect
+
+            engine = get_engine()
+            inspector = inspect(engine)
+
+            # Get all table names
+            all_tables = inspector.get_table_names()
+
+            # Target tables we want to check
+            target_tables = {
+                "users": "Consultanti (100 utenti)",
+                "companies": "Aziende clienti (500)",
+                "assessments": "Valutazioni rischio (50K)",
+                "risk_events": "191 eventi rischio",
+                "ateco_codes": "25K codici ATECO",
+                "seismic_zones": "8,102 comuni",
+                "user_sessions": "Sessioni Syd Agent",
+                "session_events": "Eventi tracking Syd"
+            }
+
+            results = {
+                "total_tables": len(all_tables),
+                "tables": {},
+                "missing_tables": []
+            }
+
+            # Check each target table
+            for table_name, description in target_tables.items():
+                if table_name in all_tables:
+                    # Table exists, count rows
+                    try:
+                        with engine.connect() as conn:
+                            count = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}")).scalar()
+                            results["tables"][table_name] = {
+                                "exists": True,
+                                "row_count": count,
+                                "description": description
+                            }
+                    except Exception as e:
+                        results["tables"][table_name] = {
+                            "exists": True,
+                            "row_count": None,
+                            "error": str(e),
+                            "description": description
+                        }
+                else:
+                    results["missing_tables"].append({
+                        "name": table_name,
+                        "description": description
+                    })
+
+            results["status"] = "ok" if len(results["missing_tables"]) == 0 else "incomplete"
+
+            return JSONResponse(results)
+
+        except Exception as e:
+            logger.error(f"Errore in check-tables endpoint: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "status": "error",
+                "message": "Errore durante verifica tabelle",
+                "details": str(e)
+            }, status_code=500)
+
     # =====================================================
     # SYD AGENT - Event Tracking Endpoints
     # =====================================================
