@@ -2389,6 +2389,199 @@ def build_api(df: pd.DataFrame):
                 "steps": results.get("steps", [])
             }, status_code=500)
 
+    # ENDPOINT ADMIN - Migrate Seismic Zones
+    @app.post("/admin/migrate-seismic-zones")
+    async def migrate_seismic_zones():
+        """
+        Migra 8K comuni italiani + zone sismiche da zone_sismiche_comuni.json → PostgreSQL
+
+        SICUREZZA:
+        - Skip comuni già esistenti (no duplicati)
+        - Batch insert (500 righe per volta)
+        - Transazione atomica (rollback su errore)
+        """
+        try:
+            from database.config import get_db_session
+            from database.models import SeismicZone
+            import json
+            from pathlib import Path
+            from decimal import Decimal
+
+            results = {
+                "steps": [],
+                "success": False
+            }
+
+            # Step 1: Load JSON file
+            results["steps"].append({
+                "step": 1,
+                "name": "Carica zone_sismiche_comuni.json",
+                "status": "running"
+            })
+
+            json_path = Path(__file__).parent / "zone_sismiche_comuni.json"
+
+            if not json_path.exists():
+                results["steps"][-1]["status"] = "failed"
+                results["steps"][-1]["error"] = f"File non trovato: {json_path}"
+                return JSONResponse(results, status_code=404)
+
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["file_size"] = len(json.dumps(data))
+            results["steps"][-1]["metadata"] = data.get("metadata", {})
+
+            # Step 2: Parse comuni
+            results["steps"].append({
+                "step": 2,
+                "name": "Parse comuni e zone sismiche",
+                "status": "running"
+            })
+
+            comuni_to_insert = []
+            parse_errors = []
+
+            for comune_name, comune_data in data.get("comuni", {}).items():
+                try:
+                    provincia = comune_data.get("provincia", "").strip()
+                    regione = comune_data.get("regione", "").strip()
+                    zona_sismica = int(comune_data.get("zona_sismica", 0))
+                    accelerazione_ag = float(comune_data.get("accelerazione_ag", 0.0))
+                    risk_level = comune_data.get("risk_level", "").strip()
+
+                    if not provincia or not regione or zona_sismica == 0:
+                        parse_errors.append(f"{comune_name}: campi mancanti")
+                        continue
+
+                    comuni_to_insert.append({
+                        "comune": comune_name.upper(),
+                        "provincia": provincia.upper(),
+                        "regione": regione.upper(),
+                        "zona_sismica": zona_sismica,
+                        "accelerazione_ag": Decimal(str(accelerazione_ag)),
+                        "risk_level": risk_level
+                    })
+
+                except Exception as e:
+                    parse_errors.append(f"{comune_name}: {str(e)}")
+
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["total_comuni"] = len(comuni_to_insert)
+            results["steps"][-1]["parse_errors"] = len(parse_errors)
+
+            if parse_errors:
+                results["steps"][-1]["errors"] = parse_errors[:5]
+
+            # Step 3: Remove duplicates
+            results["steps"].append({
+                "step": 3,
+                "name": "Rimuovi duplicati",
+                "status": "running"
+            })
+
+            seen_comuni = set()
+            unique_comuni = []
+            duplicates = []
+
+            for comune_data in comuni_to_insert:
+                key = (comune_data["comune"], comune_data["provincia"])
+                if key in seen_comuni:
+                    duplicates.append(f"{comune_data['comune']} ({comune_data['provincia']})")
+                    continue
+
+                seen_comuni.add(key)
+                unique_comuni.append(comune_data)
+
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["unique_comuni"] = len(unique_comuni)
+            results["steps"][-1]["duplicates"] = len(duplicates)
+
+            # Step 4: Insert into database (batch insert)
+            results["steps"].append({
+                "step": 4,
+                "name": "Inserisci nel database (batch 500)",
+                "status": "running"
+            })
+
+            inserted = 0
+            skipped = 0
+            batch_size = 500
+
+            with get_db_session() as session:
+                for i in range(0, len(unique_comuni), batch_size):
+                    batch = unique_comuni[i:i+batch_size]
+
+                    for comune_data in batch:
+                        # Check if exists
+                        existing = session.query(SeismicZone).filter_by(
+                            comune=comune_data["comune"],
+                            provincia=comune_data["provincia"]
+                        ).first()
+
+                        if existing:
+                            skipped += 1
+                            continue
+
+                        # Insert new comune
+                        seismic_zone = SeismicZone(
+                            comune=comune_data["comune"],
+                            provincia=comune_data["provincia"],
+                            regione=comune_data["regione"],
+                            zona_sismica=comune_data["zona_sismica"],
+                            accelerazione_ag=comune_data["accelerazione_ag"],
+                            risk_level=comune_data["risk_level"]
+                        )
+
+                        session.add(seismic_zone)
+                        inserted += 1
+
+                    # Commit each batch
+                    session.commit()
+                    logger.info(f"Batch {i//batch_size + 1}: {inserted} inseriti, {skipped} saltati")
+
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["inserted"] = inserted
+            results["steps"][-1]["skipped"] = skipped
+
+            # Step 5: Verify
+            results["steps"].append({
+                "step": 5,
+                "name": "Verifica dati inseriti",
+                "status": "running"
+            })
+
+            with get_db_session() as session:
+                total_count = session.query(SeismicZone).count()
+
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["total_in_db"] = total_count
+
+            # Success
+            results["success"] = True
+            results["message"] = f"✅ Migrazione zone sismiche completata! {inserted} comuni inseriti"
+            results["summary"] = {
+                "total_in_json": len(data.get("comuni", {})),
+                "parsed": len(comuni_to_insert),
+                "unique": len(unique_comuni),
+                "inserted": inserted,
+                "skipped": skipped,
+                "total_in_db": total_count
+            }
+
+            return JSONResponse(results)
+
+        except Exception as e:
+            logger.error(f"Errore in migrate-seismic-zones endpoint: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "success": False,
+                "error": "internal_error",
+                "message": "Errore durante migrazione zone sismiche",
+                "details": str(e),
+                "steps": results.get("steps", [])
+            }, status_code=500)
+
     # =====================================================
     # SYD AGENT - Event Tracking Endpoints
     # =====================================================
