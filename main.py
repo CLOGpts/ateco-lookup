@@ -2096,9 +2096,23 @@ def build_api(df: pd.DataFrame):
             skipped = 0
             errors = []
 
+            # Remove duplicates from events_to_insert BEFORE inserting
+            seen_codes = set()
+            unique_events = []
+            duplicates = []
+
+            for event_data in events_to_insert:
+                if event_data["code"] in seen_codes:
+                    duplicates.append(event_data["code"])
+                    skipped += 1
+                    continue
+
+                seen_codes.add(event_data["code"])
+                unique_events.append(event_data)
+
             with get_db_session() as session:
-                for event_data in events_to_insert:
-                    # Check if exists
+                for event_data in unique_events:
+                    # Check if exists in database
                     existing = session.query(RiskEvent).filter_by(code=event_data["code"]).first()
 
                     if existing:
@@ -2124,6 +2138,8 @@ def build_api(df: pd.DataFrame):
             results["steps"][-1]["status"] = "completed"
             results["steps"][-1]["inserted"] = inserted
             results["steps"][-1]["skipped"] = skipped
+            if duplicates:
+                results["steps"][-1]["duplicates_found"] = duplicates
 
             # Step 4: Verify
             results["steps"].append({
