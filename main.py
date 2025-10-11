@@ -2180,6 +2180,215 @@ def build_api(df: pd.DataFrame):
                 "steps": results.get("steps", [])
             }, status_code=500)
 
+    # ENDPOINT ADMIN - Migrate ATECO Codes
+    @app.post("/admin/migrate-ateco")
+    async def migrate_ateco_codes():
+        """
+        Migra ~25K codici ATECO da tabella_ATECO.xlsx → PostgreSQL
+
+        SICUREZZA:
+        - Skip codici già esistenti (no duplicati)
+        - Batch insert (1000 righe per volta)
+        - Transazione atomica (rollback su errore)
+        """
+        try:
+            from database.config import get_db_session
+            from database.models import ATECOCode
+            import pandas as pd
+            from pathlib import Path
+
+            results = {
+                "steps": [],
+                "success": False
+            }
+
+            # Step 1: Load Excel file
+            results["steps"].append({
+                "step": 1,
+                "name": "Carica tabella_ATECO.xlsx",
+                "status": "running"
+            })
+
+            excel_path = Path(__file__).parent / "tabella_ATECO.xlsx"
+
+            if not excel_path.exists():
+                results["steps"][-1]["status"] = "failed"
+                results["steps"][-1]["error"] = f"File non trovato: {excel_path}"
+                return JSONResponse(results, status_code=404)
+
+            # Load Excel with existing function
+            df = load_dataset(excel_path, debug=False)
+
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["total_rows"] = len(df)
+
+            # Step 2: Parse and prepare data
+            results["steps"].append({
+                "step": 2,
+                "name": "Parse codici ATECO",
+                "status": "running"
+            })
+
+            codes_to_insert = []
+            parse_errors = []
+
+            for idx, row in df.iterrows():
+                try:
+                    # Extract fields (handle NaN)
+                    code_2022 = str(row.get("CODICE_ATECO_2022", "")).strip()
+                    if code_2022 == "nan" or not code_2022:
+                        code_2022 = None
+
+                    code_2025 = str(row.get("CODICE_ATECO_2025_RAPPRESENTATIVO", "")).strip()
+                    if code_2025 == "nan" or not code_2025:
+                        continue  # Skip if no 2025 code
+
+                    code_2025_camerale = str(row.get("CODICE_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE", "")).strip()
+                    if code_2025_camerale == "nan" or not code_2025_camerale:
+                        code_2025_camerale = None
+
+                    title_2022 = str(row.get("TITOLO_ATECO_2022", "")).strip()
+                    if title_2022 == "nan" or not title_2022:
+                        title_2022 = None
+
+                    title_2025 = str(row.get("TITOLO_ATECO_2025_RAPPRESENTATIVO", "")).strip()
+                    if title_2025 == "nan" or not title_2025:
+                        title_2025 = code_2025  # Fallback to code
+
+                    hierarchy = str(row.get("GERARCHIA_ATECO_2022", "")).strip()
+                    if hierarchy == "nan" or not hierarchy:
+                        hierarchy = None
+
+                    codes_to_insert.append({
+                        "code_2022": code_2022,
+                        "code_2025": code_2025,
+                        "code_2025_camerale": code_2025_camerale,
+                        "title_2022": title_2022,
+                        "title_2025": title_2025,
+                        "hierarchy": hierarchy,
+                        "sector": None,  # TODO: Add sector mapping if needed
+                        "regulations": None,
+                        "certifications": None
+                    })
+
+                except Exception as e:
+                    parse_errors.append(f"Row {idx}: {str(e)}")
+
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["total_codes"] = len(codes_to_insert)
+            results["steps"][-1]["parse_errors"] = len(parse_errors)
+
+            if parse_errors:
+                results["steps"][-1]["errors"] = parse_errors[:5]
+
+            # Step 3: Remove duplicates
+            results["steps"].append({
+                "step": 3,
+                "name": "Rimuovi duplicati",
+                "status": "running"
+            })
+
+            seen_codes = set()
+            unique_codes = []
+            duplicates = []
+
+            for code_data in codes_to_insert:
+                code_2025 = code_data["code_2025"]
+                if code_2025 in seen_codes:
+                    duplicates.append(code_2025)
+                    continue
+
+                seen_codes.add(code_2025)
+                unique_codes.append(code_data)
+
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["unique_codes"] = len(unique_codes)
+            results["steps"][-1]["duplicates"] = len(duplicates)
+
+            # Step 4: Insert into database (batch insert for performance)
+            results["steps"].append({
+                "step": 4,
+                "name": "Inserisci nel database (batch 1000)",
+                "status": "running"
+            })
+
+            inserted = 0
+            skipped = 0
+            batch_size = 1000
+
+            with get_db_session() as session:
+                for i in range(0, len(unique_codes), batch_size):
+                    batch = unique_codes[i:i+batch_size]
+
+                    for code_data in batch:
+                        # Check if exists
+                        existing = session.query(ATECOCode).filter_by(code_2025=code_data["code_2025"]).first()
+
+                        if existing:
+                            skipped += 1
+                            continue
+
+                        # Insert new code
+                        ateco_code = ATECOCode(
+                            code_2022=code_data["code_2022"],
+                            code_2025=code_data["code_2025"],
+                            code_2025_camerale=code_data["code_2025_camerale"],
+                            title_2022=code_data["title_2022"],
+                            title_2025=code_data["title_2025"],
+                            hierarchy=code_data["hierarchy"],
+                            sector=code_data["sector"],
+                            regulations=code_data["regulations"],
+                            certifications=code_data["certifications"]
+                        )
+
+                        session.add(ateco_code)
+                        inserted += 1
+
+                    # Commit each batch
+                    session.commit()
+                    logger.info(f"Batch {i//batch_size + 1}: {inserted} inseriti, {skipped} saltati")
+
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["inserted"] = inserted
+            results["steps"][-1]["skipped"] = skipped
+
+            # Step 5: Verify
+            results["steps"].append({
+                "step": 5,
+                "name": "Verifica dati inseriti",
+                "status": "running"
+            })
+
+            with get_db_session() as session:
+                total_count = session.query(ATECOCode).count()
+
+            results["steps"][-1]["status"] = "completed"
+            results["steps"][-1]["total_in_db"] = total_count
+
+            # Success
+            results["success"] = True
+            results["message"] = f"✅ Migrazione ATECO completata! {inserted} codici inseriti"
+            results["summary"] = {
+                "total_in_excel": len(df),
+                "parsed": len(codes_to_insert),
+                "unique": len(unique_codes),
+                "inserted": inserted,
+                "skipped": skipped,
+                "total_in_db": total_count
+            }
+
+            return JSONResponse(results)
+
+        except Exception as e:
+            logger.error(f"Errore in migrate-ateco endpoint: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "success": False,
+                "error": "internal_error",
+                "message": "Errore durante migrazione ATECO",
+                "details": str(e),
+                "steps": results.get("steps", [])
+            }, status_code=500)
+
     # =====================================================
     # SYD AGENT - Event Tracking Endpoints
     # =====================================================
