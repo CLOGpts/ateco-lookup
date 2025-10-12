@@ -2807,6 +2807,123 @@ def build_api(df: pd.DataFrame):
                 "message": str(e)
             }, status_code=500)
 
+    @app.get("/db/lookup")
+    async def lookup_ateco_from_db(code: str):
+        """
+        Lookup ATECO da PostgreSQL (nuovo endpoint)
+
+        IDENTICO al vecchio /lookup - stesso formato risposta
+        """
+        from database.config import get_db_session
+        from database.models import ATECOCode
+
+        try:
+            with get_db_session() as session:
+                # Cerca per codice 2022 o 2025
+                result = session.query(ATECOCode).filter(
+                    (ATECOCode.code_2022 == code) | (ATECOCode.code_2025 == code)
+                ).first()
+
+                if not result:
+                    return JSONResponse({
+                        "found": 0,
+                        "items": [],
+                        "message": f"Codice ATECO '{code}' non trovato"
+                    })
+
+                # Formatta risposta IDENTICA al vecchio endpoint
+                item = {
+                    "ORDINE_CODICE_ATECO_2022": "",  # Non nel DB, lascia vuoto
+                    "CODICE_ATECO_2022": result.code_2022 or "",
+                    "TITOLO_ATECO_2022": result.title_2022 or "",
+                    "GERARCHIA_ATECO_2022": result.hierarchy or "",
+                    "NUMERO_CORR_ATECO_2022": "",  # Non nel DB
+                    "SOTTOTIPOLOGIA": "",  # Non nel DB
+                    "TIPO_RICODIFICA": "",  # Non nel DB
+                    "CODICE_ATECO_2025_RAPPRESENTATIVO": result.code_2025,
+                    "TITOLO_ATECO_2025_RAPPRESENTATIVO": result.title_2025,
+                    "CODICE_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": result.code_2025_camerale or result.code_2025,
+                    "TITOLO_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": result.title_2025,
+                    "settore": result.sector or "",
+                    "normative": result.regulations or [],
+                    "certificazioni": result.certifications or []
+                }
+
+                return JSONResponse({
+                    "found": 1,
+                    "items": [item]
+                })
+
+        except Exception as e:
+            logger.error(f"Errore lookup_ateco_from_db: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "error": "database_error",
+                "message": str(e)
+            }, status_code=500)
+
+    @app.get("/db/seismic-zone/{comune}")
+    async def get_seismic_zone_from_db(comune: str, provincia: str = None):
+        """
+        Ottieni zona sismica da PostgreSQL (nuovo endpoint)
+
+        IDENTICO al vecchio /seismic-zone/{comune} - stesso formato risposta
+        """
+        from database.config import get_db_session
+        from database.models import SeismicZone
+
+        try:
+            with get_db_session() as session:
+                # Normalizza comune (uppercase)
+                comune_upper = comune.upper()
+
+                # Query con o senza provincia
+                query = session.query(SeismicZone).filter(
+                    SeismicZone.comune == comune_upper
+                )
+
+                if provincia:
+                    query = query.filter(SeismicZone.provincia == provincia.upper())
+
+                result = query.first()
+
+                if not result:
+                    return JSONResponse({
+                        "error": "comune_not_found",
+                        "message": f"Comune '{comune}' non trovato nel database zone sismiche",
+                        "source": "not_found"
+                    }, status_code=404)
+
+                # Genera description basata su zona sismica
+                descriptions = {
+                    1: "Zona 1 - Sismicità alta: Zona più pericolosa, dove possono verificarsi forti terremoti",
+                    2: "Zona 2 - Sismicità medio-alta: Zona dove possono verificarsi terremoti abbastanza forti",
+                    3: "Zona 3 - Sismicità bassa: Zona che può essere soggetta a scuotimenti modesti",
+                    4: "Zona 4 - Sismicità molto bassa: Zona meno pericolosa"
+                }
+
+                # Formatta risposta IDENTICA al vecchio endpoint
+                response = {
+                    "comune": result.comune,
+                    "provincia": result.provincia,
+                    "regione": result.regione,
+                    "zona_sismica": result.zona_sismica,
+                    "accelerazione_ag": float(result.accelerazione_ag),
+                    "risk_level": result.risk_level,
+                    "description": descriptions.get(result.zona_sismica, "Zona sismica non definita"),
+                    "normativa": "OPCM 3519/2006",
+                    "source": "database_match",
+                    "confidence": 1.0
+                }
+
+                return JSONResponse(response)
+
+        except Exception as e:
+            logger.error(f"Errore get_seismic_zone_from_db: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "error": "database_error",
+                "message": str(e)
+            }, status_code=500)
+
     # =====================================================
     # SYD AGENT - Event Tracking Endpoints
     # =====================================================
