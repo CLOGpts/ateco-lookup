@@ -2708,35 +2708,47 @@ def build_api(df: pd.DataFrame):
         """
         Ottieni eventi di rischio da PostgreSQL (nuovo endpoint)
 
-        DIFFERENZA dal vecchio /events/{category}:
-        - Legge da PostgreSQL risk_events table
-        - Stesso formato risposta per compatibilità
-        - Supporta stessi alias categorie
+        IDENTICO al vecchio /events/{category} - stesso output esatto
         """
         from database.config import get_db_session
         from database.models import RiskEvent
 
-        # Mappa alias comuni alle categorie database
+        # MAPPING IDENTICO al vecchio endpoint (Excel format)
         category_mapping = {
-            "operational": "Execution & Delivery",
-            "cyber": "Business Disruption",
-            "compliance": "Clients & Products",
-            "financial": "Internal Fraud",
-            "damage": "Damage/Danni",
-            "employment": "Employment Practices",
-            "external_fraud": "External Fraud"
+            "operational": "Execution_delivery_Problemi_di_produzione_o_consegna",
+            "cyber": "Business_disruption",
+            "compliance": "Clients_product_Clienti",
+            "financial": "Internal_Fraud_Frodi_interne",
+            "damage": "Damage_Danni",
+            "employment": "Employment_practices_Dipendenti",
+            "external_fraud": "External_fraud_Frodi_esterne"
         }
 
-        # Normalizza categoria richiesta
-        real_category = category
+        # Database → Excel category mapping (per restituire nome Excel)
+        db_to_excel_category = {
+            "Damage/Danni": "Damage_Danni",
+            "Business Disruption": "Business_disruption",
+            "Employment Practices": "Employment_practices_Dipendenti",
+            "Execution & Delivery": "Execution_delivery_Problemi_di_produzione_o_consegna",
+            "Clients & Products": "Clients_product_Clienti",
+            "Internal Fraud": "Internal_Fraud_Frodi_interne",
+            "External Fraud": "External_fraud_Frodi_esterne"
+        }
+
+        # Normalizza categoria richiesta (usa mapping vecchio)
+        real_category_excel = category
         if category.lower() in category_mapping:
-            real_category = category_mapping[category.lower()]
+            real_category_excel = category_mapping[category.lower()]
+
+        # Trova categoria nel database (mapping inverso)
+        excel_to_db = {v: k for k, v in db_to_excel_category.items()}
+        real_category_db = excel_to_db.get(real_category_excel, real_category_excel)
 
         try:
             with get_db_session() as session:
                 # Query eventi per categoria
                 db_events = session.query(RiskEvent).filter(
-                    RiskEvent.category == real_category
+                    RiskEvent.category == real_category_db
                 ).all()
 
                 # Se categoria non trovata, prova ricerca parziale
@@ -2746,31 +2758,46 @@ def build_api(df: pd.DataFrame):
                     ).all()
 
                 if not db_events:
-                    # Lista categorie disponibili
-                    available = session.query(RiskEvent.category).distinct().all()
-                    available_categories = [cat[0] for cat in available]
-
                     return JSONResponse({
                         "error": f"Category '{category}' not found",
-                        "available_categories": available_categories,
+                        "available_categories": list(category_mapping.values()),
                         "category_mapping": category_mapping
                     }, status_code=404)
 
-                # Converti in formato frontend (compatibile con vecchio endpoint)
+                # SEVERITY LOGICA IDENTICA AL VECCHIO (basata su primo numero codice)
+                def get_severity_by_code(code: str) -> str:
+                    if code.startswith('1'):
+                        return 'medium'
+                    elif code.startswith('2'):
+                        return 'high'
+                    elif code.startswith('3'):
+                        return 'low'
+                    elif code.startswith('4'):
+                        return 'medium'
+                    elif code.startswith('5'):
+                        return 'high'
+                    elif code.startswith('6') or code.startswith('7'):
+                        return 'critical'
+                    else:
+                        return 'medium'
+
+                # Converti in formato frontend (IDENTICO al vecchio)
                 events = []
                 for event in db_events:
                     events.append({
                         "code": event.code,
                         "name": event.name,
-                        "severity": event.severity
+                        "severity": get_severity_by_code(event.code)  # USA LOGICA VECCHIA
                     })
 
+                # Restituisci nome categoria in formato Excel (con underscore)
+                category_name_excel = db_to_excel_category.get(db_events[0].category, real_category_excel) if db_events else real_category_excel
+
                 return JSONResponse({
-                    "category": db_events[0].category if db_events else real_category,
+                    "category": category_name_excel,  # FORMATO EXCEL (underscore)
                     "original_request": category,
                     "events": events,
-                    "total": len(events),
-                    "source": "postgresql"  # Indica che viene da DB
+                    "total": len(events)
                 })
 
         except Exception as e:
