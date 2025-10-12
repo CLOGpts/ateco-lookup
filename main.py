@@ -399,14 +399,28 @@ def build_api(df: pd.DataFrame):
 
     app = FastAPI(title="ATECO Lookup", version="2.0")
 
-    # Abilita CORS con configurazione più permissiva per debug
+    # CORS configurazione sicura - Solo domini autorizzati
+    ALLOWED_ORIGINS = [
+        "https://syd-cyber-dario.vercel.app",
+        "https://syd-cyber-marcello.vercel.app",
+        "https://syd-cyber-claudio.vercel.app",
+    ]
+
+    # Aggiungi localhost solo in development
+    if os.getenv("ENVIRONMENT") == "development":
+        ALLOWED_ORIGINS.extend([
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "http://localhost:3000",
+        ])
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # in produzione meglio specificare solo il dominio della UI
+        allow_origins=ALLOWED_ORIGINS,
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-        expose_headers=["*"],  # Esponi tutti gli header
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization", "Accept"],
+        expose_headers=["Content-Length", "Content-Type"],
     )
     
     # Middleware personalizzato per garantire CORS su errori
