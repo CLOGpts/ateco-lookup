@@ -401,18 +401,17 @@ def build_api(df: pd.DataFrame):
 
     # CORS configurazione sicura - Solo domini autorizzati
     ALLOWED_ORIGINS = [
+        # Vercel production deployments
+        "https://syd-cyber-ui.vercel.app",
         "https://syd-cyber-dario.vercel.app",
         "https://syd-cyber-marcello.vercel.app",
         "https://syd-cyber-claudio.vercel.app",
+        # Localhost per development (sicuro - non accessibile da internet)
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+        "http://localhost:3000",
     ]
-
-    # Aggiungi localhost solo in development
-    if os.getenv("ENVIRONMENT") == "development":
-        ALLOWED_ORIGINS.extend([
-            "http://localhost:5173",
-            "http://localhost:5174",
-            "http://localhost:3000",
-        ])
 
     app.add_middleware(
         CORSMiddleware,
