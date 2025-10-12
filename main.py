@@ -2698,6 +2698,89 @@ def build_api(df: pd.DataFrame):
             }, status_code=500)
 
     # =====================================================
+    # DATABASE-FIRST ENDPOINTS (PostgreSQL)
+    # =====================================================
+    # Questi endpoint leggono da PostgreSQL invece di file JSON/Excel
+    # Paralleli agli endpoint legacy per backward compatibility
+
+    @app.get("/db/events/{category}")
+    async def get_events_from_db(category: str):
+        """
+        Ottieni eventi di rischio da PostgreSQL (nuovo endpoint)
+
+        DIFFERENZA dal vecchio /events/{category}:
+        - Legge da PostgreSQL risk_events table
+        - Stesso formato risposta per compatibilità
+        - Supporta stessi alias categorie
+        """
+        from database.config import get_db_session
+        from database.models import RiskEvent
+
+        # Mappa alias comuni alle categorie database
+        category_mapping = {
+            "operational": "Execution & Delivery",
+            "cyber": "Business Disruption",
+            "compliance": "Clients & Products",
+            "financial": "Internal Fraud",
+            "damage": "Damage/Danni",
+            "employment": "Employment Practices",
+            "external_fraud": "External Fraud"
+        }
+
+        # Normalizza categoria richiesta
+        real_category = category
+        if category.lower() in category_mapping:
+            real_category = category_mapping[category.lower()]
+
+        try:
+            with get_db_session() as session:
+                # Query eventi per categoria
+                db_events = session.query(RiskEvent).filter(
+                    RiskEvent.category == real_category
+                ).all()
+
+                # Se categoria non trovata, prova ricerca parziale
+                if not db_events:
+                    db_events = session.query(RiskEvent).filter(
+                        RiskEvent.category.ilike(f"%{category}%")
+                    ).all()
+
+                if not db_events:
+                    # Lista categorie disponibili
+                    available = session.query(RiskEvent.category).distinct().all()
+                    available_categories = [cat[0] for cat in available]
+
+                    return JSONResponse({
+                        "error": f"Category '{category}' not found",
+                        "available_categories": available_categories,
+                        "category_mapping": category_mapping
+                    }, status_code=404)
+
+                # Converti in formato frontend (compatibile con vecchio endpoint)
+                events = []
+                for event in db_events:
+                    events.append({
+                        "code": event.code,
+                        "name": event.name,
+                        "severity": event.severity
+                    })
+
+                return JSONResponse({
+                    "category": db_events[0].category if db_events else real_category,
+                    "original_request": category,
+                    "events": events,
+                    "total": len(events),
+                    "source": "postgresql"  # Indica che viene da DB
+                })
+
+        except Exception as e:
+            logger.error(f"Errore get_events_from_db: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "error": "database_error",
+                "message": str(e)
+            }, status_code=500)
+
+    # =====================================================
     # SYD AGENT - Event Tracking Endpoints
     # =====================================================
 
