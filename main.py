@@ -618,8 +618,8 @@ def build_api(df: pd.DataFrame):
             risk_data = json.load(f)
             EXCEL_CATEGORIES = risk_data['mappature_categoria_eventi']
             EXCEL_DESCRIPTIONS = risk_data['vlookup_map']
-    except:
-        # Fallback se il file non esiste
+    except FileNotFoundError:
+        logger.warning("⚠️ MAPPATURE_EXCEL_PERFETTE.json non trovato, uso fallback")
         EXCEL_CATEGORIES = {
             "Damage_Danni": [],
             "Business_disruption": [],
@@ -630,6 +630,12 @@ def build_api(df: pd.DataFrame):
             "External_fraud_Frodi_esterne": []
         }
         EXCEL_DESCRIPTIONS = {}
+    except json.JSONDecodeError as e:
+        logger.error(f"❌ MAPPATURE_EXCEL_PERFETTE.json corrotto: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"❌ Errore inaspettato caricando MAPPATURE_EXCEL_PERFETTE.json: {e}")
+        raise
     
     @app.get("/events/{category}")
     def get_events(category: str):
@@ -1639,8 +1645,10 @@ def build_api(df: pd.DataFrame):
             if tmp_path:
                 try:
                     os.unlink(tmp_path)
-                except:
-                    pass
+                except FileNotFoundError:
+                    pass  # File già cancellato, ok
+                except Exception as e:
+                    logger.warning(f"⚠️ Impossibile cancellare file temporaneo {tmp_path}: {e}")
         
         return JSONResponse(result)
 
