@@ -2831,7 +2831,7 @@ def build_api(df: pd.DataFrame):
                         "message": f"Codice ATECO '{code}' non trovato"
                     })
 
-                # Formatta risposta IDENTICA al vecchio endpoint
+                # Formatta risposta base
                 item = {
                     "ORDINE_CODICE_ATECO_2022": "",  # Non nel DB, lascia vuoto
                     "CODICE_ATECO_2022": result.code_2022 or "",
@@ -2843,11 +2843,12 @@ def build_api(df: pd.DataFrame):
                     "CODICE_ATECO_2025_RAPPRESENTATIVO": result.code_2025,
                     "TITOLO_ATECO_2025_RAPPRESENTATIVO": result.title_2025,
                     "CODICE_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": result.code_2025_camerale or result.code_2025,
-                    "TITOLO_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": result.title_2025,
-                    "settore": result.sector or "",
-                    "normative": result.regulations or [],
-                    "certificazioni": result.certifications or []
+                    "TITOLO_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": result.title_2025
                 }
+
+                # Arricchisci con settore, normative, certificazioni da mapping.yaml
+                # (usa stessa logica del vecchio endpoint)
+                item = enrich(item)
 
                 return JSONResponse({
                     "found": 1,
