@@ -3253,6 +3253,229 @@ def build_api(df: pd.DataFrame):
                 "details": str(e)
             }, status_code=500)
 
+    # ENDPOINT - Send Pre-Report PDF via Telegram
+    @app.post("/api/send-prereport-pdf")
+    async def send_prereport_pdf(request: dict = Body(...)):
+        """
+        Genera PDF dal pre-report ATECO e lo invia via Telegram
+
+        Request body:
+        {
+            "atecoData": {...},  // Dati completi del report ATECO
+            "telegramChatId": "5123398987"
+        }
+        """
+        try:
+            from datetime import datetime
+            from io import BytesIO
+            from weasyprint import HTML
+            from telegram import Bot
+            import asyncio
+
+            ateco_data = request.get("atecoData")
+            chat_id = request.get("telegramChatId")
+
+            if not ateco_data or not chat_id:
+                return JSONResponse({
+                    "success": False,
+                    "error": "missing_data",
+                    "message": "atecoData e telegramChatId sono richiesti"
+                }, status_code=400)
+
+            # Step 1: Genera HTML per il PDF
+            lookup = ateco_data.get("lookup", {})
+            arricchimento = ateco_data.get("arricchimento", "")
+            normative = ateco_data.get("normative", [])
+            certificazioni = ateco_data.get("certificazioni", [])
+            rischi = ateco_data.get("rischi", {})
+
+            html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {{
+            size: A4;
+            margin: 2cm;
+        }}
+        body {{
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }}
+        h1 {{
+            color: #0EA5E9;
+            border-bottom: 3px solid #0EA5E9;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }}
+        h2 {{
+            color: #0284C7;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-left: 4px solid #0EA5E9;
+            padding-left: 15px;
+        }}
+        h3 {{
+            color: #0369A1;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }}
+        .section {{
+            margin-bottom: 25px;
+        }}
+        .info-box {{
+            background: #F0F9FF;
+            border: 1px solid #BAE6FD;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }}
+        ul {{
+            list-style-type: none;
+            padding-left: 0;
+        }}
+        li {{
+            margin: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }}
+        li:before {{
+            content: "•";
+            color: #0EA5E9;
+            font-weight: bold;
+            font-size: 1.2em;
+            position: absolute;
+            left: 0;
+        }}
+        .risk-category {{
+            background: #FEF3C7;
+            border-left: 4px solid #F59E0B;
+            padding: 12px;
+            margin: 10px 0;
+        }}
+        footer {{
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ccc;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }}
+    </style>
+</head>
+<body>
+    <h1>📊 PRE-REPORT ANALISI ATECO</h1>
+    <p style="color: #666; font-style: italic;">Generato da SYD CYBER il {datetime.now().strftime('%d/%m/%Y alle %H:%M')}</p>
+
+    <div class="section">
+        <h2>🔎 Lookup Diretto</h2>
+        <div class="info-box">
+            <p><strong>Codice ATECO 2022:</strong> {lookup.get('codice2022', 'N/A')}</p>
+            <p><strong>Titolo 2022:</strong> {lookup.get('titolo2022', 'N/A')}</p>
+            <p><strong>Codice ATECO 2025:</strong> {lookup.get('codice2025', 'N/A')}</p>
+            <p><strong>Titolo 2025:</strong> {lookup.get('titolo2025', 'N/A')}</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📌 Arricchimento Consulenziale</h2>
+        <p>{arricchimento}</p>
+    </div>
+
+    <div class="section">
+        <h2>📜 Normative UE e Nazionali Rilevanti</h2>
+        <ul>
+            {''.join([f'<li>{norm}</li>' for norm in normative])}
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>📑 Certificazioni ISO / Schemi Tipici del Settore</h2>
+        <ul>
+            {''.join([f'<li>{cert}</li>' for cert in certificazioni])}
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>⚠️ Rischi Principali da Gestire</h2>
+
+        <div class="risk-category">
+            <h3>Rischi Operativi</h3>
+            <ul>
+                {''.join([f'<li>{risk}</li>' for risk in rischi.get('operativi', [])])}
+            </ul>
+        </div>
+
+        <div class="risk-category">
+            <h3>Rischi di Compliance</h3>
+            <ul>
+                {''.join([f'<li>{risk}</li>' for risk in rischi.get('compliance', [])])}
+            </ul>
+        </div>
+
+        <div class="risk-category">
+            <h3>Rischi Cyber / OT</h3>
+            <ul>
+                {''.join([f'<li>{risk}</li>' for risk in rischi.get('cyber', [])])}
+            </ul>
+        </div>
+
+        <div class="risk-category">
+            <h3>Rischi Reputazionali</h3>
+            <ul>
+                {''.join([f'<li>{risk}</li>' for risk in rischi.get('reputazionali', [])])}
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        <p><strong>SYD CYBER</strong> - Sistema di Valutazione Dinamica dei Rischi Operativi</p>
+        <p>Questo è un pre-report preliminare. Per l'analisi completa contattare il consulente.</p>
+    </footer>
+</body>
+</html>
+            """
+
+            # Step 2: Genera PDF
+            pdf_buffer = BytesIO()
+            HTML(string=html_content).write_pdf(pdf_buffer)
+            pdf_buffer.seek(0)
+
+            # Step 3: Invia via Telegram
+            TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8487460592:AAEPO3TCVVVVe4s7yHRiQNt-NY0Y5yQB3Xk")
+
+            bot = Bot(token=TELEGRAM_BOT_TOKEN)
+
+            ateco_code = lookup.get('codice2025') or lookup.get('codice2022', 'UNKNOWN')
+            filename = f"PreReport_ATECO_{ateco_code}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+
+            await bot.send_document(
+                chat_id=chat_id,
+                document=pdf_buffer,
+                filename=filename,
+                caption=f"📊 Pre-Report ATECO {ateco_code}\n\nGenerato da SYD CYBER il {datetime.now().strftime('%d/%m/%Y alle %H:%M')}"
+            )
+
+            logger.info(f"✅ PDF inviato con successo a chat_id {chat_id}: {filename}")
+
+            return JSONResponse({
+                "success": True,
+                "message": "Report inviato con successo su Telegram",
+                "filename": filename,
+                "chat_id": chat_id
+            })
+
+        except Exception as e:
+            logger.error(f"❌ Errore send_prereport_pdf: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "success": False,
+                "error": "send_failed",
+                "message": "Errore durante generazione o invio del report",
+                "details": str(e)
+            }, status_code=500)
+
     return app
 
 

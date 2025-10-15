@@ -14,3 +14,7 @@ Pillow
 sqlalchemy==2.0.23
 psycopg2-binary==2.9.9
 alembic==1.12.1
+
+# PDF Generation & Telegram
+weasyprint
+python-telegram-bot
