@@ -3268,9 +3268,12 @@ def build_api(df: pd.DataFrame):
         try:
             from datetime import datetime
             from io import BytesIO
-            from weasyprint import HTML
+            from reportlab.lib.pagesizes import A4
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import cm
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+            from reportlab.lib.colors import HexColor
             from telegram import Bot
-            import asyncio
 
             ateco_data = request.get("atecoData")
             chat_id = request.get("telegramChatId")
@@ -3282,170 +3285,90 @@ def build_api(df: pd.DataFrame):
                     "message": "atecoData e telegramChatId sono richiesti"
                 }, status_code=400)
 
-            # Step 1: Genera HTML per il PDF
             lookup = ateco_data.get("lookup", {})
             arricchimento = ateco_data.get("arricchimento", "")
             normative = ateco_data.get("normative", [])
             certificazioni = ateco_data.get("certificazioni", [])
             rischi = ateco_data.get("rischi", {})
 
-            html_content = f"""
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <style>
-        @page {{
-            size: A4;
-            margin: 2cm;
-        }}
-        body {{
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-        }}
-        h1 {{
-            color: #0EA5E9;
-            border-bottom: 3px solid #0EA5E9;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }}
-        h2 {{
-            color: #0284C7;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            border-left: 4px solid #0EA5E9;
-            padding-left: 15px;
-        }}
-        h3 {{
-            color: #0369A1;
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }}
-        .section {{
-            margin-bottom: 25px;
-        }}
-        .info-box {{
-            background: #F0F9FF;
-            border: 1px solid #BAE6FD;
-            border-radius: 5px;
-            padding: 15px;
-            margin: 15px 0;
-        }}
-        ul {{
-            list-style-type: none;
-            padding-left: 0;
-        }}
-        li {{
-            margin: 8px 0;
-            padding-left: 25px;
-            position: relative;
-        }}
-        li:before {{
-            content: "•";
-            color: #0EA5E9;
-            font-weight: bold;
-            font-size: 1.2em;
-            position: absolute;
-            left: 0;
-        }}
-        .risk-category {{
-            background: #FEF3C7;
-            border-left: 4px solid #F59E0B;
-            padding: 12px;
-            margin: 10px 0;
-        }}
-        footer {{
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 1px solid #ccc;
-            text-align: center;
-            color: #666;
-            font-size: 0.9em;
-        }}
-    </style>
-</head>
-<body>
-    <h1>📊 PRE-REPORT ANALISI ATECO</h1>
-    <p style="color: #666; font-style: italic;">Generato da SYD CYBER il {datetime.now().strftime('%d/%m/%Y alle %H:%M')}</p>
-
-    <div class="section">
-        <h2>🔎 Lookup Diretto</h2>
-        <div class="info-box">
-            <p><strong>Codice ATECO 2022:</strong> {lookup.get('codice2022', 'N/A')}</p>
-            <p><strong>Titolo 2022:</strong> {lookup.get('titolo2022', 'N/A')}</p>
-            <p><strong>Codice ATECO 2025:</strong> {lookup.get('codice2025', 'N/A')}</p>
-            <p><strong>Titolo 2025:</strong> {lookup.get('titolo2025', 'N/A')}</p>
-        </div>
-    </div>
-
-    <div class="section">
-        <h2>📌 Arricchimento Consulenziale</h2>
-        <p>{arricchimento}</p>
-    </div>
-
-    <div class="section">
-        <h2>📜 Normative UE e Nazionali Rilevanti</h2>
-        <ul>
-            {''.join([f'<li>{norm}</li>' for norm in normative])}
-        </ul>
-    </div>
-
-    <div class="section">
-        <h2>📑 Certificazioni ISO / Schemi Tipici del Settore</h2>
-        <ul>
-            {''.join([f'<li>{cert}</li>' for cert in certificazioni])}
-        </ul>
-    </div>
-
-    <div class="section">
-        <h2>⚠️ Rischi Principali da Gestire</h2>
-
-        <div class="risk-category">
-            <h3>Rischi Operativi</h3>
-            <ul>
-                {''.join([f'<li>{risk}</li>' for risk in rischi.get('operativi', [])])}
-            </ul>
-        </div>
-
-        <div class="risk-category">
-            <h3>Rischi di Compliance</h3>
-            <ul>
-                {''.join([f'<li>{risk}</li>' for risk in rischi.get('compliance', [])])}
-            </ul>
-        </div>
-
-        <div class="risk-category">
-            <h3>Rischi Cyber / OT</h3>
-            <ul>
-                {''.join([f'<li>{risk}</li>' for risk in rischi.get('cyber', [])])}
-            </ul>
-        </div>
-
-        <div class="risk-category">
-            <h3>Rischi Reputazionali</h3>
-            <ul>
-                {''.join([f'<li>{risk}</li>' for risk in rischi.get('reputazionali', [])])}
-            </ul>
-        </div>
-    </div>
-
-    <footer>
-        <p><strong>SYD CYBER</strong> - Sistema di Valutazione Dinamica dei Rischi Operativi</p>
-        <p>Questo è un pre-report preliminare. Per l'analisi completa contattare il consulente.</p>
-    </footer>
-</body>
-</html>
-            """
-
-            # Step 2: Genera PDF
+            # Step 1: Genera PDF con ReportLab
             pdf_buffer = BytesIO()
-            HTML(string=html_content).write_pdf(pdf_buffer)
+            doc = SimpleDocTemplate(pdf_buffer, pagesize=A4, topMargin=2*cm, bottomMargin=2*cm)
+
+            # Stili
+            styles = getSampleStyleSheet()
+            title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'],
+                                        textColor=HexColor('#0EA5E9'), fontSize=20, spaceAfter=12)
+            heading_style = ParagraphStyle('CustomHeading', parent=styles['Heading2'],
+                                          textColor=HexColor('#0284C7'), fontSize=14, spaceAfter=10)
+            normal_style = styles['Normal']
+
+            story = []
+
+            # Titolo
+            story.append(Paragraph("📊 PRE-REPORT ANALISI ATECO", title_style))
+            story.append(Paragraph(f"<i>Generato da SYD CYBER il {datetime.now().strftime('%d/%m/%Y alle %H:%M')}</i>", normal_style))
+            story.append(Spacer(1, 0.5*cm))
+
+            # Lookup
+            story.append(Paragraph("🔎 Lookup Diretto", heading_style))
+            story.append(Paragraph(f"<b>Codice ATECO 2022:</b> {lookup.get('codice2022', 'N/A')}", normal_style))
+            story.append(Paragraph(f"<b>Titolo 2022:</b> {lookup.get('titolo2022', 'N/A')}", normal_style))
+            story.append(Paragraph(f"<b>Codice ATECO 2025:</b> {lookup.get('codice2025', 'N/A')}", normal_style))
+            story.append(Paragraph(f"<b>Titolo 2025:</b> {lookup.get('titolo2025', 'N/A')}", normal_style))
+            story.append(Spacer(1, 0.5*cm))
+
+            # Arricchimento
+            story.append(Paragraph("📌 Arricchimento Consulenziale", heading_style))
+            story.append(Paragraph(arricchimento, normal_style))
+            story.append(Spacer(1, 0.5*cm))
+
+            # Normative
+            story.append(Paragraph("📜 Normative UE e Nazionali Rilevanti", heading_style))
+            for norm in normative:
+                story.append(Paragraph(f"• {norm}", normal_style))
+            story.append(Spacer(1, 0.5*cm))
+
+            # Certificazioni
+            story.append(Paragraph("📑 Certificazioni ISO / Schemi Tipici del Settore", heading_style))
+            for cert in certificazioni:
+                story.append(Paragraph(f"• {cert}", normal_style))
+            story.append(Spacer(1, 0.5*cm))
+
+            # Rischi
+            story.append(Paragraph("⚠️ Rischi Principali da Gestire", heading_style))
+
+            story.append(Paragraph("<b>Rischi Operativi</b>", normal_style))
+            for risk in rischi.get('operativi', []):
+                story.append(Paragraph(f"› {risk}", normal_style))
+            story.append(Spacer(1, 0.3*cm))
+
+            story.append(Paragraph("<b>Rischi di Compliance</b>", normal_style))
+            for risk in rischi.get('compliance', []):
+                story.append(Paragraph(f"› {risk}", normal_style))
+            story.append(Spacer(1, 0.3*cm))
+
+            story.append(Paragraph("<b>Rischi Cyber / OT</b>", normal_style))
+            for risk in rischi.get('cyber', []):
+                story.append(Paragraph(f"› {risk}", normal_style))
+            story.append(Spacer(1, 0.3*cm))
+
+            story.append(Paragraph("<b>Rischi Reputazionali</b>", normal_style))
+            for risk in rischi.get('reputazionali', []):
+                story.append(Paragraph(f"› {risk}", normal_style))
+            story.append(Spacer(1, 0.5*cm))
+
+            # Footer
+            story.append(Spacer(1, 1*cm))
+            story.append(Paragraph("<b>SYD CYBER</b> - Sistema di Valutazione Dinamica dei Rischi Operativi", normal_style))
+            story.append(Paragraph("<i>Questo è un pre-report preliminare. Per l'analisi completa contattare il consulente.</i>", normal_style))
+
+            # Build PDF
+            doc.build(story)
             pdf_buffer.seek(0)
 
-            # Step 3: Invia via Telegram
+            # Step 2: Invia via Telegram
             TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8487460592:AAEPO3TCVVVVe4s7yHRiQNt-NY0Y5yQB3Xk")
-
             bot = Bot(token=TELEGRAM_BOT_TOKEN)
 
             ateco_code = lookup.get('codice2025') or lookup.get('codice2022', 'UNKNOWN')
