@@ -3797,8 +3797,12 @@ def build_api(df: pd.DataFrame):
             try:
                 from telegram import Bot
 
+                logger.info("🔄 Tentativo invio Telegram feedback...")
+
                 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8487460592:AAEPO3TCVVVVe4s7yHRiQNt-NY0Y5yQB3Xk")
                 TELEGRAM_CHAT_ID = "5123398987"  # Team chat
+
+                logger.info(f"Token presente: {TELEGRAM_BOT_TOKEN[:20]}...")
 
                 # Converti scale in emoji e testo
                 def rating_emoji(value, max_val=5):
@@ -3807,14 +3811,13 @@ def build_api(df: pd.DataFrame):
                     stars = "⭐" * (max_val - value + 1)
                     return f"{stars} ({value}/{max_val})"
 
-                message = f"""
-🎯 **NUOVO FEEDBACK UTENTE**
+                message = f"""🎯 NUOVO FEEDBACK UTENTE
 
-👤 **Utente:**
-- Session: `{session_id[:8]}...`
+👤 Utente:
+- Session: {session_id[:8]}...
 - Email: {user_email or 'N/A'}
 
-📊 **Valutazioni:**
+📊 Valutazioni:
 - UI: {rating_emoji(impression_ui, 5)}
 - Utilità: {rating_emoji(impression_utility, 5)}
 - Facilità d'uso: {rating_emoji(ease_of_use, 4)}
@@ -3822,18 +3825,16 @@ def build_api(df: pd.DataFrame):
 - Syd Agent: {rating_emoji(syd_helpfulness, 4)}
 - Chiarezza: {rating_emoji(assessment_clarity, 4)}
 
-💬 **Feedback aperto:**
+💬 Feedback aperto:
 ✅ Piaciuto: {liked_most[:200] if liked_most else 'N/A'}
 🔧 Migliorare: {improvements[:200] if improvements else 'N/A'}
 
-🕒 {datetime.now().strftime('%d/%m/%Y %H:%M')}
-                """
+🕒 {datetime.now().strftime('%d/%m/%Y %H:%M')}"""
 
                 bot = Bot(token=TELEGRAM_BOT_TOKEN)
                 await bot.send_message(
                     chat_id=TELEGRAM_CHAT_ID,
-                    text=message,
-                    parse_mode='Markdown'
+                    text=message
                 )
 
                 logger.info(f"✅ Notifica Telegram inviata per feedback ID {feedback_id}")
