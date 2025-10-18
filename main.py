@@ -3806,10 +3806,11 @@ def build_api(df: pd.DataFrame):
                 logger.info(f"Token presente: {TELEGRAM_BOT_TOKEN[:20]}...")
 
                 # Converti scale in emoji e testo
+                # Scala: 5 = molto positivo (5 stelle), 1 = molto negativo (1 stella)
                 def rating_emoji(value, max_val=5):
                     if value is None:
                         return "N/A"
-                    stars = "⭐" * (max_val - value + 1)
+                    stars = "⭐" * value
                     return f"{stars} ({value}/{max_val})"
 
                 message = f"""🎯 NUOVO FEEDBACK UTENTE
