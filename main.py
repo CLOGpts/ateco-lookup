@@ -3399,6 +3399,182 @@ def build_api(df: pd.DataFrame):
                 "details": str(e)
             }, status_code=500)
 
+    # ENDPOINT - Send Risk Assessment Report PDF via Telegram
+    @app.post("/api/send-risk-report-pdf")
+    async def send_risk_report_pdf(request: dict = Body(...)):
+        """
+        Genera PDF dal risk assessment report e lo invia via Telegram
+
+        Request body:
+        {
+            "riskData": {
+                "eventCode": "107",
+                "category": "Damage_Danni",
+                "inherentRisk": "High",
+                "control": "Partially Adequate",
+                "economicImpact": "...",
+                "nonEconomicImpact": "...",
+                "explanation": "...",
+                "requiredAction": "...",
+                "matrixPosition": "C2",
+                "riskScore": 75
+            },
+            "telegramChatId": "5123398987"
+        }
+        """
+        try:
+            from datetime import datetime
+            from io import BytesIO
+            from reportlab.lib.pagesizes import A4
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import cm
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+            from reportlab.lib.colors import HexColor
+            from telegram import Bot
+            import html
+
+            risk_data = request.get("riskData")
+            chat_id = request.get("telegramChatId")
+
+            if not risk_data or not chat_id:
+                return JSONResponse({
+                    "success": False,
+                    "error": "missing_data",
+                    "message": "riskData e telegramChatId sono richiesti"
+                }, status_code=400)
+
+            # Estrai dati
+            event_code = risk_data.get("eventCode", "N/A")
+            category = risk_data.get("category", "N/A")
+            inherent_risk = risk_data.get("inherentRisk", "N/A")
+            control = risk_data.get("control", "N/A")
+            economic_impact = risk_data.get("economicImpact", "N/A")
+            non_economic_impact = risk_data.get("nonEconomicImpact", "N/A")
+            explanation = risk_data.get("explanation", "N/A")
+            required_action = risk_data.get("requiredAction", "N/A")
+            matrix_position = risk_data.get("matrixPosition", "N/A")
+            risk_score = risk_data.get("riskScore", 0)
+
+            # Pulisci HTML dall'explanation
+            if explanation and explanation != "N/A":
+                explanation = html.unescape(explanation)
+                explanation = explanation.replace('<br/>', '\n').replace('<strong>', '').replace('</strong>', '')
+                explanation = explanation.replace('<div class="h-3"></div>', '\n')
+
+            # Step 1: Genera PDF con ReportLab
+            pdf_buffer = BytesIO()
+            doc = SimpleDocTemplate(pdf_buffer, pagesize=A4, topMargin=2*cm, bottomMargin=2*cm)
+
+            # Stili
+            styles = getSampleStyleSheet()
+            title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'],
+                                        textColor=HexColor('#60A5FA'), fontSize=22, spaceAfter=12, alignment=1)
+            heading_style = ParagraphStyle('CustomHeading', parent=styles['Heading2'],
+                                          textColor=HexColor('#3B82F6'), fontSize=16, spaceAfter=10)
+            subheading_style = ParagraphStyle('CustomSubheading', parent=styles['Heading3'],
+                                             textColor=HexColor('#93C5FD'), fontSize=12, spaceAfter=8)
+            normal_style = styles['Normal']
+
+            # Colori risk
+            risk_colors = {
+                'Critical': '#EF4444',
+                'High': '#F97316',
+                'Medium': '#F59E0B',
+                'Low': '#10B981'
+            }
+            risk_color = risk_colors.get(inherent_risk, '#F59E0B')
+
+            story = []
+
+            # Titolo
+            story.append(Paragraph("📊 RISK ASSESSMENT REPORT", title_style))
+            story.append(Paragraph(f"<i>Generato da SYD CYBER il {datetime.now().strftime('%d/%m/%Y alle %H:%M')}</i>",
+                                 ParagraphStyle('Centered', parent=normal_style, alignment=1)))
+            story.append(Spacer(1, 1*cm))
+
+            # Evento
+            story.append(Paragraph("🎯 EVENTO", heading_style))
+            story.append(Paragraph(f"<b>Codice:</b> {event_code}", normal_style))
+            story.append(Paragraph(f"<b>Categoria:</b> {category}", normal_style))
+            story.append(Spacer(1, 0.5*cm))
+
+            # Dati principali
+            story.append(Paragraph("📊 VALUTAZIONE RISCHIO", heading_style))
+            risk_style = ParagraphStyle('RiskLevel', parent=normal_style,
+                                       textColor=HexColor(risk_color), fontSize=14, fontName='Helvetica-Bold')
+            story.append(Paragraph(f"<b>Rischio Inerente:</b> <font color='{risk_color}'>{inherent_risk}</font>", normal_style))
+            story.append(Paragraph(f"<b>Livello Controlli:</b> {control}", normal_style))
+            story.append(Paragraph(f"<b>Posizione Matrice:</b> {matrix_position}", normal_style))
+            story.append(Paragraph(f"<b>Risk Score:</b> {risk_score}/100", normal_style))
+            story.append(Spacer(1, 0.5*cm))
+
+            # Impatti
+            story.append(Paragraph("💰 IMPATTO ECONOMICO", heading_style))
+            story.append(Paragraph(economic_impact, normal_style))
+            story.append(Spacer(1, 0.3*cm))
+
+            story.append(Paragraph("📊 IMPATTO NON ECONOMICO", heading_style))
+            story.append(Paragraph(non_economic_impact, normal_style))
+            story.append(Spacer(1, 0.5*cm))
+
+            # Spiegazione
+            story.append(Paragraph("💡 PERCHÉ QUESTO RISULTATO", heading_style))
+            # Dividi explanation in paragrafi per gestire testi lunghi
+            explanation_paras = explanation.split('\n\n') if explanation != "N/A" else ["N/A"]
+            for para in explanation_paras:
+                if para.strip():
+                    story.append(Paragraph(para.strip(), normal_style))
+                    story.append(Spacer(1, 0.2*cm))
+            story.append(Spacer(1, 0.5*cm))
+
+            # Azione consigliata
+            story.append(Paragraph("⚡ AZIONE CONSIGLIATA", heading_style))
+            story.append(Paragraph(required_action, normal_style))
+            story.append(Spacer(1, 1*cm))
+
+            # Footer
+            story.append(Spacer(1, 1*cm))
+            story.append(Paragraph("<b>SYD CYBER</b> - Sistema di Valutazione Dinamica dei Rischi Operativi",
+                                 ParagraphStyle('Footer', parent=normal_style, alignment=1)))
+            story.append(Paragraph("<i>Report professionale di Risk Assessment</i>",
+                                 ParagraphStyle('FooterItalic', parent=normal_style, alignment=1)))
+
+            # Build PDF
+            doc.build(story)
+            pdf_buffer.seek(0)
+
+            # Step 2: Invia via Telegram
+            TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8487460592:AAEPO3TCVVVVe4s7yHRiQNt-NY0Y5yQB3Xk")
+            bot = Bot(token=TELEGRAM_BOT_TOKEN)
+
+            event_code_clean = event_code.replace('/', '_').replace(' ', '_')
+            filename = f"RiskReport_{event_code_clean}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+
+            await bot.send_document(
+                chat_id=chat_id,
+                document=pdf_buffer,
+                filename=filename,
+                caption=f"📊 Risk Assessment Report - Evento {event_code}\n\nValutazione professionale completata\nRisk Score: {risk_score}/100\nPosizione Matrice: {matrix_position}\n\nGenerato da SYD CYBER il {datetime.now().strftime('%d/%m/%Y alle %H:%M')}"
+            )
+
+            logger.info(f"✅ Risk Report PDF inviato con successo a chat_id {chat_id}: {filename}")
+
+            return JSONResponse({
+                "success": True,
+                "message": "Report inviato con successo su Telegram",
+                "filename": filename,
+                "chat_id": chat_id
+            })
+
+        except Exception as e:
+            logger.error(f"❌ Errore send_risk_report_pdf: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "success": False,
+                "error": "send_failed",
+                "message": "Errore durante generazione o invio del report",
+                "details": str(e)
+            }, status_code=500)
+
     return app
 
 
