@@ -3796,6 +3796,7 @@ def build_api(df: pd.DataFrame):
             # Invia notifica Telegram
             try:
                 from telegram import Bot
+                from datetime import datetime
 
                 logger.info("🔄 Tentativo invio Telegram feedback...")
 
