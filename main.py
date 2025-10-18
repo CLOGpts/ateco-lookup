@@ -3575,6 +3575,279 @@ def build_api(df: pd.DataFrame):
                 "details": str(e)
             }, status_code=500)
 
+    # ============================================================================
+    # ENDPOINT ADMIN - Create User Feedback Table
+    # ============================================================================
+    @app.post("/admin/create-feedback-table")
+    async def create_feedback_table():
+        """
+        Crea tabella user_feedback nel database PostgreSQL
+
+        SICUREZZA:
+        - Questo endpoint è protetto (solo chiamata admin una tantum)
+        - Usa IF NOT EXISTS per evitare errori se già esiste
+
+        CHIAMATA UNA VOLTA SOLA:
+        POST https://celerya-cyber-ateco-production.up.railway.app/admin/create-feedback-table
+        """
+        logger.info("🚀 ADMIN: Richiesta creazione tabella user_feedback")
+        results = {"steps": []}
+
+        try:
+            from database.config import get_engine
+            from sqlalchemy import text
+
+            engine = get_engine()
+
+            # SQL per creare la tabella (con IF NOT EXISTS per sicurezza)
+            sql_create_table = """
+            CREATE TABLE IF NOT EXISTS user_feedback (
+                id SERIAL PRIMARY KEY,
+
+                -- User identification
+                user_id VARCHAR(255),
+                session_id VARCHAR(255) NOT NULL,
+
+                -- Quantitative feedback (scale 1-5 or 1-4)
+                impression_ui INTEGER CHECK (impression_ui BETWEEN 1 AND 5),
+                impression_utility INTEGER CHECK (impression_utility BETWEEN 1 AND 5),
+                ease_of_use INTEGER CHECK (ease_of_use BETWEEN 1 AND 4),
+                innovation INTEGER CHECK (innovation BETWEEN 1 AND 4),
+                syd_helpfulness INTEGER CHECK (syd_helpfulness BETWEEN 1 AND 4),
+                assessment_clarity INTEGER CHECK (assessment_clarity BETWEEN 1 AND 4),
+
+                -- Qualitative feedback (open text)
+                liked_most TEXT,
+                improvements TEXT,
+
+                -- Metadata
+                created_at TIMESTAMP DEFAULT NOW(),
+                user_email VARCHAR(255),
+                assessment_id INTEGER,
+
+                -- One feedback per session
+                CONSTRAINT user_feedback_session_unique UNIQUE (session_id)
+            );
+
+            -- Create indexes
+            CREATE INDEX IF NOT EXISTS idx_user_feedback_user_id ON user_feedback(user_id);
+            CREATE INDEX IF NOT EXISTS idx_user_feedback_created_at ON user_feedback(created_at DESC);
+            CREATE INDEX IF NOT EXISTS idx_user_feedback_session_id ON user_feedback(session_id);
+
+            -- Add table comment
+            COMMENT ON TABLE user_feedback IS 'User feedback collected after first risk assessment completion';
+            """
+
+            with engine.connect() as conn:
+                trans = conn.begin()
+                try:
+                    # Esegui creazione tabella
+                    conn.execute(text(sql_create_table))
+                    trans.commit()
+                    results["steps"].append("✅ Tabella user_feedback creata")
+                    logger.info("✅ Tabella user_feedback creata con successo")
+
+                    # Verifica tabella
+                    result = conn.execute(text("""
+                        SELECT column_name, data_type
+                        FROM information_schema.columns
+                        WHERE table_name = 'user_feedback'
+                        ORDER BY ordinal_position;
+                    """))
+                    columns = result.fetchall()
+                    results["steps"].append(f"✅ Trovate {len(columns)} colonne")
+
+                    # Verifica indici
+                    result = conn.execute(text("""
+                        SELECT indexname
+                        FROM pg_indexes
+                        WHERE tablename = 'user_feedback';
+                    """))
+                    indexes = result.fetchall()
+                    results["steps"].append(f"✅ Trovati {len(indexes)} indici")
+
+                except Exception as e:
+                    trans.rollback()
+                    raise e
+
+            logger.info("🎉 Tabella user_feedback setup completato!")
+
+            return JSONResponse({
+                "success": True,
+                "message": "Tabella user_feedback creata con successo",
+                "steps": results["steps"]
+            })
+
+        except Exception as e:
+            logger.error(f"❌ Errore creazione tabella user_feedback: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "success": False,
+                "error": "table_creation_failed",
+                "message": "Errore durante creazione tabella",
+                "details": str(e),
+                "steps": results.get("steps", [])
+            }, status_code=500)
+
+    # ============================================================================
+    # ENDPOINT API - Submit User Feedback
+    # ============================================================================
+    @app.post("/api/feedback")
+    async def submit_feedback(request: dict = Body(...)):
+        """
+        Riceve feedback utente e invia notifica Telegram
+
+        Request body:
+        {
+            "sessionId": "uuid-session",
+            "userId": "firebase-uid" (optional),
+            "userEmail": "user@example.com" (optional),
+            "impressionUI": 1-5,
+            "impressionUtility": 1-5,
+            "easeOfUse": 1-4,
+            "innovation": 1-4,
+            "sydHelpfulness": 1-4,
+            "assessmentClarity": 1-4,
+            "likedMost": "text",
+            "improvements": "text"
+        }
+        """
+        logger.info("📝 Ricezione feedback utente")
+
+        try:
+            from database.config import get_engine
+            from sqlalchemy import text
+
+            # Estrai dati dalla request
+            session_id = request.get("sessionId")
+            user_id = request.get("userId")
+            user_email = request.get("userEmail")
+
+            impression_ui = request.get("impressionUI")
+            impression_utility = request.get("impressionUtility")
+            ease_of_use = request.get("easeOfUse")
+            innovation = request.get("innovation")
+            syd_helpfulness = request.get("sydHelpfulness")
+            assessment_clarity = request.get("assessmentClarity")
+
+            liked_most = request.get("likedMost", "")
+            improvements = request.get("improvements", "")
+
+            if not session_id:
+                return JSONResponse({
+                    "success": False,
+                    "error": "missing_session_id"
+                }, status_code=400)
+
+            # Salva nel database
+            engine = get_engine()
+
+            with engine.connect() as conn:
+                trans = conn.begin()
+                try:
+                    result = conn.execute(text("""
+                        INSERT INTO user_feedback (
+                            session_id, user_id, user_email,
+                            impression_ui, impression_utility,
+                            ease_of_use, innovation,
+                            syd_helpfulness, assessment_clarity,
+                            liked_most, improvements
+                        )
+                        VALUES (
+                            :session_id, :user_id, :user_email,
+                            :impression_ui, :impression_utility,
+                            :ease_of_use, :innovation,
+                            :syd_helpfulness, :assessment_clarity,
+                            :liked_most, :improvements
+                        )
+                        RETURNING id;
+                    """), {
+                        "session_id": session_id,
+                        "user_id": user_id,
+                        "user_email": user_email,
+                        "impression_ui": impression_ui,
+                        "impression_utility": impression_utility,
+                        "ease_of_use": ease_of_use,
+                        "innovation": innovation,
+                        "syd_helpfulness": syd_helpfulness,
+                        "assessment_clarity": assessment_clarity,
+                        "liked_most": liked_most,
+                        "improvements": improvements
+                    })
+
+                    feedback_id = result.scalar()
+                    trans.commit()
+
+                    logger.info(f"✅ Feedback salvato nel database (ID: {feedback_id})")
+
+                except Exception as db_error:
+                    trans.rollback()
+                    logger.error(f"❌ Errore salvataggio database: {str(db_error)}")
+                    raise db_error
+
+            # Invia notifica Telegram
+            try:
+                from telegram import Bot
+
+                TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8487460592:AAEPO3TCVVVVe4s7yHRiQNt-NY0Y5yQB3Xk")
+                TELEGRAM_CHAT_ID = "5123398987"  # Team chat
+
+                # Converti scale in emoji e testo
+                def rating_emoji(value, max_val=5):
+                    if value is None:
+                        return "N/A"
+                    stars = "⭐" * (max_val - value + 1)
+                    return f"{stars} ({value}/{max_val})"
+
+                message = f"""
+🎯 **NUOVO FEEDBACK UTENTE**
+
+👤 **Utente:**
+- Session: `{session_id[:8]}...`
+- Email: {user_email or 'N/A'}
+
+📊 **Valutazioni:**
+- UI: {rating_emoji(impression_ui, 5)}
+- Utilità: {rating_emoji(impression_utility, 5)}
+- Facilità d'uso: {rating_emoji(ease_of_use, 4)}
+- Innovazione: {rating_emoji(innovation, 4)}
+- Syd Agent: {rating_emoji(syd_helpfulness, 4)}
+- Chiarezza: {rating_emoji(assessment_clarity, 4)}
+
+💬 **Feedback aperto:**
+✅ Piaciuto: {liked_most[:200] if liked_most else 'N/A'}
+🔧 Migliorare: {improvements[:200] if improvements else 'N/A'}
+
+🕒 {datetime.now().strftime('%d/%m/%Y %H:%M')}
+                """
+
+                bot = Bot(token=TELEGRAM_BOT_TOKEN)
+                await bot.send_message(
+                    chat_id=TELEGRAM_CHAT_ID,
+                    text=message,
+                    parse_mode='Markdown'
+                )
+
+                logger.info(f"✅ Notifica Telegram inviata per feedback ID {feedback_id}")
+
+            except Exception as telegram_error:
+                # Non bloccare se Telegram fallisce
+                logger.warning(f"⚠️ Telegram notification failed: {str(telegram_error)}")
+
+            return JSONResponse({
+                "success": True,
+                "message": "Feedback ricevuto con successo",
+                "feedbackId": feedback_id
+            })
+
+        except Exception as e:
+            logger.error(f"❌ Errore submit_feedback: {str(e)}", exc_info=True)
+            return JSONResponse({
+                "success": False,
+                "error": "submission_failed",
+                "message": "Errore durante invio feedback",
+                "details": str(e)
+            }, status_code=500)
+
     return app
 
 
