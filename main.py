@@ -3782,6 +3782,15 @@ def build_api(df: pd.DataFrame):
                 except Exception as db_error:
                     trans.rollback()
                     logger.error(f"❌ Errore salvataggio database: {str(db_error)}")
+
+                    # Gestisci errore di duplicato session_id
+                    if "user_feedback_session_unique" in str(db_error) or "duplicate key" in str(db_error).lower():
+                        return JSONResponse({
+                            "success": False,
+                            "error": "already_submitted",
+                            "message": "Hai già inviato feedback per questa sessione. Grazie!"
+                        }, status_code=409)
+
                     raise db_error
 
             # Invia notifica Telegram
