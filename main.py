@@ -449,6 +449,13 @@ def build_api(df: pd.DataFrame):
                 }
             )
 
+    # ============================================================================
+    # MODULAR ROUTERS (Story 2.1 - Refactoring)
+    # ============================================================================
+    from app.routers import health as health_router
+    app.include_router(health_router.router)
+    # ============================================================================
+
     @app.get("/health")
     def health():
         logger.info("Health check requested")
