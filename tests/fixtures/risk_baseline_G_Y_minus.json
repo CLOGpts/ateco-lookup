@@ -1,0 +1,31 @@
+{
+  "status": "success",
+  "matrix_position": "B2",
+  "risk_level": "High",
+  "risk_color": "orange",
+  "risk_value": 0,
+  "inherent_risk": {
+    "value": 3,
+    "label": "Medium"
+  },
+  "control_effectiveness": {
+    "value": 2,
+    "label": "-",
+    "description": "Parzialmente Adeguato"
+  },
+  "calculation_details": {
+    "economic_loss": "G",
+    "economic_value": 4,
+    "non_economic_loss": "Y",
+    "non_economic_value": 3,
+    "min_value": 3,
+    "control_level": "-",
+    "control_row": 2,
+    "matrix_column": "B"
+  },
+  "recommendations": [
+    "Priorità alta per mitigazione",
+    "Rafforzare i controlli esistenti",
+    "Monitoraggio frequente richiesto"
+  ]
+}

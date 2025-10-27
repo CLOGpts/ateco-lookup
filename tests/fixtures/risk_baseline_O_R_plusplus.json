@@ -1,0 +1,31 @@
+{
+  "status": "success",
+  "matrix_position": "D4",
+  "risk_level": "High",
+  "risk_color": "orange",
+  "risk_value": 0,
+  "inherent_risk": {
+    "value": 1,
+    "label": "Critical"
+  },
+  "control_effectiveness": {
+    "value": 4,
+    "label": "++",
+    "description": "Adeguato"
+  },
+  "calculation_details": {
+    "economic_loss": "O",
+    "economic_value": 2,
+    "non_economic_loss": "R",
+    "non_economic_value": 1,
+    "min_value": 1,
+    "control_level": "++",
+    "control_row": 4,
+    "matrix_column": "D"
+  },
+  "recommendations": [
+    "Priorità alta per mitigazione",
+    "Rafforzare i controlli esistenti",
+    "Monitoraggio frequente richiesto"
+  ]
+}

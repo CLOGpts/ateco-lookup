@@ -1,0 +1,31 @@
+{
+  "status": "success",
+  "matrix_position": "D1",
+  "risk_level": "Critical",
+  "risk_color": "red",
+  "risk_value": 1,
+  "inherent_risk": {
+    "value": 1,
+    "label": "Critical"
+  },
+  "control_effectiveness": {
+    "value": 1,
+    "label": "--",
+    "description": "Non adeguato / assente"
+  },
+  "calculation_details": {
+    "economic_loss": "R",
+    "economic_value": 1,
+    "non_economic_loss": "R",
+    "non_economic_value": 1,
+    "min_value": 1,
+    "control_level": "--",
+    "control_row": 1,
+    "matrix_column": "D"
+  },
+  "recommendations": [
+    "Azione immediata richiesta",
+    "Implementare controlli aggiuntivi urgentemente",
+    "Escalation al management richiesta"
+  ]
+}

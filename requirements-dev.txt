@@ -1,0 +1,14 @@
+# Development & Testing Dependencies
+# Installa con: pip install -r requirements-dev.txt
+
+# Testing framework
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-asyncio==0.21.1
+
+# HTTP client for testing
+httpx==0.25.2
+
+# Code quality tools (opzionali, ma utili)
+black==23.12.1
+flake8==6.1.0

@@ -1,0 +1,31 @@
+{
+  "status": "success",
+  "matrix_position": "B4",
+  "risk_level": "Low",
+  "risk_color": "green",
+  "risk_value": 0,
+  "inherent_risk": {
+    "value": 3,
+    "label": "Medium"
+  },
+  "control_effectiveness": {
+    "value": 4,
+    "label": "++",
+    "description": "Adeguato"
+  },
+  "calculation_details": {
+    "economic_loss": "G",
+    "economic_value": 4,
+    "non_economic_loss": "Y",
+    "non_economic_value": 3,
+    "min_value": 3,
+    "control_level": "++",
+    "control_row": 4,
+    "matrix_column": "B"
+  },
+  "recommendations": [
+    "Rischio accettabile",
+    "Mantenere controlli attuali",
+    "Revisione periodica standard"
+  ]
+}

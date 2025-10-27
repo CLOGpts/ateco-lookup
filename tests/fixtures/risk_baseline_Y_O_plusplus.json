@@ -1,0 +1,31 @@
+{
+  "status": "success",
+  "matrix_position": "C4",
+  "risk_level": "Medium",
+  "risk_color": "yellow",
+  "risk_value": 0,
+  "inherent_risk": {
+    "value": 2,
+    "label": "High"
+  },
+  "control_effectiveness": {
+    "value": 4,
+    "label": "++",
+    "description": "Adeguato"
+  },
+  "calculation_details": {
+    "economic_loss": "Y",
+    "economic_value": 3,
+    "non_economic_loss": "O",
+    "non_economic_value": 2,
+    "min_value": 2,
+    "control_level": "++",
+    "control_row": 4,
+    "matrix_column": "C"
+  },
+  "recommendations": [
+    "Monitorare regolarmente",
+    "Valutare opportunità di miglioramento controlli",
+    "Documentare piani di contingenza"
+  ]
+}

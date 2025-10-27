@@ -374,10 +374,17 @@ else:
 _global_df = None
 _df_hash = None
 
+# Pydantic models - Definiti a livello modulo per compatibilità con FastAPI/Pydantic moderni
+class BatchRequest(BaseModel):
+    """Request model per endpoint /batch - ricerca multipla codici ATECO"""
+    codes: List[str]
+    prefer: Optional[str] = None
+    prefix: bool = False
+
 def build_api(df: pd.DataFrame):
     if not FASTAPI_AVAILABLE:
         raise ImportError("FastAPI non disponibile. Installa con: pip install fastapi uvicorn")
-    
+
     if not visura_extraction_available:
         logger.warning("VisuraExtractor non disponibile")
         # Verifica quale dipendenza manca
@@ -391,11 +398,6 @@ def build_api(df: pd.DataFrame):
             logger.info("PyPDF2 è installato")
         except ImportError:
             logger.warning("PyPDF2 NON è installato")
-    
-    class BatchRequest(BaseModel):
-        codes: List[str]
-        prefer: Optional[str] = None
-        prefix: bool = False
 
     app = FastAPI(title="ATECO Lookup", version="2.0")
 
