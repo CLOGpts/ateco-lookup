@@ -450,10 +450,13 @@ def build_api(df: pd.DataFrame):
             )
 
     # ============================================================================
-    # MODULAR ROUTERS (Story 2.1 - Refactoring)
+    # MODULAR ROUTERS (Story 2.1, 2.2 - Refactoring)
     # ============================================================================
     from app.routers import health as health_router
+    from app.routers import ateco as ateco_router
+
     app.include_router(health_router.router)
+    app.include_router(ateco_router.router)
     # ============================================================================
 
     @app.get("/health")
