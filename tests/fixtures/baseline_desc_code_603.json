@@ -1,0 +1,15 @@
+{
+  "code": "603",
+  "name": "Transazioni non notificate (intenzionalmente)",
+  "description": "Occultamento intenzionale di una transazione non notificata (volontariamente)\nValori oltre un limite autorizzato\nModifica fraudolenta di uno o più parametri di transazione",
+  "category": "Internal_Fraud_Frodi_interne",
+  "impact": "Frodi interne e perdite finanziarie",
+  "probability": "low",
+  "controls": [
+    "Audit interni",
+    "Segregation of duties",
+    "Whistleblowing"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

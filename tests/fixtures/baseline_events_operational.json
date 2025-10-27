@@ -1,0 +1,302 @@
+{
+  "category": "Execution_delivery_Problemi_di_produzione_o_consegna",
+  "original_request": "operational",
+  "events": [
+    {
+      "code": "401",
+      "name": "Inserimento dati, manutenzione o errori di caricamento",
+      "severity": "medium"
+    },
+    {
+      "code": "402",
+      "name": "Scarsa conformità o cattiva comprensione delle norme",
+      "severity": "medium"
+    },
+    {
+      "code": "403",
+      "name": "Carenze organizzative e di norme interne, violazioni del controllo interno o decisioni",
+      "severity": "medium"
+    },
+    {
+      "code": "404",
+      "name": "Errori dovuti all'inadeguatezza dei sistemi informativi ai prodotti bancari o altro di formale",
+      "severity": "medium"
+    },
+    {
+      "code": "405",
+      "name": "Debolezza o errori nel change management",
+      "severity": "medium"
+    },
+    {
+      "code": "406",
+      "name": "Problemi di pagamento / regolamento / consegna",
+      "severity": "medium"
+    },
+    {
+      "code": "407",
+      "name": "Outsourcing",
+      "severity": "medium"
+    },
+    {
+      "code": "408",
+      "name": "Malfunzionamento nella gestione dei dati aziendali (database, tabelle, riferimenti, ecc...)",
+      "severity": "medium"
+    },
+    {
+      "code": "409",
+      "name": "Inaccuratezza o imprecisione riguardo report o dati esterni (che causa perdita)",
+      "severity": "medium"
+    },
+    {
+      "code": "410",
+      "name": "Contenzioso (causato anche da processi, procedure, ecc…)",
+      "severity": "medium"
+    },
+    {
+      "code": "411",
+      "name": "Insuccesso involontario in dichiarazioni contabili, dichiarazioni normative, prudenziali e / o di segnalazione (eccetto disfunzione IT)",
+      "severity": "medium"
+    },
+    {
+      "code": "412",
+      "name": "Altre pendenze a causa di processi e procedure",
+      "severity": "medium"
+    },
+    {
+      "code": "413",
+      "name": "Mancanza di autorizzazioni / esclusione di responsabilità del cliente",
+      "severity": "medium"
+    },
+    {
+      "code": "414",
+      "name": "Mancato rilevamento e aggiornamento dei dati",
+      "severity": "medium"
+    },
+    {
+      "code": "415",
+      "name": "Documenti legali mancanti / incompleti",
+      "severity": "medium"
+    },
+    {
+      "code": "416",
+      "name": "Dati clienti errati o incompleti",
+      "severity": "medium"
+    },
+    {
+      "code": "417",
+      "name": "Perdita per negligenza o altro danno riguardo le risorse del cliente",
+      "severity": "medium"
+    },
+    {
+      "code": "418",
+      "name": "Errore o perdita di business, di una controparte cliente o non cliente, escluso ciò che è coperto da garanzia o assicurazione",
+      "severity": "medium"
+    },
+    {
+      "code": "419",
+      "name": "Controversie con controparti non clienti",
+      "severity": "medium"
+    },
+    {
+      "code": "420",
+      "name": "Controversie con i fornitori",
+      "severity": "medium"
+    },
+    {
+      "code": "421",
+      "name": "Errore nella gestione o impostazione di un modello / sistema o processo di calcolo",
+      "severity": "medium"
+    },
+    {
+      "code": "422",
+      "name": "Errore contabile (Escluso errore durante una transazione su un account cliente)",
+      "severity": "medium"
+    },
+    {
+      "code": "423",
+      "name": "Mancato monitoraggio o gestione di una garanzia",
+      "severity": "medium"
+    },
+    {
+      "code": "424",
+      "name": "Mancato scambio o trasmissione di informazioni e / o comunicazioni",
+      "severity": "medium"
+    },
+    {
+      "code": "425",
+      "name": "Mancato rispetto delle scadenze o identificazione delle responsabilità",
+      "severity": "medium"
+    },
+    {
+      "code": "426",
+      "name": "Mancato rispetto degli obblighi per lo scambio di informazioni essenziali",
+      "severity": "medium"
+    },
+    {
+      "code": "427",
+      "name": "Errore nell'attuazione di una vigilanza interna costante, adattata al livello e alla natura dei rischi considerati nel processo",
+      "severity": "medium"
+    },
+    {
+      "code": "428",
+      "name": "Errore nel sistema di generazione, controllo ed elaborazione delle segnalazioni relative il riciclaggio di denaro / finanziamento del terrorismo e obblighi normativi",
+      "severity": "medium"
+    },
+    {
+      "code": "429",
+      "name": "Errori nella gestione degli elenchi di clienti, fornitori, dipendenti, non clienti e altre terze parti (con possibili sanzioni)",
+      "severity": "medium"
+    },
+    {
+      "code": "430",
+      "name": "Errore nella gestione delle transazioni finanziarie",
+      "severity": "medium"
+    },
+    {
+      "code": "431",
+      "name": "Mancato rispetto del processo e/o mancato rispetto della gestione dei reclami del cliente",
+      "severity": "medium"
+    },
+    {
+      "code": "432",
+      "name": "Mancanza di clausole formali che disciplinano l'esternalizzazione di processi importanti",
+      "severity": "medium"
+    },
+    {
+      "code": "433",
+      "name": "Mancato aggiornamento delle informazioni e dei documenti del cliente.",
+      "severity": "medium"
+    },
+    {
+      "code": "434",
+      "name": "Mancato recupero e aggiornamento di informazioni e documentazione relative all'identificazione e alla conoscenza del cliente",
+      "severity": "medium"
+    },
+    {
+      "code": "435",
+      "name": "Mancata analisi dei dati e/o dei rischi",
+      "severity": "medium"
+    },
+    {
+      "code": "435",
+      "name": "Mancata analisi dei dati e / o dei rischi",
+      "severity": "medium"
+    },
+    {
+      "code": "436",
+      "name": "Errore di immissione di dati",
+      "severity": "medium"
+    },
+    {
+      "code": "437",
+      "name": "Mancanza di dati, contratti e formalizzazione di documenti legali",
+      "severity": "medium"
+    },
+    {
+      "code": "438",
+      "name": "Errore nella gestione degli aggiormanenti, errore di elaborazione o mancata consegna",
+      "severity": "medium"
+    },
+    {
+      "code": "439",
+      "name": "Mancato rispetto delle procedure e/o deleghe (non intenzionale)",
+      "severity": "medium"
+    },
+    {
+      "code": "440",
+      "name": "Finanziamento di fatture fittizie o crediti fasulli che creano danno finanziario",
+      "severity": "medium"
+    },
+    {
+      "code": "441",
+      "name": "Mancato rispetto delle regole di idoneità del cliente ad un prodotto, eccetto problemi di conoscenza del cliente e malfunzionamenti IT",
+      "severity": "medium"
+    },
+    {
+      "code": "442",
+      "name": "Carenze organizzative durante l'implementazione di modifiche importanti (gestione della conoscenza, autorizzazioni)",
+      "severity": "medium"
+    },
+    {
+      "code": "443",
+      "name": "Mancato progettazione o formalizzazione delle procedure",
+      "severity": "medium"
+    },
+    {
+      "code": "445",
+      "name": "Mancato servizio o/e violazione di un obbligo di legge",
+      "severity": "medium"
+    },
+    {
+      "code": "446",
+      "name": "Contrattualizzazione non in linea con \"fornitori Strategici\" (FOI: Funzioni Operative Importanti)",
+      "severity": "medium"
+    },
+    {
+      "code": "447",
+      "name": "Insuccesso nella realizzazione di un servizio da parte di un FOI o/e violazione di un obbligo",
+      "severity": "medium"
+    },
+    {
+      "code": "448",
+      "name": "Errore monitoraggio di una FOI",
+      "severity": "medium"
+    },
+    {
+      "code": "450",
+      "name": "Disfunzione derivante dall'obsolescenza di una risorsa (impossibile manutenzione)",
+      "severity": "medium"
+    },
+    {
+      "code": "451",
+      "name": "Mancato aggiornamento delle informazioni diffuse su Internet e/o mancato rispetto delle regole relative al diritto dell'immagine",
+      "severity": "medium"
+    },
+    {
+      "code": "452",
+      "name": "Mancata analisi dei dati e/o dei rischi",
+      "severity": "medium"
+    },
+    {
+      "code": "453",
+      "name": "Errori o dimenticanze riguardo le normative fiscali",
+      "severity": "medium"
+    },
+    {
+      "code": "454",
+      "name": "Errore nel processo di archiviazione, tracciabilità e conservazione dei dati",
+      "severity": "medium"
+    },
+    {
+      "code": "455",
+      "name": "Mancato rispetto dei termini del contratto, contrattazione non conforme e/o violazione abusiva del contratto con fornitori, controparti non clienti (escluso FOI)",
+      "severity": "medium"
+    },
+    {
+      "code": "458",
+      "name": "Inadeguatezza nell'esercizio del controllo regolamentare",
+      "severity": "medium"
+    },
+    {
+      "code": "459",
+      "name": "Mancato rispetto delle regole per allarmi e whistle blowing, Insufficienza nel sistema per segnalare malfunzionamenti, Mancato rispetto della procedura di escalation",
+      "severity": "medium"
+    },
+    {
+      "code": "460",
+      "name": "Errori nelle registrazioni in relazione a terzi esclusi i clienti (fornitori, altre terze parti)",
+      "severity": "medium"
+    },
+    {
+      "code": "461",
+      "name": "Bassa performance della controparte non cliente",
+      "severity": "medium"
+    },
+    {
+      "code": "499",
+      "name": "Altre cause dovute a \"Execution_delivery\" (Trattamenti e Procedure (da utilizzare solo se non è possibile utilizzare altri codici))",
+      "severity": "medium"
+    }
+  ],
+  "total": 59
+}

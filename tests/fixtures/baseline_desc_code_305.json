@@ -1,0 +1,15 @@
+{
+  "code": "305",
+  "name": "Contenzioso / pagamento dei dipendenti ai dipendenti",
+  "description": "Normative interne assenti o vetuste, cause legali o liti attive",
+  "category": "Employment_practices_Dipendenti",
+  "impact": "Problemi con dipendenti e clima aziendale",
+  "probability": "medium",
+  "controls": [
+    "HR policies",
+    "Formazione continua",
+    "Welfare aziendale"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

@@ -1,0 +1,15 @@
+{
+  "code": "105",
+  "name": "Distruzione e deterioramento doloso di proprietà / atti vandalici",
+  "description": "Danni a uffici, edifici, magazzini, capannoni, culture dovute a degradazione intenzionale, vandalismo senza intenzione di furto, rivolte, attacchi\nIl furto fa parte di frodi esterne\ne' da escludere i danni ai veicoli",
+  "category": "Damage_Danni",
+  "impact": "Danni fisici e materiali",
+  "probability": "low",
+  "controls": [
+    "Assicurazione danni",
+    "Manutenzione preventiva",
+    "Procedure di emergenza"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

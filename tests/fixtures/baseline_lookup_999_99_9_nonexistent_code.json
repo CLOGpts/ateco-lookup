@@ -1,0 +1,27 @@
+{
+  "found": 0,
+  "items": [],
+  "suggestions": [
+    {
+      "code": "94.99.9",
+      "title": "Attività di altre organizzazioni associative n.c.a."
+    },
+    {
+      "code": "94.99.90",
+      "title": "Attività di altre organizzazioni associative n.c.a."
+    },
+    {
+      "code": "94.99.6",
+      "title": "Attività di organizzazioni per la promozione e la difesa degli animali e dell'ambiente"
+    },
+    {
+      "code": "94.99.5",
+      "title": "Attività di organizzazioni per la filantropia"
+    },
+    {
+      "code": "94.99.4",
+      "title": "Attività di organizzazioni per la cooperazione e la solidarietà internazionale"
+    }
+  ],
+  "message": "Nessun risultato per '999.99.9'. Prova con uno dei suggerimenti."
+}

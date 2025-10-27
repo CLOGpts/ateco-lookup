@@ -1,0 +1,15 @@
+{
+  "code": "502",
+  "name": "Autorizzazione / rifiuto di un pagamento non conforme",
+  "description": "Autorizzazione di una transazione non conforme / Mancata accettazione di una transazione conforme\nRifiuto ingiustificato del credito, rifiuto ingiustificato della carta o del conto bancario",
+  "category": "Clients_product_Clienti",
+  "impact": "Perdita clienti e sanzioni",
+  "probability": "medium",
+  "controls": [
+    "Customer satisfaction",
+    "Compliance monitoring",
+    "Legal review"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

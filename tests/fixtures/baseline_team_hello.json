@@ -1,0 +1,19 @@
+{
+  "agent": "Backend Railway",
+  "message": "Ciao team! Sono il backend",
+  "capabilities": [
+    "ATECO",
+    "Risk API",
+    "Database"
+  ],
+  "timestamp": "2025-10-27T19:15:21.651167",
+  "status": "operational",
+  "endpoints_available": [
+    "/lookup",
+    "/autocomplete",
+    "/batch",
+    "/events/{category}",
+    "/risk-assessment-fields",
+    "/api/extract-visura"
+  ]
+}

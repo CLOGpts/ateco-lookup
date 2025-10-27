@@ -1,0 +1,107 @@
+{
+  "category": "Business_disruption",
+  "original_request": "Business_disruption",
+  "events": [
+    {
+      "code": "201",
+      "name": "Violazione riguardo l'integrità dei dati aziendali",
+      "severity": "high"
+    },
+    {
+      "code": "202",
+      "name": "Errori di programmazione o risultati forniti da applicazioni informatiche inaccurate o incomplete (bug, errori di progettazione o di specifica o incomprensioni ...)",
+      "severity": "high"
+    },
+    {
+      "code": "203",
+      "name": "Violazione della sicurezza del software (non intenzionale)",
+      "severity": "high"
+    },
+    {
+      "code": "204",
+      "name": "Debolezza o mancanza di conformità tra la politica di remunerazione variabile del personale e l'idoneità dei prodotti venduti ai clienti",
+      "severity": "high"
+    },
+    {
+      "code": "205",
+      "name": "Inadeguatezza delle risorse dei computer in termini di potenza elaborativa o di memorizzazione (storage)",
+      "severity": "high"
+    },
+    {
+      "code": "206",
+      "name": "Indisponibilità di un servizio aziendale a causa di indisponibilità accidentale o involontaria (perdita, deterioramento, blocco del funzionamento) di una risorsa (hardware, applicazione)",
+      "severity": "high"
+    },
+    {
+      "code": "207",
+      "name": "Contenzioso (tecnologia)",
+      "severity": "high"
+    },
+    {
+      "code": "208",
+      "name": "Inosservanza nelle norme relatine i sistemi di sorveglianza informatica",
+      "severity": "high"
+    },
+    {
+      "code": "209",
+      "name": "Danni causati da un taglio alla rete elettrica, rete di telecomunicazione, collegamenti specializzati, approvvigionamento idrico …",
+      "severity": "high"
+    },
+    {
+      "code": "210",
+      "name": "Disfunzione derivante dall'inosservanza dei requisiti legali, professionali ed etici in relazione all'IT",
+      "severity": "high"
+    },
+    {
+      "code": "211",
+      "name": "Violazione contrattuale",
+      "severity": "high"
+    },
+    {
+      "code": "212",
+      "name": "Distruzione o deterioramento irrimediabile dei dati dei computer o server (incidente o errore)",
+      "severity": "high"
+    },
+    {
+      "code": "213",
+      "name": "Abuso di mercato (insider trading, manipolazione dei prezzi, diffusione di informazioni false) commessi da terzi",
+      "severity": "high"
+    },
+    {
+      "code": "214",
+      "name": "Concorrenti",
+      "severity": "high"
+    },
+    {
+      "code": "215",
+      "name": "Ricerca e sviluppo- progresso tecnologico inadeguato",
+      "severity": "high"
+    },
+    {
+      "code": "216",
+      "name": "Costi materie prime e/o utility non adeguati al business case iniziale",
+      "severity": "high"
+    },
+    {
+      "code": "217",
+      "name": "Oscillazioni cambi e tassi non adeguati al business case iniziale",
+      "severity": "high"
+    },
+    {
+      "code": "218",
+      "name": "Ciclo di vita del prodotto non adeguato alle attese del cliente",
+      "severity": "high"
+    },
+    {
+      "code": "219",
+      "name": "Proprietà intellettuale non normata o rischio di perdita",
+      "severity": "high"
+    },
+    {
+      "code": "299",
+      "name": "Altre cause con origine tecnica (da utilizzare solo se non è possibile utilizzare un altro codice)",
+      "severity": "high"
+    }
+  ],
+  "total": 20
+}

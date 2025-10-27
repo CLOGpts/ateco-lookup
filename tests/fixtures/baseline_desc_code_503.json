@@ -1,0 +1,15 @@
+{
+  "code": "503",
+  "name": "Comportamenti o pratiche di vendita impropri",
+  "description": "Vendite forzate in modo non conforme\nSottoscrizione forzata di un contratto\nAbuso di prodotti o servizi",
+  "category": "Clients_product_Clienti",
+  "impact": "Perdita clienti e sanzioni",
+  "probability": "medium",
+  "controls": [
+    "Customer satisfaction",
+    "Compliance monitoring",
+    "Legal review"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

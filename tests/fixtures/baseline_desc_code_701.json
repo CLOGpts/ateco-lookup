@@ -1,0 +1,15 @@
+{
+  "code": "701",
+  "name": "Furto / perdita / frode",
+  "description": "Estorsione, frode, transazione fraudolenta sul capitale bloccato di una società durante il processo di registrazione, falsa dichiarazione di perdita, reclamo fraudolento, depositi di denaro contraffatto, frodi di investimento, schema PONZI, frodi di investimento FOREX, opzioni binarie, frodi di investimento, altri investimenti frode, ecc.",
+  "category": "External_fraud_Frodi_esterne",
+  "impact": "Frodi esterne e attacchi cyber",
+  "probability": "medium",
+  "controls": [
+    "Cybersecurity",
+    "Fraud detection",
+    "Identity verification"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

@@ -1,0 +1,15 @@
+{
+  "code": "504",
+  "name": "Violazione delle regole fiduciarie",
+  "description": "Violazione oppure variazione delle regole in atto al momento di un contratto e non gestite",
+  "category": "Clients_product_Clienti",
+  "impact": "Perdita clienti e sanzioni",
+  "probability": "medium",
+  "controls": [
+    "Customer satisfaction",
+    "Compliance monitoring",
+    "Legal review"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

@@ -1,0 +1,5 @@
+{
+  "status": "error",
+  "message": "Errore durante verifica tabelle",
+  "details": "(psycopg2.OperationalError) connection to server at \"localhost\" (127.0.0.1), port 5432 failed: Connection refused\n\tIs the server running on that host and accepting TCP/IP connections?\n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
+}

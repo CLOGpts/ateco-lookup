@@ -1,0 +1,15 @@
+{
+  "code": "501",
+  "name": "Mancato rispetto delle regole di vendita (anche vendite a distanza) / Inosservanza delle regole e delle competenze professionali",
+  "description": "Rispetto del regolamento relativo ai metodi di commercializzazione del prodotto \nRispetto delle leggi in materia di marketing diretto, marketing indiretto e regolamentazione delle informazioni (politica della concorrenza, tutela dei consumatori, ecc...)",
+  "category": "Clients_product_Clienti",
+  "impact": "Perdita clienti e sanzioni",
+  "probability": "medium",
+  "controls": [
+    "Customer satisfaction",
+    "Compliance monitoring",
+    "Legal review"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

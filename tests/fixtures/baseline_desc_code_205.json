@@ -1,0 +1,15 @@
+{
+  "code": "205",
+  "name": "Inadeguatezza delle risorse dei computer in termini di potenza elaborativa o di memorizzazione (storage)",
+  "description": "Si tratta di una perdita di capacità dovuta a eventi informatici non considerati, legati a un cambiamento improvviso o ad una lenta degradazione che non è stata adeguatamente anticipata e/o gestita.",
+  "category": "Business_disruption",
+  "impact": "Interruzione operativa e perdita dati",
+  "probability": "medium",
+  "controls": [
+    "Backup e recovery",
+    "Ridondanza sistemi",
+    "Monitoring continuo"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

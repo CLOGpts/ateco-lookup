@@ -1,0 +1,15 @@
+{
+  "code": "304",
+  "name": "Subappalto illegale e subaffitto di dipendenti non normato",
+  "description": "Qualsiasi schema contrattuale di fornitura di lavoro che abbia l'effetto di arrecare danno al dipendente o all'azienda e che non è condotto nel quadro della legge",
+  "category": "Employment_practices_Dipendenti",
+  "impact": "Problemi con dipendenti e clima aziendale",
+  "probability": "medium",
+  "controls": [
+    "HR policies",
+    "Formazione continua",
+    "Welfare aziendale"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

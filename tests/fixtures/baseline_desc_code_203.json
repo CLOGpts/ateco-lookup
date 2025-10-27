@@ -1,0 +1,15 @@
+{
+  "code": "203",
+  "name": "Violazione della sicurezza del software (non intenzionale)",
+  "description": "Questo rischio include casi che comportano la perdita di integrità e/o prove, il che significa che il processo ha determinati difetti che sono generalmente aggirati ma con eccezioni e rischi. Inoltre, queste perdite possono consentire di contestare il processo, o le misure implementate (o meno) per raggiungerlo",
+  "category": "Business_disruption",
+  "impact": "Interruzione operativa e perdita dati",
+  "probability": "medium",
+  "controls": [
+    "Backup e recovery",
+    "Ridondanza sistemi",
+    "Monitoring continuo"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

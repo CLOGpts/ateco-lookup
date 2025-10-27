@@ -1,0 +1,6 @@
+{
+  "success": false,
+  "error": "send_failed",
+  "message": "Errore durante generazione o invio del report",
+  "details": "No module named 'telegram'"
+}

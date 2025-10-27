@@ -1,0 +1,15 @@
+{
+  "code": "301",
+  "name": "Mancanza di personale, turnover eccessivo",
+  "description": "Indisponibilità di risorse o competenze per realizzare tutti i progetti e le attività in un contesto \"normale\" o di cambiamenti organizzativi",
+  "category": "Employment_practices_Dipendenti",
+  "impact": "Problemi con dipendenti e clima aziendale",
+  "probability": "medium",
+  "controls": [
+    "HR policies",
+    "Formazione continua",
+    "Welfare aziendale"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

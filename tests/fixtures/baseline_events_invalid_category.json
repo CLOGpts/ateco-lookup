@@ -1,0 +1,21 @@
+{
+  "error": "Category 'nonexistent_category_xyz' not found",
+  "available_categories": [
+    "Damage_Danni",
+    "Business_disruption",
+    "Employment_practices_Dipendenti",
+    "Execution_delivery_Problemi_di_produzione_o_consegna",
+    "Clients_product_Clienti",
+    "Internal_Fraud_Frodi_interne",
+    "External_fraud_Frodi_esterne"
+  ],
+  "category_mapping": {
+    "operational": "Execution_delivery_Problemi_di_produzione_o_consegna",
+    "cyber": "Business_disruption",
+    "compliance": "Clients_product_Clienti",
+    "financial": "Internal_Fraud_Frodi_interne",
+    "damage": "Damage_Danni",
+    "employment": "Employment_practices_Dipendenti",
+    "external_fraud": "External_fraud_Frodi_esterne"
+  }
+}

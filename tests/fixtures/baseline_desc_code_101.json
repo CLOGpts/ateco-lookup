@@ -1,0 +1,15 @@
+{
+  "code": "101",
+  "name": "Disastro naturale: fuoco",
+  "description": "Danno da incendio involontario",
+  "category": "Damage_Danni",
+  "impact": "Danni fisici e materiali",
+  "probability": "low",
+  "controls": [
+    "Assicurazione danni",
+    "Manutenzione preventiva",
+    "Procedure di emergenza"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

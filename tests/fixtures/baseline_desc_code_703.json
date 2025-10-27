@@ -1,0 +1,15 @@
+{
+  "code": "703",
+  "name": "Distruzione di dati (frode esterna)",
+  "description": "Distruzione di dati da parte di entità esterna all'azienda",
+  "category": "External_fraud_Frodi_esterne",
+  "impact": "Frodi esterne e attacchi cyber",
+  "probability": "medium",
+  "controls": [
+    "Cybersecurity",
+    "Fraud detection",
+    "Identity verification"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

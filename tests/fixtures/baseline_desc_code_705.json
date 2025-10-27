@@ -1,0 +1,15 @@
+{
+  "code": "705",
+  "name": "Frode con carte di credito o prepagate",
+  "description": "Frode con carte (allo sportello bancomat, negoziante / POS (Point Of Sale), furto di dati di tracciamento, acquisizione dei dati (tramite skimming) di una carta e successiva ricodifica nuova carta per uso internazionale (USA, Canada ...), furto di dati di carte, una disputa fraudolenta di una transazione con carta di credito",
+  "category": "External_fraud_Frodi_esterne",
+  "impact": "Frodi esterne e attacchi cyber",
+  "probability": "medium",
+  "controls": [
+    "Cybersecurity",
+    "Fraud detection",
+    "Identity verification"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

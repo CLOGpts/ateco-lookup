@@ -1,0 +1,21 @@
+{
+  "found": 1,
+  "items": [
+    {
+      "ORDINE_CODICE_ATECO_2022": "2",
+      "CODICE_ATECO_2022": "01",
+      "TITOLO_ATECO_2022": "COLTIVAZIONI AGRICOLE E PRODUZIONE DI PRODOTTI ANIMALI, CACCIA E SERVIZI CONNESSI",
+      "GERARCHIA_ATECO_2022": "2",
+      "NUMERO_CORR_ATECO_2022": "1",
+      "SOTTOTIPOLOGIA": "N-1",
+      "TIPO_RICODIFICA": "S",
+      "CODICE_ATECO_2025_RAPPRESENTATIVO": "01",
+      "TITOLO_ATECO_2025_RAPPRESENTATIVO": "Produzioni vegetali e animali, caccia e servizi connessi",
+      "CODICE_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "01",
+      "TITOLO_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "Produzioni vegetali e animali, caccia e servizi connessi",
+      "settore": "non mappato",
+      "normative": [],
+      "certificazioni": []
+    }
+  ]
+}

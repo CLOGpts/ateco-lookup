@@ -1,0 +1,47 @@
+{
+  "success": false,
+  "error": "internal_error",
+  "message": "Errore durante migrazione zone sismiche",
+  "details": "(psycopg2.OperationalError) connection to server at \"localhost\" (127.0.0.1), port 5432 failed: Connection refused\n\tIs the server running on that host and accepting TCP/IP connections?\n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)",
+  "steps": [
+    {
+      "step": 1,
+      "name": "Carica zone_sismiche_comuni.json",
+      "status": "completed",
+      "file_size": 1012368,
+      "metadata": {
+        "source": "OPCM 3519/2006 - Protezione Civile",
+        "last_update": "2025-05-01",
+        "total_comuni": 7896,
+        "description": "Database completo zone sismiche comuni italiani",
+        "coverage": "100%",
+        "note": "Comuni with duplicate names include province code in parentheses",
+        "ag_reference": {
+          "zona_1": 0.35,
+          "zona_2": 0.25,
+          "zona_3": 0.15,
+          "zona_4": 0.05
+        }
+      }
+    },
+    {
+      "step": 2,
+      "name": "Parse comuni e zone sismiche",
+      "status": "completed",
+      "total_comuni": 7896,
+      "parse_errors": 0
+    },
+    {
+      "step": 3,
+      "name": "Rimuovi duplicati",
+      "status": "completed",
+      "unique_comuni": 7896,
+      "duplicates": 0
+    },
+    {
+      "step": 4,
+      "name": "Inserisci nel database (batch 500)",
+      "status": "running"
+    }
+  ]
+}

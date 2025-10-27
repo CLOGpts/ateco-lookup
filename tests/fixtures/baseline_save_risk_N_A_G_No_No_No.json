@@ -1,0 +1,6 @@
+{
+  "status": "success",
+  "message": "Risk assessment salvato",
+  "risk_score": 2,
+  "analysis": "Livello di rischio: BASSO (Score: 2/100). Rischio accettabile, monitoraggio standard"
+}

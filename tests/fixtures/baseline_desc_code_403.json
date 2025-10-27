@@ -1,0 +1,15 @@
+{
+  "code": "403",
+  "name": "Carenze organizzative e di norme interne, violazioni del controllo interno o decisioni",
+  "description": "Aspetto organizzativo",
+  "category": "Execution_delivery_Problemi_di_produzione_o_consegna",
+  "impact": "Errori di processo e consegna",
+  "probability": "high",
+  "controls": [
+    "Quality control",
+    "Process automation",
+    "KPI monitoring"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

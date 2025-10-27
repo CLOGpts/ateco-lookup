@@ -1,0 +1,15 @@
+{
+  "code": "704",
+  "name": "Attacchi: rapina o furto (denaro o beni)",
+  "description": "Furto o aggressione nei locali o ad un dipendente, cliente o di un non cliente, di un trasportatore di beni ...",
+  "category": "External_fraud_Frodi_esterne",
+  "impact": "Frodi esterne e attacchi cyber",
+  "probability": "medium",
+  "controls": [
+    "Cybersecurity",
+    "Fraud detection",
+    "Identity verification"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

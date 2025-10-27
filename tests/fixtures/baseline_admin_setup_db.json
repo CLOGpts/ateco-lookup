@@ -1,0 +1,11 @@
+{
+  "steps": [
+    {
+      "step": 1,
+      "name": "Verifica connessione",
+      "status": "failed",
+      "error": "Impossibile connettersi al database"
+    }
+  ],
+  "success": false
+}

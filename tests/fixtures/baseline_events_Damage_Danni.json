@@ -1,0 +1,57 @@
+{
+  "category": "Damage_Danni",
+  "original_request": "Damage_Danni",
+  "events": [
+    {
+      "code": "101",
+      "name": "Disastro naturale: fuoco",
+      "severity": "medium"
+    },
+    {
+      "code": "102",
+      "name": "Meteorologico, geologico e altre catastrofi naturali",
+      "severity": "medium"
+    },
+    {
+      "code": "103",
+      "name": "Altri disastri naturali",
+      "severity": "medium"
+    },
+    {
+      "code": "105",
+      "name": "Distruzione e deterioramento doloso di proprietà / atti vandalici",
+      "severity": "medium"
+    },
+    {
+      "code": "106",
+      "name": "Controversie dovute a beni materiali, infrastrutture o altro",
+      "severity": "medium"
+    },
+    {
+      "code": "107",
+      "name": "Rischi derivanti da proprietà operative o non operative (possedute o affittate)",
+      "severity": "medium"
+    },
+    {
+      "code": "108",
+      "name": "Danni accidentali a beni, danni da acqua, danni elettrici ...",
+      "severity": "medium"
+    },
+    {
+      "code": "109",
+      "name": "Degrado dei mezzi posseduti: un'automobile, furgoni ecc... appartenenti alla società",
+      "severity": "medium"
+    },
+    {
+      "code": "110",
+      "name": "Danno ad una delle sedi o area produttiva o uffici …",
+      "severity": "medium"
+    },
+    {
+      "code": "115",
+      "name": "Altri danni a beni materiali",
+      "severity": "medium"
+    }
+  ],
+  "total": 10
+}

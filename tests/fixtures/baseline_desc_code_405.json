@@ -1,0 +1,15 @@
+{
+  "code": "405",
+  "name": "Debolezza o errori nel change management",
+  "description": "La gestione del cambiamento (di qualsiasi natura, inadeguato e/o incapace di essere celere e saper gestire (e anticipare) le variazioni del mercato",
+  "category": "Execution_delivery_Problemi_di_produzione_o_consegna",
+  "impact": "Errori di processo e consegna",
+  "probability": "high",
+  "controls": [
+    "Quality control",
+    "Process automation",
+    "KPI monitoring"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

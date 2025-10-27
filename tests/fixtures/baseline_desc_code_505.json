@@ -1,0 +1,15 @@
+{
+  "code": "505",
+  "name": "Mancato rispetto delle misure di protezione dei dati o delle informazioni personali dei clienti o altri soggetti terzi (esclusi i collaboratori)",
+  "description": "Mancanza di informazioni e non conformità dei diritti del cliente ...\nNon conformità del trattamento\nMancata registrazione delle proprie informazioni personali per scopi commerciali\nMancato rispetto delle regole sul trasferimento dei dati personali",
+  "category": "Clients_product_Clienti",
+  "impact": "Perdita clienti e sanzioni",
+  "probability": "medium",
+  "controls": [
+    "Customer satisfaction",
+    "Compliance monitoring",
+    "Legal review"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

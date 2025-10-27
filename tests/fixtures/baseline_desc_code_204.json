@@ -1,0 +1,15 @@
+{
+  "code": "204",
+  "name": "Debolezza o mancanza di conformità tra la politica di remunerazione variabile del personale e l'idoneità dei prodotti venduti ai clienti",
+  "description": "Rischio di un sistema di remunerazione variabile o concessione di benefici che incoraggi i dipendenti a vendere prodotti inadatti alle esigenze dei loro clienti con rischi di azioni legali, perdita di clienti o immagine",
+  "category": "Business_disruption",
+  "impact": "Interruzione operativa e perdita dati",
+  "probability": "medium",
+  "controls": [
+    "Backup e recovery",
+    "Ridondanza sistemi",
+    "Monitoring continuo"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

@@ -1,0 +1,33 @@
+{
+  "success": false,
+  "error": "internal_error",
+  "message": "Errore durante migrazione ATECO",
+  "details": "(psycopg2.OperationalError) connection to server at \"localhost\" (127.0.0.1), port 5432 failed: Connection refused\n\tIs the server running on that host and accepting TCP/IP connections?\n\n(Background on this error at: https://sqlalche.me/e/20/e3q8)",
+  "steps": [
+    {
+      "step": 1,
+      "name": "Carica tabella_ATECO.xlsx",
+      "status": "completed",
+      "total_rows": 3157
+    },
+    {
+      "step": 2,
+      "name": "Parse codici ATECO",
+      "status": "completed",
+      "total_codes": 3157,
+      "parse_errors": 0
+    },
+    {
+      "step": 3,
+      "name": "Rimuovi duplicati",
+      "status": "completed",
+      "unique_codes": 2714,
+      "duplicates": 443
+    },
+    {
+      "step": 4,
+      "name": "Inserisci nel database (batch 1000)",
+      "status": "running"
+    }
+  ]
+}

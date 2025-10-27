@@ -1,0 +1,175 @@
+{
+  "fields": [
+    {
+      "id": "impatto_finanziario",
+      "column": "H",
+      "question": "Qual è l'impatto finanziario stimato?",
+      "type": "select",
+      "options": [
+        "N/A",
+        "0 - 1K€",
+        "1 - 10K€",
+        "10 - 50K€",
+        "50 - 100K€",
+        "100 - 500K€",
+        "500K€ - 1M€",
+        "1 - 3M€",
+        "3 - 5M€"
+      ],
+      "required": true
+    },
+    {
+      "id": "perdita_economica",
+      "column": "I",
+      "question": "Qual è il livello di perdita economica attesa?",
+      "type": "select_color",
+      "options": [
+        {
+          "value": "G",
+          "label": "Bassa/Nulla",
+          "color": "green",
+          "emoji": "🟢"
+        },
+        {
+          "value": "Y",
+          "label": "Media",
+          "color": "yellow",
+          "emoji": "🟡"
+        },
+        {
+          "value": "O",
+          "label": "Importante",
+          "color": "orange",
+          "emoji": "🟠"
+        },
+        {
+          "value": "R",
+          "label": "Grave",
+          "color": "red",
+          "emoji": "🔴"
+        }
+      ],
+      "required": true
+    },
+    {
+      "id": "impatto_immagine",
+      "column": "J",
+      "question": "L'evento ha impatto sull'immagine aziendale?",
+      "type": "boolean",
+      "options": [
+        "Si",
+        "No"
+      ],
+      "required": true
+    },
+    {
+      "id": "impatto_regolamentare",
+      "column": "L",
+      "question": "Ci sono possibili conseguenze regolamentari o legali civili?",
+      "type": "boolean",
+      "options": [
+        "Si",
+        "No"
+      ],
+      "description": "Multe, sanzioni amministrative, cause civili",
+      "required": true
+    },
+    {
+      "id": "impatto_criminale",
+      "column": "M",
+      "question": "Ci sono possibili conseguenze penali?",
+      "type": "boolean",
+      "options": [
+        "Si",
+        "No"
+      ],
+      "description": "Denunce penali, procedimenti criminali",
+      "required": true
+    },
+    {
+      "id": "perdita_non_economica",
+      "column": "V",
+      "question": "Qual è il livello di perdita non economica non attesa ma accadibile?",
+      "type": "select_color",
+      "options": [
+        {
+          "value": "G",
+          "label": "Bassa/Nulla - Impatto minimo o trascurabile",
+          "color": "green",
+          "emoji": "🟢"
+        },
+        {
+          "value": "Y",
+          "label": "Media - Impatto moderato gestibile",
+          "color": "yellow",
+          "emoji": "🟡"
+        },
+        {
+          "value": "O",
+          "label": "Importante - Impatto significativo che richiede attenzione",
+          "color": "orange",
+          "emoji": "🟠"
+        },
+        {
+          "value": "R",
+          "label": "Grave - Impatto critico che richiede azione immediata",
+          "color": "red",
+          "emoji": "🔴"
+        }
+      ],
+      "required": false
+    },
+    {
+      "id": "controllo",
+      "column": "W",
+      "question": "Qual è il livello di controllo?",
+      "type": "select",
+      "options": [
+        {
+          "value": "++",
+          "label": "++ Adeguato"
+        },
+        {
+          "value": "+",
+          "label": "+ Sostanzialmente adeguato"
+        },
+        {
+          "value": "-",
+          "label": "- Parzialmente Adeguato"
+        },
+        {
+          "value": "--",
+          "label": "-- Non adeguato / assente"
+        }
+      ],
+      "required": false,
+      "triggers": "descrizione_controllo"
+    },
+    {
+      "id": "descrizione_controllo",
+      "column": "X",
+      "question": "Descrizione del controllo",
+      "type": "readonly",
+      "autoPopulated": true,
+      "vlookupSource": "W",
+      "vlookupMap": {
+        "++": {
+          "titolo": "Adeguato",
+          "descrizione": "Il sistema di controllo interno è efficace ed adeguato (controlli 1 e 2 sono attivi e consolidati)"
+        },
+        "+": {
+          "titolo": "Sostanzialmente adeguato",
+          "descrizione": "Alcune correzioni potrebbero rendere soddisfacente il sistema di controllo interno (controlli 1 e 2 presenti ma parzialmente strutturati)"
+        },
+        "-": {
+          "titolo": "Parzialmente Adeguato",
+          "descrizione": "Il sistema di controllo interno deve essere migliorato e il processo dovrebbe essere più strettamente controllato (controlli 1 e 2 NON formalizzati)"
+        },
+        "--": {
+          "titolo": "Non adeguato / assente",
+          "descrizione": "Il sistema di controllo interno dei processi deve essere riorganizzato immediatamente (livelli di controllo 1 e 2 NON attivi)"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "code": "202",
+  "name": "Errori di programmazione o risultati forniti da applicazioni informatiche inaccurate o incomplete (bug, errori di progettazione o di specifica o incomprensioni ...)",
+  "description": "Questo rischio copre tutti i casi in cui gli errori di qualsiasi tipo relativi ai processi IT generano risultati inaccurati o incompleti che richiedono riparazioni lunghe e costose le cui conseguenze sono visibili al cliente o alle autorità e causano una perdita. Esempio: durante un progetto che include cambiamenti nella gestione degli account, lo schema contabile non viene aggiornato (o erroneamente) e diventa impossibile ricostruire una situazione contabile coerente; L'algoritmo di un modulo di calcolo è falso e i risultati falsi vengono generati per mesi, ecc...",
+  "category": "Business_disruption",
+  "impact": "Interruzione operativa e perdita dati",
+  "probability": "medium",
+  "controls": [
+    "Backup e recovery",
+    "Ridondanza sistemi",
+    "Monitoring continuo"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

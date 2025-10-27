@@ -1,0 +1,15 @@
+{
+  "code": "201",
+  "name": "Violazione riguardo l'integrità dei dati aziendali",
+  "description": "Dati informatici e archivi",
+  "category": "Business_disruption",
+  "impact": "Interruzione operativa e perdita dati",
+  "probability": "medium",
+  "controls": [
+    "Backup e recovery",
+    "Ridondanza sistemi",
+    "Monitoring continuo"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

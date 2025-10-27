@@ -1,0 +1,15 @@
+{
+  "code": "401",
+  "name": "Inserimento dati, manutenzione o errori di caricamento",
+  "description": "Errori o scarsa robustezza del processo di gestione dei dati (caricamento, manutenzione, vetustità, ecc…)",
+  "category": "Execution_delivery_Problemi_di_produzione_o_consegna",
+  "impact": "Errori di processo e consegna",
+  "probability": "high",
+  "controls": [
+    "Quality control",
+    "Process automation",
+    "KPI monitoring"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

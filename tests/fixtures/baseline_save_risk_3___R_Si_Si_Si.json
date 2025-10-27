@@ -1,0 +1,6 @@
+{
+  "status": "success",
+  "message": "Risk assessment salvato",
+  "risk_score": 55,
+  "analysis": "Livello di rischio: ALTO (Score: 55/100). Priorità alta, pianificare mitigazione"
+}

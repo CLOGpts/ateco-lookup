@@ -1,0 +1,15 @@
+{
+  "code": "702",
+  "name": "Danno da hacking",
+  "description": "Perdita di dati o soldi a causa di attacco informatico",
+  "category": "External_fraud_Frodi_esterne",
+  "impact": "Frodi esterne e attacchi cyber",
+  "probability": "medium",
+  "controls": [
+    "Cybersecurity",
+    "Fraud detection",
+    "Identity verification"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

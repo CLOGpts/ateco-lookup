@@ -1,0 +1,15 @@
+{
+  "code": "605",
+  "name": "Appropriazione indebita di fondi / titoli, furto e uso fraudolento di altri beni aziendali",
+  "description": "Appropriazione indebita di fondi, titoli, furto di contanti, PayPal, beni aziendali, ecc ...",
+  "category": "Internal_Fraud_Frodi_interne",
+  "impact": "Frodi interne e perdite finanziarie",
+  "probability": "low",
+  "controls": [
+    "Audit interni",
+    "Segregation of duties",
+    "Whistleblowing"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

@@ -1,0 +1,11 @@
+{
+  "code": "602",
+  "name": "Evento non mappato",
+  "description": "Evento 602 non presente nel mapping Excel",
+  "impact": "Da valutare",
+  "probability": "unknown",
+  "controls": [
+    "Da definire in base all'analisi specifica"
+  ],
+  "source": "Generic"
+}

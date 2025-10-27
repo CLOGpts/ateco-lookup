@@ -1,0 +1,6 @@
+{
+  "detail": {
+    "error": "INVALID_CODE",
+    "message": "Codice troppo corto (minimo 2 caratteri)"
+  }
+}

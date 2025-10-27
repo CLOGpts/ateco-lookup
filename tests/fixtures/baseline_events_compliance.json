@@ -1,0 +1,227 @@
+{
+  "category": "Clients_product_Clienti",
+  "original_request": "compliance",
+  "events": [
+    {
+      "code": "501",
+      "name": "Mancato rispetto delle regole di vendita (anche vendite a distanza) / Inosservanza delle regole e delle competenze professionali",
+      "severity": "high"
+    },
+    {
+      "code": "502",
+      "name": "Autorizzazione / rifiuto di un pagamento non conforme",
+      "severity": "high"
+    },
+    {
+      "code": "503",
+      "name": "Comportamenti o pratiche di vendita impropri",
+      "severity": "high"
+    },
+    {
+      "code": "504",
+      "name": "Violazione delle regole fiduciarie",
+      "severity": "high"
+    },
+    {
+      "code": "505",
+      "name": "Mancato rispetto delle misure di protezione dei dati o delle informazioni personali dei clienti o altri soggetti terzi (esclusi i collaboratori)",
+      "severity": "high"
+    },
+    {
+      "code": "506",
+      "name": "Insufficiente formalizzazione / sistema / Non conformità con le regole in materia di segreto professionale",
+      "severity": "high"
+    },
+    {
+      "code": "507",
+      "name": "Mancato rispetto delle regole sui beni non reclamati",
+      "severity": "high"
+    },
+    {
+      "code": "508",
+      "name": "Danno reputazionale",
+      "severity": "high"
+    },
+    {
+      "code": "509",
+      "name": "Analisi dei bisogni dei clienti",
+      "severity": "high"
+    },
+    {
+      "code": "511",
+      "name": "Errori sui modelli e/o prodotti difettosi",
+      "severity": "high"
+    },
+    {
+      "code": "512",
+      "name": "Mancata idoneetà prodotti o servizi inadeguati alle esigenze del cliente, controversie",
+      "severity": "high"
+    },
+    {
+      "code": "515",
+      "name": "Non conformità alle norme antitrust",
+      "severity": "high"
+    },
+    {
+      "code": "516",
+      "name": "Mancata attuazione della politica di prevenzione e gestione dei conflitti di interesse",
+      "severity": "high"
+    },
+    {
+      "code": "517",
+      "name": "Regolamentazione professionale: inosservanza delle condizioni per l'esercizio delle attività (autorizzazione, ecc.)",
+      "severity": "high"
+    },
+    {
+      "code": "518",
+      "name": "Mancato rispetto delle regole e dei regolamenti interni relativi agli embarghi, al congelamento dei beni e al finanziamento del terrorismo",
+      "severity": "high"
+    },
+    {
+      "code": "519",
+      "name": "Due diligence insufficiente (nel contesto della protezione del cliente)",
+      "severity": "high"
+    },
+    {
+      "code": "520",
+      "name": "Mancato rispetto della procedura per l'approvazione di nuovi prodotti e nuove attività",
+      "severity": "high"
+    },
+    {
+      "code": "521",
+      "name": "Superamento del limite di esposizione del cliente",
+      "severity": "high"
+    },
+    {
+      "code": "522",
+      "name": "Uso improprio di informazioni riservate",
+      "severity": "high"
+    },
+    {
+      "code": "523",
+      "name": "Mancato rispetto delle misure legali e regolamentari relative agli abusi di mercato",
+      "severity": "high"
+    },
+    {
+      "code": "533",
+      "name": "Inosservanza del principio di mettere al primo posto gli interessi del cliente",
+      "severity": "high"
+    },
+    {
+      "code": "537",
+      "name": "Rapporti con clienti e transazioni non formalizzate, come richiesto dalle normative (contratti, sicurezza, clausole, fatturazione, ...)",
+      "severity": "high"
+    },
+    {
+      "code": "538",
+      "name": "Gestione inadeguata dei malfunzionamenti e/o implementazione di misure correttive.",
+      "severity": "high"
+    },
+    {
+      "code": "543",
+      "name": "Mancanza di informazioni sui prodotti e debolezza su informazioni e servizi",
+      "severity": "high"
+    },
+    {
+      "code": "544",
+      "name": "Mancato rispetto delle regole e delle condizioni tariffarie",
+      "severity": "high"
+    },
+    {
+      "code": "550",
+      "name": "Pubblicità ingannevole",
+      "severity": "high"
+    },
+    {
+      "code": "551",
+      "name": "Nessuna gestione relativa il conflitto di interessi",
+      "severity": "high"
+    },
+    {
+      "code": "552",
+      "name": "Mancato rispetto (o assenza) delle regole che regolano l'archiviazione e tracciabilità dei dati, le registrazioni telefoniche, ecc...",
+      "severity": "high"
+    },
+    {
+      "code": "554",
+      "name": "Mancato rispetto degli obblighi contrattuali, dei termini legali, delle regole di gestione, delle regole formali o delle formalità applicabili ai contratti e alla sicurezza / clausole abusive o fatturazione",
+      "severity": "high"
+    },
+    {
+      "code": "555",
+      "name": "Mancato obbligo di informare, avvisare o consigliare il management a fronte di un evento importante",
+      "severity": "high"
+    },
+    {
+      "code": "556",
+      "name": "Ristrutturazione di un contratto o di una garanzia",
+      "severity": "high"
+    },
+    {
+      "code": "557",
+      "name": "Prodotto con design o specifiche inadeguate",
+      "severity": "high"
+    },
+    {
+      "code": "558",
+      "name": "Mancato rispetto delle regole formali o delle formalità applicabili ai contratti, ai garanti e/o garanzie",
+      "severity": "high"
+    },
+    {
+      "code": "558",
+      "name": "Mancato rispetto delle regole formali o delle formalità applicabili ai contratti, ai garanti e/o garanzie",
+      "severity": "high"
+    },
+    {
+      "code": "559",
+      "name": "Clausole abusive o fatturazione errata che può generare contenzioso",
+      "severity": "high"
+    },
+    {
+      "code": "561",
+      "name": "Assunzione di titoli e garanzie eccessive o sproporzionate",
+      "severity": "high"
+    },
+    {
+      "code": "564",
+      "name": "Abuso di diritto",
+      "severity": "high"
+    },
+    {
+      "code": "565",
+      "name": "Fideiussione sproporzionata o fraudolenta",
+      "severity": "high"
+    },
+    {
+      "code": "566",
+      "name": "Discriminazione dei clienti e/o scoring non etico",
+      "severity": "high"
+    },
+    {
+      "code": "568",
+      "name": "Mancato rispetto delle norme relative all'usura e ai tassi di interesse",
+      "severity": "high"
+    },
+    {
+      "code": "570",
+      "name": "Frode in gestione presso un legale",
+      "severity": "high"
+    },
+    {
+      "code": "571",
+      "name": "Mancato rispetto delle norme relative ai mezzi di pagamento",
+      "severity": "high"
+    },
+    {
+      "code": "575",
+      "name": "Mancato rispetto delle condizioni di vendita e dei regolamenti di trasparenza dei prezzi",
+      "severity": "high"
+    },
+    {
+      "code": "599",
+      "name": "Altre cause in relazione alla relazione con il cliente (da utilizzare solo se non è possibile utilizzare un altro codice)",
+      "severity": "high"
+    }
+  ],
+  "total": 44
+}

@@ -1,0 +1,15 @@
+{
+  "code": "604",
+  "name": "Frode mista / collusione",
+  "description": "Frode sia interna che esterna (collusione). Frode commessa da un dipendente con la complicità di una persona esterna o un'azione concertata di diversi dipendenti per frodare un cliente o la società",
+  "category": "Internal_Fraud_Frodi_interne",
+  "impact": "Frodi interne e perdite finanziarie",
+  "probability": "low",
+  "controls": [
+    "Audit interni",
+    "Segregation of duties",
+    "Whistleblowing"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

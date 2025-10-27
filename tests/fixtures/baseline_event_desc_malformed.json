@@ -1,0 +1,6 @@
+{
+  "error": "Invalid event code format",
+  "received": "[object Object]",
+  "expected": "Event code like '101', '201', etc.",
+  "hint": "Frontend should pass event.code, not the entire event object"
+}

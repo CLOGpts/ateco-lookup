@@ -1,0 +1,21 @@
+{
+  "success": true,
+  "message": "API funzionante! VisuraExtractorPower disponibile: False",
+  "data": {
+    "denominazione": "TEST CELERYA SRL",
+    "partita_iva": "12345678901",
+    "pec": "test@pec.it",
+    "codici_ateco": [
+      {
+        "codice": "62.01",
+        "descrizione": "Produzione software",
+        "principale": true
+      }
+    ],
+    "sede_legale": {
+      "comune": "Torino",
+      "provincia": "TO"
+    },
+    "confidence": 0.99
+  }
+}

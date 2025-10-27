@@ -1,0 +1,21 @@
+{
+  "found": 1,
+  "items": [
+    {
+      "ORDINE_CODICE_ATECO_2022": "3",
+      "CODICE_ATECO_2022": "01.1",
+      "TITOLO_ATECO_2022": "COLTIVAZIONE DI COLTURE AGRICOLE NON PERMANENTI",
+      "GERARCHIA_ATECO_2022": "3",
+      "NUMERO_CORR_ATECO_2022": "2",
+      "SOTTOTIPOLOGIA": "N-M",
+      "TIPO_RICODIFICA": "C",
+      "CODICE_ATECO_2025_RAPPRESENTATIVO": "01.1",
+      "TITOLO_ATECO_2025_RAPPRESENTATIVO": "Coltivazione di colture agricole non permanenti",
+      "CODICE_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "01.1",
+      "TITOLO_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "Coltivazione di colture agricole non permanenti",
+      "settore": "non mappato",
+      "normative": [],
+      "certificazioni": []
+    }
+  ]
+}

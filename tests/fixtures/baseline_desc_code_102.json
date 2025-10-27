@@ -1,0 +1,15 @@
+{
+  "code": "102",
+  "name": "Meteorologico, geologico e altre catastrofi naturali",
+  "description": "Danni dovuti a forti piogge, allagamenti, fiumi, tempeste, fulmini, grandine, caduta di alberi, terremoti, eruzioni vulcaniche, tsunami ...",
+  "category": "Damage_Danni",
+  "impact": "Danni fisici e materiali",
+  "probability": "low",
+  "controls": [
+    "Assicurazione danni",
+    "Manutenzione preventiva",
+    "Procedure di emergenza"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

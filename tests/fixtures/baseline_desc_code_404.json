@@ -1,0 +1,15 @@
+{
+  "code": "404",
+  "name": "Errori dovuti all'inadeguatezza dei sistemi informativi ai prodotti bancari o altro di formale",
+  "description": "Il riferimento è relativo il data banking e la gestione remota delle transazioni",
+  "category": "Execution_delivery_Problemi_di_produzione_o_consegna",
+  "impact": "Errori di processo e consegna",
+  "probability": "high",
+  "controls": [
+    "Quality control",
+    "Process automation",
+    "KPI monitoring"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

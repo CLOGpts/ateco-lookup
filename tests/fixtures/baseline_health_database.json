@@ -1,0 +1,6 @@
+{
+  "status": "error",
+  "database": "postgresql",
+  "connection": "failed",
+  "message": "Cannot connect to database"
+}

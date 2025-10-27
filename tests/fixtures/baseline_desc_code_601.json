@@ -1,0 +1,15 @@
+{
+  "code": "601",
+  "name": "Furto di denaro, cassa o altro",
+  "description": "Furto di denaro o beni da parte di un dipendente o collaboratore o visitatore",
+  "category": "Internal_Fraud_Frodi_interne",
+  "impact": "Frodi interne e perdite finanziarie",
+  "probability": "low",
+  "controls": [
+    "Audit interni",
+    "Segregation of duties",
+    "Whistleblowing"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

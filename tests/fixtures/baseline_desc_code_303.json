@@ -1,0 +1,15 @@
+{
+  "code": "303",
+  "name": "Indennità relative al contratto di lavoro (compensi, benefit, licenziamenti ...)",
+  "description": "Normative interne assenti o vetuste",
+  "category": "Employment_practices_Dipendenti",
+  "impact": "Problemi con dipendenti e clima aziendale",
+  "probability": "medium",
+  "controls": [
+    "HR policies",
+    "Formazione continua",
+    "Welfare aziendale"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

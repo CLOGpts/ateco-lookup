@@ -1,0 +1,5 @@
+{
+  "success": false,
+  "error": "missing_fields",
+  "message": "user_id, session_id e event_type sono obbligatori"
+}

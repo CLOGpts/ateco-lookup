@@ -1,0 +1,15 @@
+{
+  "code": "103",
+  "name": "Altri disastri naturali",
+  "description": "Attacco alle culture, meteorite, ecc…",
+  "category": "Damage_Danni",
+  "impact": "Danni fisici e materiali",
+  "probability": "low",
+  "controls": [
+    "Assicurazione danni",
+    "Manutenzione preventiva",
+    "Procedure di emergenza"
+  ],
+  "source": "Excel Risk Mapping",
+  "has_vlookup": true
+}

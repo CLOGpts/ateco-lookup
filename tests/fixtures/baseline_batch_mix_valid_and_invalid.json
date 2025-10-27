@@ -1,0 +1,54 @@
+{
+  "total_codes": 3,
+  "results": [
+    {
+      "code": "01.11.0",
+      "found": 1,
+      "items": [
+        {
+          "ORDINE_CODICE_ATECO_2022": "5",
+          "CODICE_ATECO_2022": "01.11.1",
+          "TITOLO_ATECO_2022": "Coltivazione di cereali (escluso il riso)",
+          "GERARCHIA_ATECO_2022": "5",
+          "NUMERO_CORR_ATECO_2022": "1",
+          "SOTTOTIPOLOGIA": "N-1",
+          "TIPO_RICODIFICA": "S",
+          "CODICE_ATECO_2025_RAPPRESENTATIVO": "01.11.0",
+          "TITOLO_ATECO_2025_RAPPRESENTATIVO": "Coltivazione di cereali, legumi da granella e semi oleosi, escluso il riso",
+          "CODICE_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "01.11.00",
+          "TITOLO_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "Coltivazione di cereali, legumi da granella e semi oleosi, escluso il riso",
+          "settore": "non mappato",
+          "normative": [],
+          "certificazioni": []
+        }
+      ]
+    },
+    {
+      "code": "INVALID",
+      "found": 0,
+      "items": []
+    },
+    {
+      "code": "47.19.1",
+      "found": 1,
+      "items": [
+        {
+          "ORDINE_CODICE_ATECO_2022": "1853",
+          "CODICE_ATECO_2022": "47.19.1",
+          "TITOLO_ATECO_2022": "Grandi magazzini",
+          "GERARCHIA_ATECO_2022": "5",
+          "NUMERO_CORR_ATECO_2022": "7",
+          "SOTTOTIPOLOGIA": "N-M",
+          "TIPO_RICODIFICA": "C",
+          "CODICE_ATECO_2025_RAPPRESENTATIVO": "47.12",
+          "TITOLO_ATECO_2025_RAPPRESENTATIVO": "Commercio al dettaglio non specializzato di altri prodotti",
+          "CODICE_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "47.12",
+          "TITOLO_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "Commercio al dettaglio non specializzato di altri prodotti",
+          "settore": "non mappato",
+          "normative": [],
+          "certificazioni": []
+        }
+      ]
+    }
+  ]
+}
