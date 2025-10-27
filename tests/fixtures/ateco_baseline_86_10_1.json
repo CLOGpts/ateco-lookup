@@ -1,0 +1,53 @@
+{
+  "found": 2,
+  "items": [
+    {
+      "ORDINE_CODICE_ATECO_2022": "2889",
+      "CODICE_ATECO_2022": "86.10.1",
+      "TITOLO_ATECO_2022": "Ospedali e case di cura generici",
+      "GERARCHIA_ATECO_2022": "5",
+      "NUMERO_CORR_ATECO_2022": "1",
+      "SOTTOTIPOLOGIA": "N-1",
+      "TIPO_RICODIFICA": "S",
+      "CODICE_ATECO_2025_RAPPRESENTATIVO": "86.10.0",
+      "TITOLO_ATECO_2025_RAPPRESENTATIVO": "Attività ospedaliere",
+      "CODICE_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "86.10.00",
+      "TITOLO_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "Attività ospedaliere",
+      "settore": "sanitario",
+      "normative": [
+        "Regolamento UE 2017/745 (MDR - dispositivi medici)",
+        "Regolamento UE 2017/746 (IVDR - diagnostica in vitro)",
+        "EU Health Data Space (EHDS)"
+      ],
+      "certificazioni": [
+        "ISO 13485",
+        "ISO 27001",
+        "ISO 22301"
+      ]
+    },
+    {
+      "ORDINE_CODICE_ATECO_2022": "2890",
+      "CODICE_ATECO_2022": "86.10.10",
+      "TITOLO_ATECO_2022": "Ospedali e case di cura generici",
+      "GERARCHIA_ATECO_2022": "6",
+      "NUMERO_CORR_ATECO_2022": "1",
+      "SOTTOTIPOLOGIA": "N-1",
+      "TIPO_RICODIFICA": "S",
+      "CODICE_ATECO_2025_RAPPRESENTATIVO": "86.10.00",
+      "TITOLO_ATECO_2025_RAPPRESENTATIVO": "Attività ospedaliere",
+      "CODICE_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "86.10.00",
+      "TITOLO_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "Attività ospedaliere",
+      "settore": "sanitario",
+      "normative": [
+        "Regolamento UE 2017/745 (MDR - dispositivi medici)",
+        "Regolamento UE 2017/746 (IVDR - diagnostica in vitro)",
+        "EU Health Data Space (EHDS)"
+      ],
+      "certificazioni": [
+        "ISO 13485",
+        "ISO 27001",
+        "ISO 22301"
+      ]
+    }
+  ]
+}

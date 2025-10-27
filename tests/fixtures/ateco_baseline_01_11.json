@@ -1,0 +1,21 @@
+{
+  "found": 1,
+  "items": [
+    {
+      "ORDINE_CODICE_ATECO_2022": "4",
+      "CODICE_ATECO_2022": "01.11",
+      "TITOLO_ATECO_2022": "Coltivazione di cereali (escluso il riso), legumi da granella e semi oleosi",
+      "GERARCHIA_ATECO_2022": "4",
+      "NUMERO_CORR_ATECO_2022": "1",
+      "SOTTOTIPOLOGIA": "1-1",
+      "TIPO_RICODIFICA": "S",
+      "CODICE_ATECO_2025_RAPPRESENTATIVO": "01.11",
+      "TITOLO_ATECO_2025_RAPPRESENTATIVO": "Coltivazione di cereali, legumi da granella e semi oleosi, escluso il riso",
+      "CODICE_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "01.11.00",
+      "TITOLO_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "Coltivazione di cereali, legumi da granella e semi oleosi, escluso il riso",
+      "settore": "non mappato",
+      "normative": [],
+      "certificazioni": []
+    }
+  ]
+}

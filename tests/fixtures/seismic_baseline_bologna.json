@@ -1,0 +1,12 @@
+{
+  "comune": "BOLOGNA",
+  "provincia": "BO",
+  "regione": "EMILIA-ROMAGNA",
+  "zona_sismica": 3,
+  "accelerazione_ag": 0.15,
+  "risk_level": "Media",
+  "description": "Zona 3 - Sismicità bassa: Zona che può essere soggetta a scuotimenti modesti",
+  "normativa": "OPCM 3519/2006",
+  "source": "database_match",
+  "confidence": 1.0
+}

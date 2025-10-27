@@ -1,0 +1,12 @@
+{
+  "comune": "NORCIA",
+  "provincia": "PG",
+  "regione": "UMBRIA",
+  "zona_sismica": 1,
+  "accelerazione_ag": 0.35,
+  "risk_level": "Molto Alta",
+  "description": "Zona 1 - Sismicità alta: È la zona più pericolosa, dove possono verificarsi fortissimi terremoti",
+  "normativa": "OPCM 3519/2006",
+  "source": "database_match",
+  "confidence": 1.0
+}

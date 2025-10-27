@@ -1,0 +1,27 @@
+{
+  "XYZ123NonEsiste": {
+    "status_code": 404,
+    "response": "{\"error\":\"comune_not_found\",\"message\":\"Comune 'XYZ123NonEsiste' non trovato nel database\",\"suggestions\":[],\"suggestion_text\":\"Verifica il nome del comune o fornisci la sigla provincia\"}"
+  },
+  "ParisXXX": {
+    "status_code": 200,
+    "response": {
+      "comune": "PAROLISE",
+      "input_comune": "PARISXXX",
+      "provincia": "AV",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta",
+      "description": "Zona 2 - Sismicità media: Zona dove possono verificarsi forti terremoti",
+      "normativa": "OPCM 3519/2006",
+      "source": "fuzzy_match",
+      "confidence": 0.62,
+      "note": "Match approssimato: 'ParisXXX' -> 'PAROLISE'"
+    }
+  },
+  "123456": {
+    "status_code": 404,
+    "response": "{\"error\":\"comune_not_found\",\"message\":\"Comune '123456' non trovato nel database\",\"suggestions\":[],\"suggestion_text\":\"Verifica il nome del comune o fornisci la sigla provincia\"}"
+  }
+}

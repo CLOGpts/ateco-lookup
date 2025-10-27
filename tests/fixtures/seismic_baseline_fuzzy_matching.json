@@ -1,0 +1,38 @@
+{
+  "milano": {
+    "comune": "MILANO",
+    "provincia": "MI",
+    "regione": "LOMBARDIA",
+    "zona_sismica": 3,
+    "accelerazione_ag": 0.15,
+    "risk_level": "Media",
+    "description": "Zona 3 - Sismicità bassa: Zona che può essere soggetta a scuotimenti modesti",
+    "normativa": "OPCM 3519/2006",
+    "source": "database_match",
+    "confidence": 1.0
+  },
+  "roma": {
+    "comune": "ROMA",
+    "provincia": "RM",
+    "regione": "LAZIO",
+    "zona_sismica": 2,
+    "accelerazione_ag": 0.25,
+    "risk_level": "Alta",
+    "description": "Zona 2 - Sismicità media: Zona dove possono verificarsi forti terremoti",
+    "normativa": "OPCM 3519/2006",
+    "source": "database_match",
+    "confidence": 1.0
+  },
+  "torino": {
+    "comune": "TORINO",
+    "provincia": "TO",
+    "regione": "PIEMONTE",
+    "zona_sismica": 3,
+    "accelerazione_ag": 0.15,
+    "risk_level": "Media",
+    "description": "Zona 3 - Sismicità bassa: Zona che può essere soggetta a scuotimenti modesti",
+    "normativa": "OPCM 3519/2006",
+    "source": "database_match",
+    "confidence": 1.0
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "San Giovanni": {
+    "status_code": 200,
+    "response": {
+      "comune": "SALE SAN GIOVANNI",
+      "input_comune": "SAN GIOVANNI",
+      "provincia": "CN",
+      "regione": "PIEMONTE",
+      "zona_sismica": 4,
+      "accelerazione_ag": 0.05,
+      "risk_level": "Bassa",
+      "description": "Zona 4 - Sismicità molto bassa: È la zona meno pericolosa",
+      "normativa": "OPCM 3519/2006",
+      "source": "fuzzy_match",
+      "confidence": 0.83,
+      "note": "Match approssimato: 'San Giovanni' -> 'SALE SAN GIOVANNI'"
+    }
+  },
+  "Santa Maria": {
+    "status_code": 200,
+    "response": {
+      "comune": "SANTA MARINA",
+      "input_comune": "SANTA MARIA",
+      "provincia": "SA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta",
+      "description": "Zona 2 - Sismicità media: Zona dove possono verificarsi forti terremoti",
+      "normativa": "OPCM 3519/2006",
+      "source": "fuzzy_match",
+      "confidence": 0.96,
+      "note": "Match approssimato: 'Santa Maria' -> 'SANTA MARINA'"
+    }
+  },
+  "Montefiore": {
+    "status_code": 200,
+    "response": {
+      "comune": "MONTEFINO",
+      "input_comune": "MONTEFIORE",
+      "provincia": "TE",
+      "regione": "ABRUZZO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta",
+      "description": "Zona 2 - Sismicità media: Zona dove possono verificarsi forti terremoti",
+      "normativa": "OPCM 3519/2006",
+      "source": "fuzzy_match",
+      "confidence": 0.84,
+      "note": "Match approssimato: 'Montefiore' -> 'MONTEFINO'"
+    }
+  }
+}

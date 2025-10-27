@@ -1,0 +1,57 @@
+{
+  "found": 2,
+  "items": [
+    {
+      "ORDINE_CODICE_ATECO_2022": "2330",
+      "CODICE_ATECO_2022": "62.01.0",
+      "TITOLO_ATECO_2022": "Produzione di software non connesso all'edizione",
+      "GERARCHIA_ATECO_2022": "5",
+      "NUMERO_CORR_ATECO_2022": "1",
+      "SOTTOTIPOLOGIA": "1-1",
+      "TIPO_RICODIFICA": "S",
+      "CODICE_ATECO_2025_RAPPRESENTATIVO": "62.10.0",
+      "TITOLO_ATECO_2025_RAPPRESENTATIVO": "Attività di programmazione informatica",
+      "CODICE_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "62.10.00",
+      "TITOLO_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "Attività di programmazione informatica",
+      "settore": "ict",
+      "normative": [
+        "NIS2 (Direttiva UE 2022/2555 – cybersicurezza e resilienza)",
+        "GDPR (Reg. UE 2016/679 – protezione dati personali)",
+        "Cyber Resilience Act (Reg. UE 2024/2847 – sicurezza software e IoT)",
+        "DORA (Reg. UE 2022/2554 – resilienza digitale per il settore finanziario, se applicabile)"
+      ],
+      "certificazioni": [
+        "ISO/IEC 27001 (Sicurezza delle informazioni)",
+        "ISO/IEC 27017 (Sicurezza per il cloud)",
+        "ISO/IEC 27018 (Protezione dati personali su cloud)",
+        "ISO 22301 (Business Continuity)"
+      ]
+    },
+    {
+      "ORDINE_CODICE_ATECO_2022": "2331",
+      "CODICE_ATECO_2022": "62.01.00",
+      "TITOLO_ATECO_2022": "Produzione di software non connesso all'edizione",
+      "GERARCHIA_ATECO_2022": "6",
+      "NUMERO_CORR_ATECO_2022": "1",
+      "SOTTOTIPOLOGIA": "1-1",
+      "TIPO_RICODIFICA": "S",
+      "CODICE_ATECO_2025_RAPPRESENTATIVO": "62.10.00",
+      "TITOLO_ATECO_2025_RAPPRESENTATIVO": "Attività di programmazione informatica",
+      "CODICE_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "62.10.00",
+      "TITOLO_ATECO_2025_RAPPRESENTATIVO_SISTEMA_CAMERALE": "Attività di programmazione informatica",
+      "settore": "ict",
+      "normative": [
+        "NIS2 (Direttiva UE 2022/2555 – cybersicurezza e resilienza)",
+        "GDPR (Reg. UE 2016/679 – protezione dati personali)",
+        "Cyber Resilience Act (Reg. UE 2024/2847 – sicurezza software e IoT)",
+        "DORA (Reg. UE 2022/2554 – resilienza digitale per il settore finanziario, se applicabile)"
+      ],
+      "certificazioni": [
+        "ISO/IEC 27001 (Sicurezza delle informazioni)",
+        "ISO/IEC 27017 (Sicurezza per il cloud)",
+        "ISO/IEC 27018 (Protezione dati personali su cloud)",
+        "ISO 22301 (Business Continuity)"
+      ]
+    }
+  ]
+}

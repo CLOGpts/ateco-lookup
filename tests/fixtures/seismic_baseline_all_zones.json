@@ -1,0 +1,106 @@
+{
+  "zona_1_alta": {
+    "Norcia": {
+      "comune": "NORCIA",
+      "provincia": "PG",
+      "regione": "UMBRIA",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta",
+      "description": "Zona 1 - Sismicità alta: È la zona più pericolosa, dove possono verificarsi fortissimi terremoti",
+      "normativa": "OPCM 3519/2006",
+      "source": "database_match",
+      "confidence": 1.0
+    },
+    "Accumoli": {
+      "comune": "ACCUMOLI",
+      "provincia": "RI",
+      "regione": "LAZIO",
+      "zona_sismica": 1,
+      "accelerazione_ag": 0.35,
+      "risk_level": "Molto Alta",
+      "description": "Zona 1 - Sismicità alta: È la zona più pericolosa, dove possono verificarsi fortissimi terremoti",
+      "normativa": "OPCM 3519/2006",
+      "source": "database_match",
+      "confidence": 1.0
+    }
+  },
+  "zona_2_media": {
+    "Napoli": {
+      "comune": "NAPOLI",
+      "provincia": "NA",
+      "regione": "CAMPANIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta",
+      "description": "Zona 2 - Sismicità media: Zona dove possono verificarsi forti terremoti",
+      "normativa": "OPCM 3519/2006",
+      "source": "database_match",
+      "confidence": 1.0
+    },
+    "Catania": {
+      "comune": "CATANIA",
+      "provincia": "CT",
+      "regione": "SICILIA",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta",
+      "description": "Zona 2 - Sismicità media: Zona dove possono verificarsi forti terremoti",
+      "normativa": "OPCM 3519/2006",
+      "source": "database_match",
+      "confidence": 1.0
+    }
+  },
+  "zona_3_bassa": {
+    "Roma": {
+      "comune": "ROMA",
+      "provincia": "RM",
+      "regione": "LAZIO",
+      "zona_sismica": 2,
+      "accelerazione_ag": 0.25,
+      "risk_level": "Alta",
+      "description": "Zona 2 - Sismicità media: Zona dove possono verificarsi forti terremoti",
+      "normativa": "OPCM 3519/2006",
+      "source": "database_match",
+      "confidence": 1.0
+    },
+    "Bologna": {
+      "comune": "BOLOGNA",
+      "provincia": "BO",
+      "regione": "EMILIA-ROMAGNA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media",
+      "description": "Zona 3 - Sismicità bassa: Zona che può essere soggetta a scuotimenti modesti",
+      "normativa": "OPCM 3519/2006",
+      "source": "database_match",
+      "confidence": 1.0
+    }
+  },
+  "zona_4_molto_bassa": {
+    "Milano": {
+      "comune": "MILANO",
+      "provincia": "MI",
+      "regione": "LOMBARDIA",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media",
+      "description": "Zona 3 - Sismicità bassa: Zona che può essere soggetta a scuotimenti modesti",
+      "normativa": "OPCM 3519/2006",
+      "source": "database_match",
+      "confidence": 1.0
+    },
+    "Torino": {
+      "comune": "TORINO",
+      "provincia": "TO",
+      "regione": "PIEMONTE",
+      "zona_sismica": 3,
+      "accelerazione_ag": 0.15,
+      "risk_level": "Media",
+      "description": "Zona 3 - Sismicità bassa: Zona che può essere soggetta a scuotimenti modesti",
+      "normativa": "OPCM 3519/2006",
+      "source": "database_match",
+      "confidence": 1.0
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "comune": "NAPOLI",
+  "provincia": "NA",
+  "regione": "CAMPANIA",
+  "zona_sismica": 2,
+  "accelerazione_ag": 0.25,
+  "risk_level": "Alta",
+  "description": "Zona 2 - Sismicità media: Zona dove possono verificarsi forti terremoti",
+  "normativa": "OPCM 3519/2006",
+  "source": "database_match",
+  "confidence": 1.0
+}
