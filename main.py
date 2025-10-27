@@ -374,6 +374,12 @@ else:
 _global_df = None
 _df_hash = None
 
+# Pydantic models for API endpoints (must be global for FastAPI)
+class BatchRequest(BaseModel):
+    codes: List[str]
+    prefer: Optional[str] = None
+    prefix: bool = False
+
 def build_api(df: pd.DataFrame):
     if not FASTAPI_AVAILABLE:
         raise ImportError("FastAPI non disponibile. Installa con: pip install fastapi uvicorn")
@@ -391,11 +397,6 @@ def build_api(df: pd.DataFrame):
             logger.info("PyPDF2 è installato")
         except ImportError:
             logger.warning("PyPDF2 NON è installato")
-    
-    class BatchRequest(BaseModel):
-        codes: List[str]
-        prefer: Optional[str] = None
-        prefix: bool = False
 
     app = FastAPI(title="ATECO Lookup", version="2.0")
 
@@ -3859,6 +3860,16 @@ def build_api(df: pd.DataFrame):
                 "message": "Errore durante invio feedback",
                 "details": str(e)
             }, status_code=500)
+
+    # ==================== MODULAR ROUTERS (Story 2.3 - Refactoring) ====================
+    # Register new modular routers - endpoints remain compatible with old ones
+    # Registered at the end to avoid import/scope issues
+    from app.routers import risk as risk_router
+
+    app.include_router(risk_router.router)
+
+    logger.info("✅ Modular routers registered: /risk/*")
+    # ===================================================================================
 
     return app
 
