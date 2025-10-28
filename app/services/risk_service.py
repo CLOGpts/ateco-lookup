@@ -36,6 +36,16 @@ class RiskService:
         self._load_risk_data()
         logger.info(f"RiskService initialized with data from: {data_path}")
 
+    @property
+    def EXCEL_CATEGORIES(self) -> Dict[str, List[str]]:
+        """Backward compatibility property for uppercase naming."""
+        return self.excel_categories
+
+    @property
+    def EXCEL_DESCRIPTIONS(self) -> Dict[str, str]:
+        """Backward compatibility property for uppercase naming."""
+        return self.excel_descriptions
+
     def _load_risk_data(self):
         """
         Load risk data from JSON file.
@@ -463,66 +473,75 @@ class RiskService:
             data: Dict with assessment values
 
         Returns:
-            Dict with status, risk_score, analysis
+            Dict with status, risk_score, risk_level, financial_score, economic_score,
+            non_economic_score, control_multiplier, final_score, analysis
         """
-        score = 0
-
         # Financial impact (max 40 points)
         impatto_map = {
             'N/A': 0, '0 - 1K€': 5, '1 - 10K€': 10, '10 - 50K€': 15,
             '50 - 100K€': 20, '100 - 500K€': 25, '500K€ - 1M€': 30,
             '1 - 3M€': 35, '3 - 5M€': 40
         }
-        score += impatto_map.get(data.get('impatto_finanziario', 'N/A'), 0)
+        financial_score = impatto_map.get(data.get('impatto_finanziario', 'N/A'), 0)
 
         # Economic loss (max 30 points)
         perdita_map = {'G': 5, 'Y': 15, 'O': 25, 'R': 30}
-        score += perdita_map.get(data.get('perdita_economica', 'G'), 0)
+        economic_score = perdita_map.get(data.get('perdita_economica', 'G'), 0)
 
-        # Boolean impacts (10 points each)
+        # Boolean impacts (10 points each) + Non-economic loss
+        non_economic_score = 0
         if data.get('impatto_immagine') == 'Si':
-            score += 10
+            non_economic_score += 10
         if data.get('impatto_regolamentare') == 'Si':
-            score += 10
+            non_economic_score += 10
         if data.get('impatto_criminale') == 'Si':
-            score += 10
+            non_economic_score += 10
 
         # Non-economic loss (max 10 points)
         perdita_non_eco_map = {'G': 0, 'Y': 3, 'O': 6, 'R': 10}
-        score += perdita_non_eco_map.get(data.get('perdita_non_economica', 'G'), 0)
+        non_economic_score += perdita_non_eco_map.get(data.get('perdita_non_economica', 'G'), 0)
+
+        # Calculate base score
+        base_score = financial_score + economic_score + non_economic_score
 
         # Control multiplier
-        controllo_multiplier = {
+        controllo_multiplier_map = {
             '++': 0.5,   # Reduces risk by 50%
             '+': 0.75,   # Reduces risk by 25%
             '-': 1.25,   # Increases risk by 25%
             '--': 1.5    # Increases risk by 50%
         }
         controllo = data.get('controllo', '+')
-        if controllo in controllo_multiplier:
-            score = int(score * controllo_multiplier[controllo])
+        control_multiplier = controllo_multiplier_map.get(controllo, 1.0)
+        final_score = int(base_score * control_multiplier)
 
-        # Generate analysis
-        if score >= 70:
-            level = "CRITICO"
+        # Generate risk level and analysis
+        if final_score >= 70:
+            level = "Critical"
             action = "Richiede azione immediata"
-        elif score >= 50:
-            level = "ALTO"
+        elif final_score >= 50:
+            level = "High"
             action = "Priorità alta, pianificare mitigazione"
-        elif score >= 30:
-            level = "MEDIO"
+        elif final_score >= 30:
+            level = "Medium"
             action = "Monitorare e valutare opzioni"
         else:
-            level = "BASSO"
+            level = "Low"
             action = "Rischio accettabile, monitoraggio standard"
 
-        analysis = f"Livello di rischio: {level} (Score: {score}/100). {action}"
+        analysis = f"Livello di rischio: {level} (Score: {final_score}/100). {action}"
 
-        logger.info(f"Risk score calculated: {score} - {level}")
+        logger.info(f"Risk score calculated: {final_score} - {level}")
 
         return {
             "status": "success",
             "message": "Risk assessment salvato",
-            "risk_score": score,
+            "risk_score": base_score,
+            "risk_level": level,
+            "financial_score": financial_score,
+            "economic_score": economic_score,
+            "non_economic_score": non_economic_score,
+            "control_multiplier": control_multiplier,
+            "final_score": final_score,
             "analysis": analysis
         }

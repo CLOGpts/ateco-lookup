@@ -95,8 +95,9 @@ def test_risk_service_with_custom_path(tmp_path):
 def test_risk_service_missing_file():
     """Test RiskService handles missing data file gracefully"""
     service = RiskService(data_path=Path("/nonexistent/file.json"))
-    # Should initialize with empty data
-    assert service.EXCEL_CATEGORIES == {}
+    # Should initialize with fallback data (7 default categories)
+    assert len(service.EXCEL_CATEGORIES) == 7
+    assert "Damage_Danni" in service.EXCEL_CATEGORIES
     assert service.EXCEL_DESCRIPTIONS == {}
 
 
@@ -231,11 +232,11 @@ def test_calculate_risk_score_basic(risk_service_with_mock_data):
 def test_calculate_risk_score_high_impact(risk_service_with_mock_data):
     """Test risk score with high impact values"""
     data = {
-        "financial_impact": "3 - 5M€",
-        "image_impact": True,
-        "regulatory_impact": True,
-        "criminal_impact": True,
-        "control_level": "--"
+        "impatto_finanziario": "3 - 5M€",
+        "impatto_immagine": "Si",
+        "impatto_regolamentare": "Si",
+        "impatto_criminale": "Si",
+        "controllo": "--"
     }
 
     result = risk_service_with_mock_data.calculate_risk_score(data)
@@ -251,18 +252,18 @@ def test_calculate_risk_score_high_impact(risk_service_with_mock_data):
 def test_calculate_risk_score_control_multiplier(risk_service_with_mock_data):
     """Test control level affects final score"""
     base_data = {
-        "financial_impact": "50 - 100K€",
-        "image_impact": True,
-        "regulatory_impact": False,
-        "criminal_impact": False
+        "impatto_finanziario": "50 - 100K€",
+        "impatto_immagine": "Si",
+        "impatto_regolamentare": "No",
+        "impatto_criminale": "No"
     }
 
-    # Good controls
-    data_good_control = {**base_data, "control_level": "++"}
+    # Good controls (0.5x multiplier)
+    data_good_control = {**base_data, "controllo": "++"}
     result_good = risk_service_with_mock_data.calculate_risk_score(data_good_control)
 
-    # Poor controls
-    data_poor_control = {**base_data, "control_level": "--"}
+    # Poor controls (1.5x multiplier)
+    data_poor_control = {**base_data, "controllo": "--"}
     result_poor = risk_service_with_mock_data.calculate_risk_score(data_poor_control)
 
     # Poor controls should result in higher final score
@@ -357,12 +358,12 @@ def test_calculate_severity(risk_service_with_mock_data):
 
 
 def test_get_impact_for_code(risk_service_with_mock_data):
-    """Test impact calculation for event codes"""
-    # Code 1xx should be high impact (damage)
-    assert risk_service_with_mock_data._get_impact_for_code("101") == "high"
+    """Test impact description for event codes"""
+    # Code 1xx should return damage description
+    assert risk_service_with_mock_data._get_impact_for_code("101") == "Danni fisici e materiali"
 
-    # Code 2xx should be critical impact (business disruption)
-    assert risk_service_with_mock_data._get_impact_for_code("201") == "critical"
+    # Code 2xx should return business disruption description
+    assert risk_service_with_mock_data._get_impact_for_code("201") == "Interruzione operativa e perdita dati"
 
 
 def test_get_probability_for_code(risk_service_with_mock_data):
