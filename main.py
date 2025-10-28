@@ -509,6 +509,53 @@ def build_api(df: pd.DataFrame):
             ]
         }
 
+    # =====================================================
+    # ATECO AUTOCOMPLETE - Frontend Search Support
+    # =====================================================
+
+    @app.get("/autocomplete")
+    def autocomplete(partial: str = Query(..., min_length=2, description="Codice parziale"),
+                     limit: int = Query(5, le=20, description="Numero suggerimenti")):
+        """Endpoint per suggerimenti autocomplete durante la digitazione."""
+        logger.info(f"🔍 Autocomplete requested for: {partial}")
+
+        partial_norm = normalize_code(partial)
+        suggestions = []
+        seen = set()
+
+        # Cerca nei codici 2022
+        for _, row in df.iterrows():
+            code = normalize_code(row.get("CODICE_ATECO_2022", ""))
+            if code and code.startswith(partial_norm) and code not in seen:
+                seen.add(code)
+                suggestions.append({
+                    "code": row.get("CODICE_ATECO_2022", ""),
+                    "title": row.get("TITOLO_ATECO_2022", ""),
+                    "version": "2022"
+                })
+                if len(suggestions) >= limit:
+                    break
+
+        # Se non abbastanza risultati, cerca anche nei codici 2025
+        if len(suggestions) < limit:
+            for _, row in df.iterrows():
+                code = normalize_code(row.get("CODICE_ATECO_2025_RAPPRESENTATIVO", ""))
+                if code and code.startswith(partial_norm) and code not in seen:
+                    seen.add(code)
+                    suggestions.append({
+                        "code": row.get("CODICE_ATECO_2025_RAPPRESENTATIVO", ""),
+                        "title": row.get("TITOLO_ATECO_2025_RAPPRESENTATIVO", ""),
+                        "version": "2025"
+                    })
+                    if len(suggestions) >= limit:
+                        break
+
+        return JSONResponse({
+            "partial": partial,
+            "suggestions": suggestions[:limit],
+            "count": len(suggestions[:limit])
+        })
+
     # ENDPOINT RISK MANAGEMENT - CON LOGICA EXCEL REALE
     # Carica i dati Excel corretti
     try:
@@ -642,63 +689,74 @@ def build_api(df: pd.DataFrame):
                     "message": "user_id, session_id e event_type sono obbligatori"
                 }, status_code=400)
 
-            engine = get_engine()
+            # Analytics tracking - DB opzionale (PostgreSQL su Railway)
+            # Se DB non disponibile in locale, l'evento non viene salvato ma non blocca l'app
+            try:
+                engine = get_engine()
 
-            with engine.connect() as conn:
-                trans = conn.begin()
-                try:
-                    # Verifica se session_id esiste, altrimenti crea sessione
-                    result = conn.execute(text("""
-                        SELECT id FROM user_sessions WHERE session_id = :session_id
-                    """), {"session_id": session_id})
+                with engine.connect() as conn:
+                    trans = conn.begin()
+                    try:
+                        # Verifica se session_id esiste, altrimenti crea sessione
+                        result = conn.execute(text("""
+                            SELECT id FROM user_sessions WHERE session_id = :session_id
+                        """), {"session_id": session_id})
 
-                    if not result.fetchone():
-                        # Crea nuova sessione
+                        if not result.fetchone():
+                            # Crea nuova sessione
+                            conn.execute(text("""
+                                INSERT INTO user_sessions (user_id, session_id, phase, progress)
+                                VALUES (:user_id, :session_id, 'idle', 0)
+                            """), {
+                                "user_id": user_id,
+                                "session_id": session_id
+                            })
+
+                        # Salva evento
+                        event_data_json = json.dumps(event_data)
                         conn.execute(text("""
-                            INSERT INTO user_sessions (user_id, session_id, phase, progress)
-                            VALUES (:user_id, :session_id, 'idle', 0)
+                            INSERT INTO session_events (user_id, session_id, event_type, event_data)
+                            VALUES (:user_id, :session_id, :event_type, CAST(:event_data AS jsonb))
                         """), {
-                            "user_id": user_id,
-                            "session_id": session_id
-                        })
-
-                    # Salva evento
-                    event_data_json = json.dumps(event_data)
-                    conn.execute(text("""
-                        INSERT INTO session_events (user_id, session_id, event_type, event_data)
-                        VALUES (:user_id, :session_id, :event_type, CAST(:event_data AS jsonb))
-                    """), {
-                        "user_id": user_id,
-                        "session_id": session_id,
-                        "event_type": event_type,
-                        "event_data": event_data_json
-                    })
-
-                    trans.commit()
-
-                    return JSONResponse({
-                        "success": True,
-                        "message": "Evento salvato con successo",
-                        "event": {
                             "user_id": user_id,
                             "session_id": session_id,
                             "event_type": event_type,
-                            "timestamp": datetime.now().isoformat()
-                        }
-                    })
+                            "event_data": event_data_json
+                        })
 
-                except Exception as e:
-                    trans.rollback()
-                    raise e
+                        trans.commit()
+                        logger.info(f"📊 Event tracked: {event_type} for session {session_id[:8]}...")
+
+                    except Exception as db_error:
+                        trans.rollback()
+                        raise db_error
+
+            except Exception as conn_error:
+                # DB non disponibile (localhost → Railway) - Analytics opzionali, non bloccano
+                logger.warning(f"⚠️ Analytics DB non disponibile: {type(conn_error).__name__}")
+                logger.warning(f"⚠️ Event {event_type} NOT saved (non-critical)")
+
+            # Ritorna sempre success - analytics non deve bloccare UI
+            return JSONResponse({
+                "success": True,
+                "message": "Event tracked",
+                "event": {
+                    "user_id": user_id,
+                    "session_id": session_id,
+                    "event_type": event_type,
+                    "timestamp": datetime.now().isoformat()
+                }
+            })
 
         except Exception as e:
-            logger.error(f"Errore salvataggio evento: {str(e)}", exc_info=True)
+            # Errore imprevisto (validation, parsing, etc)
+            logger.error(f"❌ Errore evento analytics: {str(e)}", exc_info=True)
+            # Anche qui, ritorna success per non bloccare UI
             return JSONResponse({
-                "success": False,
-                "error": "save_failed",
-                "message": "Impossibile salvare evento",
-                "details": str(e)
-            }, status_code=500)
+                "success": True,
+                "message": "Event received (tracking unavailable)",
+                "note": "Analytics temporarily unavailable"
+            })
 
     @app.get("/api/sessions/{user_id}")
     async def get_session_history(user_id: str):
@@ -897,13 +955,35 @@ def build_api(df: pd.DataFrame):
                 })
 
         except Exception as e:
-            logger.error(f"Errore recupero summary: {str(e)}", exc_info=True)
+            # DB non disponibile in locale (PostgreSQL su Railway)
+            # Ritorna dati vuoti invece di crashare con 500
+            logger.warning(f"⚠️ Session DB non disponibile: {type(e).__name__}")
+            logger.warning(f"⚠️ Dettaglio: {str(e)[:100]}")
+            logger.warning("⚠️ Ritorno cronologia vuota (utente nuovo o DB remoto)")
+
             return JSONResponse({
-                "success": False,
-                "error": "fetch_failed",
-                "message": "Impossibile recuperare summary",
-                "details": str(e)
-            }, status_code=500)
+                "success": True,
+                "user_id": user_id,
+                "session": {
+                    "session_id": None,
+                    "phase": "new",
+                    "progress": 0
+                },
+                "recent_events": [],
+                "summary": {
+                    "total_events": 0,
+                    "recent_count": 0,
+                    "older_count": 0,
+                    "event_counts": {},
+                    "first_event": None,
+                    "last_event": None
+                },
+                "optimization": {
+                    "mode": "empty",
+                    "tokens_saved": "0 tokens",
+                    "note": "Nessuna cronologia disponibile (DB non disponibile o utente nuovo)"
+                }
+            })
 
     # ENDPOINT - Send Pre-Report PDF via Telegram
     @app.post("/api/send-prereport-pdf")
