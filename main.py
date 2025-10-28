@@ -3861,11 +3861,12 @@ def build_api(df: pd.DataFrame):
                 "details": str(e)
             }, status_code=500)
 
-    # ==================== MODULAR ROUTERS (Stories 2.3 & 2.4 - Refactoring) ====================
+    # ==================== MODULAR ROUTERS (Stories 2.3, 2.4 & 2.5 - Refactoring) ====================
     # Register new modular routers - endpoints remain compatible with old ones
     # Registered at the end to avoid import/scope issues
     from app.routers import risk as risk_router
     from app.routers import visura as visura_router
+    from app.routers import db_admin as db_admin_router
 
     app.include_router(risk_router.router)
 
@@ -3877,7 +3878,11 @@ def build_api(df: pd.DataFrame):
     )
     app.include_router(visura_router.router)
 
-    logger.info("✅ Modular routers registered: /risk/*, /visura/*")
+    # Setup DB Admin router dependencies (DataFrame)
+    db_admin_router.set_dependencies(ateco_df=df)
+    app.include_router(db_admin_router.router)
+
+    logger.info("✅ Modular routers registered: /risk/*, /visura/*, /db-admin/*")
     # ===================================================================================
 
     return app
