@@ -10,7 +10,6 @@ Endpoints:
 
 from typing import Dict, Any, Optional, Callable
 from fastapi import APIRouter, Query, HTTPException
-from fastapi.responses import JSONResponse
 import logging
 import pandas as pd
 
@@ -64,10 +63,10 @@ def set_dependencies(
 
 
 @router.get("/lookup")
-async def lookup_ateco(
+def lookup_ateco(
     code: str = Query(..., description="Codice ATECO da cercare"),
     prefer: Optional[str] = Query(None, description="Preferenza versione (2025, 2025-camerale, 2022)")
-) -> JSONResponse:
+) -> Dict[str, Any]:
     """
     Lookup ATECO code with smart matching.
 
@@ -117,12 +116,12 @@ async def lookup_ateco(
             logger.info(f"No exact match for {code}, finding suggestions...")
             suggestions = _find_similar_fn(_ateco_df, code, limit=5)
 
-            return JSONResponse({
+            return {
                 "found": 0,
                 "items": [],
                 "suggestions": suggestions,
                 "message": f"Codice {code} non trovato. Vedi suggerimenti."
-            })
+            }
 
         # Flatten and enrich results
         items = []
@@ -133,11 +132,11 @@ async def lookup_ateco(
 
         logger.info(f"✅ Found {len(items)} results for code {code}")
 
-        return JSONResponse({
+        return {
             "found": len(items),
             "items": items,
             "suggestions": []
-        })
+        }
 
     except Exception as e:
         logger.error(f"❌ Error in ATECO lookup: {e}")
