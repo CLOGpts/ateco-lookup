@@ -1602,13 +1602,14 @@ def build_api(df: pd.DataFrame):
                 "details": str(e)
             }, status_code=500)
 
-    # ==================== MODULAR ROUTERS (Stories 2.3, 2.4, 2.5 & 2.6 - Refactoring) ====================
+    # ==================== MODULAR ROUTERS (Stories 2.3, 2.4, 2.5, 2.6 & 2.7 - Refactoring) ====================
     # Register new modular routers - endpoints remain compatible with old ones
     # Registered at the end to avoid import/scope issues
     from app.routers import risk as risk_router
     from app.routers import visura as visura_router
     from app.routers import db_admin as db_admin_router
     from app.routers import seismic as seismic_router
+    from app.routers import ateco as ateco_router
 
     app.include_router(risk_router.router)
 
@@ -1627,7 +1628,17 @@ def build_api(df: pd.DataFrame):
     # Story 2.6: Seismic Zones router (no external dependencies)
     app.include_router(seismic_router.router)
 
-    logger.info("✅ Modular routers registered: /risk/*, /visura/*, /db-admin/*, /seismic/*")
+    # Story 2.7: ATECO router for code lookup (DataFrame and utility functions)
+    ateco_router.set_dependencies(
+        ateco_df=df,
+        search_smart_fn=search_smart,
+        find_similar_fn=find_similar_codes,
+        enrich_fn=enrich,
+        flatten_fn=flatten
+    )
+    app.include_router(ateco_router.router)
+
+    logger.info("✅ Modular routers registered: /risk/*, /visura/*, /db-admin/*, /seismic/*, /ateco/*")
     # ===================================================================================
 
     return app
