@@ -99,7 +99,7 @@ def lookup_ateco(
             "suggestions": []
         }
     """
-    if not _ateco_df or not _search_smart_fn or not _enrich_fn:
+    if _ateco_df is None or _search_smart_fn is None or _enrich_fn is None:
         raise HTTPException(
             status_code=500,
             detail="ATECO router not properly initialized"
